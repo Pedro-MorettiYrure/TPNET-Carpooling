@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsForms", "WindowsForms\WindowsForms.csproj", "{76060238-4C46-4391-81EB-9EDDD0A81BDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Model", "Domain.Model\Domain.Model.csproj", "{AA7618E4-692F-4953-8EA1-141B6E1359CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{76060238-4C46-4391-81EB-9EDDD0A81BDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76060238-4C46-4391-81EB-9EDDD0A81BDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76060238-4C46-4391-81EB-9EDDD0A81BDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA7618E4-692F-4953-8EA1-141B6E1359CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA7618E4-692F-4953-8EA1-141B6E1359CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA7618E4-692F-4953-8EA1-141B6E1359CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA7618E4-692F-4953-8EA1-141B6E1359CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
