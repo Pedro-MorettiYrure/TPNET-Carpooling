@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace API.Clients
 {
-    public class LocalidadApiLoc
+    public class LocalidadApiClient
     {
         private static HttpClient loc = new HttpClient();
-        static LocalidadApiLoc()
+        static LocalidadApiClient()
         {
             loc.BaseAddress = new Uri("http://localhost:5183/");
             loc.DefaultRequestHeaders.Accept.Clear();
