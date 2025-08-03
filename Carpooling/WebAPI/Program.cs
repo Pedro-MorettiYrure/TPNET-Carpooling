@@ -28,7 +28,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
 //app.MapControllers(); esta se usa si tuvieramos que crear controladores manualmente, pero en este caso usamos los de ASP.NET Core por ahora 
 
