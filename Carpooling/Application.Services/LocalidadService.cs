@@ -69,14 +69,11 @@ namespace Application.Services
             if (localidadToUpdate != null)
             {
                 // Validar que el codigo postal no esté duplicado (excluyendo el cliente actual)
-                if (LocalidadInMemory.Localidades.Any(c => c.nombreLoc != dto.Nombre && c.codPostal.Equals(dto.CodPostal, StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new ArgumentException($"Ya existe otra localidad con el mismo codigo postal '{dto.CodPostal}'.");
-                }
+               
 
 
                 localidadToUpdate.SetNombreLoc(dto.Nombre);
-                localidadToUpdate.SetCodPostal(dto.CodPostal);
+                
 
                 return true;
             }

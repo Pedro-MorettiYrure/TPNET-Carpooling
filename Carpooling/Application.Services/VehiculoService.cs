@@ -61,10 +61,7 @@ namespace Application.Services
             Vehiculo? vehiculoToUpdate = VehiculoInMemory.Vehiculos.Find(x => x.patente == dto.Patente);
             if (vehiculoToUpdate != null)
             {
-                if (VehiculoInMemory.Vehiculos.Any(v => v.patente != dto.Patente && v.patente.Equals(dto.Patente, StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new ArgumentException($"Ya existe un vehículo con la patente '{dto.Patente}'.");
-                }
+                
                 vehiculoToUpdate.SetModelo(dto.Modelo);
                 vehiculoToUpdate.SetCantLugares(dto.CantLugares);
                 vehiculoToUpdate.SetColor(dto.Color);

@@ -73,7 +73,7 @@ namespace WindowsForms
                         await LocalidadApiClient.AddAsync(this.Localidad);
                     }
 
-                    this.Close();
+                    this.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -105,7 +105,8 @@ namespace WindowsForms
 
             if (Mode == FormMode.Update)
             {
-                labelCodPostal.Visible = true;
+                labelCodPostal.Visible = true; 
+                txtCodPostal.Enabled = false;
                 labelNombre.Visible = true;
             }
         }

@@ -37,12 +37,12 @@
             txtModelo = new TextBox();
             txtColor = new TextBox();
             labelCantLugares = new Label();
-            txtCantLugares = new TextBox();
             btnSalir = new Button();
             btnConfirmar = new Button();
             txtMarca = new TextBox();
             labelMarca = new Label();
             errorProvider1 = new ErrorProvider(components);
+            txtCantLugares = new TextBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             SuspendLayout();
             // 
@@ -113,13 +113,6 @@
             labelCantLugares.TabIndex = 7;
             labelCantLugares.Text = "Cantidad de lugares:";
             // 
-            // txtCantLugares
-            // 
-            txtCantLugares.Location = new Point(297, 203);
-            txtCantLugares.Name = "txtCantLugares";
-            txtCantLugares.Size = new Size(51, 23);
-            txtCantLugares.TabIndex = 8;
-            // 
             // btnSalir
             // 
             btnSalir.Location = new Point(212, 250);
@@ -160,16 +153,23 @@
             // 
             errorProvider1.ContainerControl = this;
             // 
+            // txtCantLugares
+            // 
+            txtCantLugares.Location = new Point(306, 208);
+            txtCantLugares.Name = "txtCantLugares";
+            txtCantLugares.Size = new Size(91, 23);
+            txtCantLugares.TabIndex = 13;
+            // 
             // VehiculoDetalle
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(607, 308);
+            Controls.Add(txtCantLugares);
             Controls.Add(txtMarca);
             Controls.Add(labelMarca);
             Controls.Add(btnConfirmar);
             Controls.Add(btnSalir);
-            Controls.Add(txtCantLugares);
             Controls.Add(labelCantLugares);
             Controls.Add(txtColor);
             Controls.Add(txtModelo);
@@ -195,11 +195,11 @@
         private TextBox txtModelo;
         private TextBox txtColor;
         private Label labelCantLugares;
-        private TextBox txtCantLugares;
         private Button btnSalir;
         private Button btnConfirmar;
         private TextBox txtMarca;
         private Label labelMarca;
         private ErrorProvider errorProvider1;
+        private TextBox txtCantLugares;
     }
 }

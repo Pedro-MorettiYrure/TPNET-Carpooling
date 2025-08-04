@@ -79,7 +79,7 @@ namespace WindowsForms
 
             this.GetAllAndLoad();
 
-            formCrear.ShowDialog();
+            
         }
 
         private void btnSalir_Click(object sender, EventArgs e)

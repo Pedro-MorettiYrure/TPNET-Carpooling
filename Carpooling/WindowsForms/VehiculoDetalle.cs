@@ -61,10 +61,11 @@ namespace WindowsForms
                     this.Vehiculo.Color = txtColor.Text;
                     this.Vehiculo.Marca = txtMarca.Text;
                     this.Vehiculo.Modelo = txtModelo.Text;
-
+                    //this.Vehiculo.CantLugares = txtCantLugares.Text;
                     //El Detalle se esta llevando la responsabilidad de llamar al servicio
                     //pero tal vez deberia ser solo una vista y que esta responsabilidad quede
                     //en la Lista o tal vez en un Presenter o Controler
+                    this.Vehiculo.CantLugares = int.Parse(txtCantLugares.Text);
 
                     if (this.Mode == FormMode.Update)
                     {
@@ -75,7 +76,7 @@ namespace WindowsForms
                         await API.Clients.VehiculoApiClient.AddAsync(this.Vehiculo);
                     }
 
-                    this.Close();
+                    this.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -90,6 +91,7 @@ namespace WindowsForms
             this.txtModelo.Text = this.Vehiculo.Modelo;
             this.txtMarca.Text = this.Vehiculo.Marca;
             this.txtColor.Text = this.Vehiculo.Color;
+            this.txtCantLugares.Text= this.Vehiculo.CantLugares.ToString();
         }
 
         private void SetFormMode(FormMode value)
@@ -112,6 +114,7 @@ namespace WindowsForms
                 labelCantLugares.Visible = true;
                 labelColor.Visible = true;
                 labelPatente.Visible = true;
+                txtPatente.Enabled = false;
             }
         }
 
