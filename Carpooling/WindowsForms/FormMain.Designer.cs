@@ -101,6 +101,7 @@
             btnVehiculoLista.TabIndex = 1;
             btnVehiculoLista.Text = "Vehiculos";
             btnVehiculoLista.UseVisualStyleBackColor = true;
+            btnVehiculoLista.Click += btnVehiculoLista_Click;
             // 
             // lbMain
             // 

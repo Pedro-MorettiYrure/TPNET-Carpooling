@@ -24,7 +24,7 @@ namespace WindowsForms
 
         private void FormMain_Shown(object sender, EventArgs e)
         {
-            
+
 
         }
 
@@ -32,6 +32,12 @@ namespace WindowsForms
         {
             LocalidadLista appLocalidad = new LocalidadLista();
             appLocalidad.ShowDialog();
+        }
+
+        private void btnVehiculoLista_Click(object sender, EventArgs e)
+        {
+            VehiculosLista appVehiculo= new VehiculosLista();
+            appVehiculo.ShowDialog();
         }
     }
 }
