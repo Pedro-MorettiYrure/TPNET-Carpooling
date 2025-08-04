@@ -68,11 +68,11 @@ namespace WindowsForms
 
                     if (this.Mode == FormMode.Update)
                     {
-                        await VehiculoApiClient.UpdateAsync(this.Vehiculo);
+                        await API.Clients.VehiculoApiClient.UpdateAsync(this.Vehiculo);
                     }
                     else
                     {
-                        await VehiculoApiClient.AddAsync(this.Vehiculo);
+                        await API.Clients.VehiculoApiClient.AddAsync(this.Vehiculo);
                     }
 
                     this.Close();

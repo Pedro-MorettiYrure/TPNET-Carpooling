@@ -35,7 +35,7 @@ namespace WindowsForms
 
                 if (result == DialogResult.Yes)
                 {
-                    await VehiculoApiClient.DeleteAsync(patente);
+                    await API.Clients.VehiculoApiClient.DeleteAsync(patente);
                     this.GetAllAndLoad();
                 }
             }
@@ -52,7 +52,7 @@ namespace WindowsForms
                 VehiculoDetalle formEditar = new VehiculoDetalle();
                 string patente = this.SelectedItem().Patente;
 
-                VehiculoDTO vehiculo = await VehiculoApiClient.GetAsync(patente);
+                VehiculoDTO vehiculo = await API.Clients.VehiculoApiClient.GetAsync(patente);
 
                 formEditar.Mode = FormMode.Update;
                 formEditar.Vehiculo = vehiculo;
@@ -92,7 +92,7 @@ namespace WindowsForms
             try
             {
                 this.dgvVehiculos.DataSource = null;
-                this.dgvVehiculos.DataSource = await VehiculoApiClient.GetAllAsync();
+                this.dgvVehiculos.DataSource = await API.Clients.VehiculoApiClient.GetAllAsync();
 
                 if (this.dgvVehiculos.Rows.Count > 0)
                 {
