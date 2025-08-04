@@ -117,7 +117,7 @@
             tsLocalidades.Items.AddRange(new ToolStripItem[] { tsbEditar, tsbEliminar });
             tsLocalidades.Location = new Point(3, 0);
             tsLocalidades.Name = "tsLocalidades";
-            tsLocalidades.Size = new Size(286, 25);
+            tsLocalidades.Size = new Size(255, 25);
             tsLocalidades.TabIndex = 0;
             // 
             // tsbEditar
@@ -138,7 +138,7 @@
             tsbEliminar.Name = "tsbEliminar";
             tsbEliminar.Size = new Size(128, 22);
             tsbEliminar.Text = "Eliminar una localidad";
-            tsbEliminar.Click += this.tsbEliminar_Click;
+            tsbEliminar.Click += tsbEliminar_Click;
             // 
             // LocalidadLista
             // 
@@ -146,7 +146,11 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(tscLocalidades);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "LocalidadLista";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Form1";
             Load += LocalidadLista_Load;
             tscLocalidades.ContentPanel.ResumeLayout(false);
