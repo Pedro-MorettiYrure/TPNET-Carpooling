@@ -16,5 +16,22 @@ namespace WindowsForms
         {
             InitializeComponent();
         }
+
+        private void mnuSalir_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+        }
+
+        private void FormMain_Shown(object sender, EventArgs e)
+        {
+            
+
+        }
+
+        private void btnLocalidadLista_Click(object sender, EventArgs e)
+        {
+            LocalidadLista appLocalidad = new LocalidadLista();
+            appLocalidad.ShowDialog();
+        }
     }
 }
