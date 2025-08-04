@@ -98,11 +98,11 @@ namespace WindowsForms
 
             if (Mode == FormMode.Add)
             {
-                labelMarca.Visible = false;
-                labelModelo.Visible = false;
-                labelCantLugares.Visible = false;
-                labelColor.Visible = false;
-                labelPatente.Visible = false;
+                labelMarca.Visible = true;
+                labelModelo.Visible = true;
+                labelCantLugares.Visible = true;
+                labelColor.Visible = true;
+                labelPatente.Visible = true;
             }
 
             if (Mode == FormMode.Update)

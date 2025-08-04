@@ -99,8 +99,8 @@ namespace WindowsForms
 
             if (Mode == FormMode.Add)
             {
-                labelCodPostal.Visible = false;
-                labelNombre.Visible = false;
+                labelCodPostal.Visible = true;
+                labelNombre.Visible = true;
             }
 
             if (Mode == FormMode.Update)
