@@ -57,6 +57,7 @@ app.MapGet("/localidades", () =>
     var dtos = localidadService.GetAll();
 
     return Results.Ok(dtos);
+
 })
 .WithName("GetAllLocalidades")
 .Produces<List<LocalidadDTO>>(StatusCodes.Status200OK)

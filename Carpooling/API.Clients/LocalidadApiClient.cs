@@ -15,7 +15,7 @@ namespace API.Clients
         private static HttpClient loc = new HttpClient();
         static LocalidadApiClient()
         {
-            loc.BaseAddress = new Uri("http://localhost:5183/");
+            loc.BaseAddress = new Uri("http://localhost:5011/");
             loc.DefaultRequestHeaders.Accept.Clear();
             loc.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
@@ -52,7 +52,7 @@ namespace API.Clients
         {
             try
             {
-                HttpResponseMessage response = await loc.GetAsync("clientes");
+                HttpResponseMessage response = await loc.GetAsync("localidades");
 
                 if (response.IsSuccessStatusCode)
                 {

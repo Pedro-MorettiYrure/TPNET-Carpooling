@@ -35,6 +35,7 @@
             btnLocalidadLista = new Button();
             btnVehiculoLista = new Button();
             lbMain = new Label();
+            label1 = new Label();
             mnsPrincipal.SuspendLayout();
             tlMain.SuspendLayout();
             SuspendLayout();
@@ -68,25 +69,27 @@
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlMain.ColumnStyles.Add(new ColumnStyle());
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tlMain.Controls.Add(btnLocalidadLista, 1, 1);
-            tlMain.Controls.Add(btnVehiculoLista, 1, 2);
             tlMain.Controls.Add(lbMain, 1, 0);
+            tlMain.Controls.Add(btnVehiculoLista, 1, 3);
+            tlMain.Controls.Add(btnLocalidadLista, 1, 2);
+            tlMain.Controls.Add(label1, 1, 1);
             tlMain.Dock = DockStyle.Fill;
             tlMain.Location = new Point(0, 24);
             tlMain.Name = "tlMain";
-            tlMain.RowCount = 3;
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tlMain.RowCount = 4;
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tlMain.Size = new Size(800, 426);
             tlMain.TabIndex = 3;
             // 
             // btnLocalidadLista
             // 
             btnLocalidadLista.Anchor = AnchorStyles.Top;
-            btnLocalidadLista.Location = new Point(356, 144);
+            btnLocalidadLista.Location = new Point(334, 215);
             btnLocalidadLista.Name = "btnLocalidadLista";
-            btnLocalidadLista.Size = new Size(86, 23);
+            btnLocalidadLista.Size = new Size(131, 47);
             btnLocalidadLista.TabIndex = 0;
             btnLocalidadLista.Text = "Localidades";
             btnLocalidadLista.UseVisualStyleBackColor = true;
@@ -95,9 +98,10 @@
             // btnVehiculoLista
             // 
             btnVehiculoLista.Anchor = AnchorStyles.Top;
-            btnVehiculoLista.Location = new Point(356, 285);
+            btnVehiculoLista.ForeColor = SystemColors.ControlText;
+            btnVehiculoLista.Location = new Point(334, 321);
             btnVehiculoLista.Name = "btnVehiculoLista";
-            btnVehiculoLista.Size = new Size(86, 23);
+            btnVehiculoLista.Size = new Size(131, 47);
             btnVehiculoLista.TabIndex = 1;
             btnVehiculoLista.Text = "Vehiculos";
             btnVehiculoLista.UseVisualStyleBackColor = true;
@@ -107,11 +111,32 @@
             // 
             lbMain.Anchor = AnchorStyles.None;
             lbMain.AutoSize = true;
-            lbMain.Location = new Point(351, 63);
+            lbMain.FlatStyle = FlatStyle.Popup;
+            lbMain.Font = new Font("Papyrus", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lbMain.ForeColor = SystemColors.HotTrack;
+            lbMain.ImageAlign = ContentAlignment.TopCenter;
+            lbMain.Location = new Point(223, 15);
             lbMain.Name = "lbMain";
-            lbMain.Size = new Size(97, 15);
+            lbMain.RightToLeft = RightToLeft.No;
+            lbMain.Size = new Size(353, 76);
             lbMain.TabIndex = 2;
-            lbMain.Text = "Gestionar CRUDS";
+            lbMain.Text = "Menú principal";
+            lbMain.Click += lbMain_Click;
+            // 
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            label1.AutoSize = true;
+            label1.FlatStyle = FlatStyle.Popup;
+            label1.Font = new Font("Calibri", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.ForeColor = SystemColors.ControlText;
+            label1.Location = new Point(223, 106);
+            label1.Name = "label1";
+            label1.RightToLeft = RightToLeft.No;
+            label1.Size = new Size(353, 23);
+            label1.TabIndex = 3;
+            label1.Text = "Seleccione un CRUD";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // FormMain
             // 
@@ -142,5 +167,6 @@
         private Button btnLocalidadLista;
         private Button btnVehiculoLista;
         private Label lbMain;
+        private Label label1;
     }
 }

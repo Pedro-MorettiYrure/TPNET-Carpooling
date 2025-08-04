@@ -36,8 +36,13 @@ namespace WindowsForms
 
         private void btnVehiculoLista_Click(object sender, EventArgs e)
         {
-            VehiculosLista appVehiculo= new VehiculosLista();
+            VehiculosLista appVehiculo = new VehiculosLista();
             appVehiculo.ShowDialog();
+        }
+
+        private void lbMain_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

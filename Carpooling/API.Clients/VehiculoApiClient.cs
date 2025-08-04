@@ -13,7 +13,7 @@ namespace API.Clients
         private static HttpClient veh = new HttpClient();
         static VehiculoApiClient()
         {
-            veh.BaseAddress = new Uri("http://localhost:5183/");
+            veh.BaseAddress = new Uri("http://localhost:5011/");
             veh.DefaultRequestHeaders.Accept.Clear();
             veh.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
