@@ -14,7 +14,7 @@ namespace WindowsForms
         private static HttpClient loc = new HttpClient();
         static LocalidadApiClient()
         {
-            loc.BaseAddress = new Uri("http://localhost:5011/");
+            loc.BaseAddress = new Uri("http://localhost:5011/");               //Ver en que puerto se abre la webapi
             loc.DefaultRequestHeaders.Accept.Clear();
             loc.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
