@@ -28,21 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LocalidadLista));
             tscLocalidades = new ToolStripContainer();
             tlLocalidades = new TableLayoutPanel();
             dgvLocalidad = new DataGridView();
-            btnCrear = new Button();
             btnSalir = new Button();
-            tsLocalidades = new ToolStrip();
-            tsbEditar = new ToolStripButton();
-            tsbEliminar = new ToolStripButton();
+            btnCrear = new Button();
+            btnEliminar = new Button();
+            btnEditar = new Button();
             tscLocalidades.ContentPanel.SuspendLayout();
-            tscLocalidades.TopToolStripPanel.SuspendLayout();
             tscLocalidades.SuspendLayout();
             tlLocalidades.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvLocalidad).BeginInit();
-            tsLocalidades.SuspendLayout();
             SuspendLayout();
             // 
             // tscLocalidades
@@ -51,7 +47,7 @@
             // tscLocalidades.ContentPanel
             // 
             tscLocalidades.ContentPanel.Controls.Add(tlLocalidades);
-            tscLocalidades.ContentPanel.Size = new Size(800, 425);
+            tscLocalidades.ContentPanel.Size = new Size(800, 450);
             tscLocalidades.Dock = DockStyle.Fill;
             tscLocalidades.Location = new Point(0, 0);
             tscLocalidades.Name = "tscLocalidades";
@@ -61,49 +57,43 @@
             // 
             // tscLocalidades.TopToolStripPanel
             // 
-            tscLocalidades.TopToolStripPanel.Controls.Add(tsLocalidades);
+            tscLocalidades.TopToolStripPanel.Click += tscLocalidades_TopToolStripPanel_Click;
             // 
             // tlLocalidades
             // 
-            tlLocalidades.ColumnCount = 2;
-            tlLocalidades.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlLocalidades.ColumnCount = 4;
+            tlLocalidades.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
+            tlLocalidades.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333359F));
+            tlLocalidades.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333359F));
             tlLocalidades.ColumnStyles.Add(new ColumnStyle());
             tlLocalidades.Controls.Add(dgvLocalidad, 0, 0);
-            tlLocalidades.Controls.Add(btnCrear, 0, 1);
-            tlLocalidades.Controls.Add(btnSalir, 1, 1);
+            tlLocalidades.Controls.Add(btnSalir, 3, 1);
+            tlLocalidades.Controls.Add(btnCrear, 2, 1);
+            tlLocalidades.Controls.Add(btnEliminar, 1, 1);
+            tlLocalidades.Controls.Add(btnEditar, 0, 1);
             tlLocalidades.Dock = DockStyle.Fill;
             tlLocalidades.Location = new Point(0, 0);
             tlLocalidades.Name = "tlLocalidades";
             tlLocalidades.RowCount = 2;
             tlLocalidades.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlLocalidades.RowStyles.Add(new RowStyle());
-            tlLocalidades.Size = new Size(800, 425);
+            tlLocalidades.Size = new Size(800, 450);
             tlLocalidades.TabIndex = 0;
             // 
             // dgvLocalidad
             // 
             dgvLocalidad.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            tlLocalidades.SetColumnSpan(dgvLocalidad, 2);
+            tlLocalidades.SetColumnSpan(dgvLocalidad, 4);
             dgvLocalidad.Dock = DockStyle.Fill;
             dgvLocalidad.Location = new Point(3, 3);
             dgvLocalidad.Name = "dgvLocalidad";
-            dgvLocalidad.Size = new Size(794, 390);
+            dgvLocalidad.Size = new Size(794, 415);
             dgvLocalidad.TabIndex = 0;
-            // 
-            // btnCrear
-            // 
-            btnCrear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnCrear.Location = new Point(558, 399);
-            btnCrear.Name = "btnCrear";
-            btnCrear.Size = new Size(158, 23);
-            btnCrear.TabIndex = 1;
-            btnCrear.Text = "Agregar Nueva Localidad";
-            btnCrear.UseVisualStyleBackColor = true;
-            btnCrear.Click += btnCrear_Click;
             // 
             // btnSalir
             // 
-            btnSalir.Location = new Point(722, 399);
+            btnSalir.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSalir.Location = new Point(722, 424);
             btnSalir.Name = "btnSalir";
             btnSalir.Size = new Size(75, 23);
             btnSalir.TabIndex = 2;
@@ -111,34 +101,35 @@
             btnSalir.UseVisualStyleBackColor = true;
             btnSalir.Click += btnSalir_Click;
             // 
-            // tsLocalidades
+            // btnCrear
             // 
-            tsLocalidades.Dock = DockStyle.None;
-            tsLocalidades.Items.AddRange(new ToolStripItem[] { tsbEditar, tsbEliminar });
-            tsLocalidades.Location = new Point(3, 0);
-            tsLocalidades.Name = "tsLocalidades";
-            tsLocalidades.Size = new Size(255, 25);
-            tsLocalidades.TabIndex = 0;
+            btnCrear.Location = new Point(481, 424);
+            btnCrear.Name = "btnCrear";
+            btnCrear.Size = new Size(158, 23);
+            btnCrear.TabIndex = 1;
+            btnCrear.Text = "Agregar Nueva Localidad";
+            btnCrear.UseVisualStyleBackColor = true;
+            btnCrear.Click += btnCrear_Click;
             // 
-            // tsbEditar
+            // btnEliminar
             // 
-            tsbEditar.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            tsbEditar.Image = (Image)resources.GetObject("tsbEditar.Image");
-            tsbEditar.ImageTransparentColor = Color.Magenta;
-            tsbEditar.Name = "tsbEditar";
-            tsbEditar.Size = new Size(115, 22);
-            tsbEditar.Text = "Editar una localidad";
-            tsbEditar.Click += tsbEditar_Click;
+            btnEliminar.Location = new Point(242, 424);
+            btnEliminar.Name = "btnEliminar";
+            btnEliminar.Size = new Size(158, 23);
+            btnEliminar.TabIndex = 3;
+            btnEliminar.Text = "Eliminar Localidad";
+            btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += btnEliminar_Click;
             // 
-            // tsbEliminar
+            // btnEditar
             // 
-            tsbEliminar.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            tsbEliminar.Image = (Image)resources.GetObject("tsbEliminar.Image");
-            tsbEliminar.ImageTransparentColor = Color.Magenta;
-            tsbEliminar.Name = "tsbEliminar";
-            tsbEliminar.Size = new Size(128, 22);
-            tsbEliminar.Text = "Eliminar una localidad";
-            tsbEliminar.Click += tsbEliminar_Click;
+            btnEditar.Location = new Point(3, 424);
+            btnEditar.Name = "btnEditar";
+            btnEditar.Size = new Size(158, 23);
+            btnEditar.TabIndex = 4;
+            btnEditar.Text = "Editar Localidad";
+            btnEditar.UseVisualStyleBackColor = true;
+            btnEditar.Click += btnEditar_Click;
             // 
             // LocalidadLista
             // 
@@ -150,18 +141,13 @@
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "LocalidadLista";
-            StartPosition = FormStartPosition.CenterParent;
             Text = "Form1";
             Load += LocalidadLista_Load;
             tscLocalidades.ContentPanel.ResumeLayout(false);
-            tscLocalidades.TopToolStripPanel.ResumeLayout(false);
-            tscLocalidades.TopToolStripPanel.PerformLayout();
             tscLocalidades.ResumeLayout(false);
             tscLocalidades.PerformLayout();
             tlLocalidades.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvLocalidad).EndInit();
-            tsLocalidades.ResumeLayout(false);
-            tsLocalidades.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -172,8 +158,7 @@
         private DataGridView dgvLocalidad;
         private Button btnCrear;
         private Button btnSalir;
-        private ToolStrip tsLocalidades;
-        private ToolStripButton tsbEditar;
-        private ToolStripButton tsbEliminar;
+        private Button btnEliminar;
+        private Button btnEditar;
     }
 }

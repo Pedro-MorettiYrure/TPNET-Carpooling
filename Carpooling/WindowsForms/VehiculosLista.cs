@@ -24,7 +24,7 @@ namespace WindowsForms
         {
             this.GetAllAndLoad();
         }
-
+        /*
         private async void tsbEliminar_Click(object sender, EventArgs e)
         {
             try
@@ -66,6 +66,7 @@ namespace WindowsForms
                 MessageBox.Show($"Error al cargar localidad para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        */
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
@@ -79,7 +80,7 @@ namespace WindowsForms
 
             this.GetAllAndLoad();
 
-            
+
         }
 
         private void btnSalir_Click(object sender, EventArgs e)
@@ -97,20 +98,20 @@ namespace WindowsForms
                 if (this.dgvVehiculos.Rows.Count > 0)
                 {
                     this.dgvVehiculos.Rows[0].Selected = true;
-                    this.tsbEliminar.Enabled = true;
-                    this.tsbEditar.Enabled = true;
+                    this.btnEliminar.Enabled = true;
+                    this.btnEditar.Enabled = true;
                 }
                 else
                 {
-                    this.tsbEditar.Enabled = false;
-                    this.tsbEliminar.Enabled = false;
+                    this.btnEditar.Enabled = false;
+                    this.btnEliminar.Enabled = false;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar la lista de vehiculos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.tsbEliminar.Enabled = false;
-                this.tsbEditar.Enabled = false;
+                this.btnEliminar.Enabled = false;
+                this.btnEditar.Enabled = false;
             }
 
         }
@@ -124,5 +125,51 @@ namespace WindowsForms
             return vehiculo;
         }
 
+        private async void btnEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string patente = this.SelectedItem().Patente;
+
+                var result = MessageBox.Show($"¿Está seguro que desea eliminar el vehiculo con patente {patente}?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    await API.Clients.VehiculoApiClient.DeleteAsync(patente);
+                    this.GetAllAndLoad();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar vehiculo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void btnEditar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                VehiculoDetalle formEditar = new VehiculoDetalle();
+                string patente = this.SelectedItem().Patente;
+
+                VehiculoDTO vehiculo = await API.Clients.VehiculoApiClient.GetAsync(patente);
+
+                formEditar.Mode = FormMode.Update;
+                formEditar.Vehiculo = vehiculo;
+
+                formEditar.ShowDialog();
+
+                this.GetAllAndLoad();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar localidad para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void tscVehiculos_TopToolStripPanel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
