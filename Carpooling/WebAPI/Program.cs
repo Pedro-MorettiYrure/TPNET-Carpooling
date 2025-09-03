@@ -1,12 +1,15 @@
 using Application.Services;
+using Data;
 using Domain.Model;
 using DTOs;
-using Microsoft.AspNetCore.OpenApi; // Este using lo usas para el .WithOpenApi()
-using Swashbuckle.AspNetCore; // Si bien el using está, el paquete se usa por debajo con AddSwaggerGen()
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.OpenApi; // Este using lo usas para el .WithOpenApi()
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore; // Si bien el using está, el paquete se usa por debajo con AddSwaggerGen()
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 

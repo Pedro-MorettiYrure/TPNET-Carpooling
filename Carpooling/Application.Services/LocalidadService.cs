@@ -6,82 +6,56 @@ namespace Application.Services
 {
     public class LocalidadService
     {
+
+        private readonly LocalidadRepository _repo;
+
+        public LocalidadService()
+        {
+            _repo = new LocalidadRepository();
+        }
         public LocalidadDTO Add(LocalidadDTO dto)
         {
-            // Validar que el cod postal no esté duplicado
-            if (LocalidadInMemory.Localidades.Any(l => l.codPostal.Equals(dto.CodPostal, StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new ArgumentException($"Ya existe un cliente con el Email '{dto.CodPostal}'.");
-            }
-
+            // Validar que no exista en DB
+            if (_repo.Get(dto.CodPostal) != null)
+                throw new ArgumentException($"Ya existe una localidad con el Código Postal '{dto.CodPostal}'.");
 
             Localidad localidad = new Localidad(dto.CodPostal, dto.Nombre);
-
-            LocalidadInMemory.Localidades.Add(localidad);
-
+            _repo.Add(localidad);
 
             return dto;
         }
-
         public bool Delete(string cod)
         {
-            Localidad? localidadToDelete = LocalidadInMemory.Localidades.Find(x => x.codPostal == cod);
-
-            if (localidadToDelete != null)
-            {
-                LocalidadInMemory.Localidades.Remove(localidadToDelete);
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return _repo.Delete(cod);
         }
 
-        public LocalidadDTO Get(string CodPostal)
+        public LocalidadDTO Get(string cod)
         {
-            Localidad? localidad = LocalidadInMemory.Localidades.Find(x => x.codPostal == CodPostal);
-
-            if (localidad == null)
-                return null;
+            var loc = _repo.Get(cod);
+            if (loc == null) return null;
 
             return new LocalidadDTO
             {
-                CodPostal = localidad.codPostal,
-                Nombre = localidad.nombreLoc,
+                CodPostal = loc.codPostal,
+                Nombre = loc.nombreLoc
             };
         }
 
         public IEnumerable<LocalidadDTO> GetAll()
         {
-            return LocalidadInMemory.Localidades.Select(localidad => new LocalidadDTO
+            return _repo.GetAll().Select(l => new LocalidadDTO
             {
-                CodPostal = localidad.codPostal,
-                Nombre = localidad.nombreLoc,
+                CodPostal = l.codPostal,
+                Nombre = l.nombreLoc
             }).ToList();
         }
 
         public bool Update(LocalidadDTO dto)
         {
-            Localidad? localidadToUpdate = LocalidadInMemory.Localidades.Find(x => x.codPostal == dto.CodPostal);
-
-            if (localidadToUpdate != null)
-            {
-                // Validar que el codigo postal no esté duplicado (excluyendo el cliente actual)
-               
-
-
-                localidadToUpdate.SetNombreLoc(dto.Nombre);
-                
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            var loc = new Localidad(dto.CodPostal, dto.Nombre);
+            return _repo.Update(loc);
         }
-
     }
+
 }
+

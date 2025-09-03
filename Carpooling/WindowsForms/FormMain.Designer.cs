@@ -32,9 +32,9 @@
             mnuArchivo = new ToolStripMenuItem();
             mnuSalir = new ToolStripMenuItem();
             tlMain = new TableLayoutPanel();
-            btnLocalidadLista = new Button();
-            btnVehiculoLista = new Button();
             lbMain = new Label();
+            btnVehiculoLista = new Button();
+            btnLocalidadLista = new Button();
             label1 = new Label();
             mnsPrincipal.SuspendLayout();
             tlMain.SuspendLayout();
@@ -84,29 +84,6 @@
             tlMain.Size = new Size(800, 426);
             tlMain.TabIndex = 3;
             // 
-            // btnLocalidadLista
-            // 
-            btnLocalidadLista.Anchor = AnchorStyles.Top;
-            btnLocalidadLista.Location = new Point(334, 215);
-            btnLocalidadLista.Name = "btnLocalidadLista";
-            btnLocalidadLista.Size = new Size(131, 47);
-            btnLocalidadLista.TabIndex = 0;
-            btnLocalidadLista.Text = "Localidades";
-            btnLocalidadLista.UseVisualStyleBackColor = true;
-            btnLocalidadLista.Click += btnLocalidadLista_Click;
-            // 
-            // btnVehiculoLista
-            // 
-            btnVehiculoLista.Anchor = AnchorStyles.Top;
-            btnVehiculoLista.ForeColor = SystemColors.ControlText;
-            btnVehiculoLista.Location = new Point(334, 321);
-            btnVehiculoLista.Name = "btnVehiculoLista";
-            btnVehiculoLista.Size = new Size(131, 47);
-            btnVehiculoLista.TabIndex = 1;
-            btnVehiculoLista.Text = "Vehiculos";
-            btnVehiculoLista.UseVisualStyleBackColor = true;
-            btnVehiculoLista.Click += btnVehiculoLista_Click;
-            // 
             // lbMain
             // 
             lbMain.Anchor = AnchorStyles.None;
@@ -122,6 +99,29 @@
             lbMain.TabIndex = 2;
             lbMain.Text = "Menú principal";
             lbMain.Click += lbMain_Click;
+            // 
+            // btnVehiculoLista
+            // 
+            btnVehiculoLista.Anchor = AnchorStyles.Top;
+            btnVehiculoLista.ForeColor = SystemColors.ControlText;
+            btnVehiculoLista.Location = new Point(334, 321);
+            btnVehiculoLista.Name = "btnVehiculoLista";
+            btnVehiculoLista.Size = new Size(131, 47);
+            btnVehiculoLista.TabIndex = 1;
+            btnVehiculoLista.Text = "Vehiculos";
+            btnVehiculoLista.UseVisualStyleBackColor = true;
+            btnVehiculoLista.Click += btnVehiculoLista_Click;
+            // 
+            // btnLocalidadLista
+            // 
+            btnLocalidadLista.Anchor = AnchorStyles.Top;
+            btnLocalidadLista.Location = new Point(334, 215);
+            btnLocalidadLista.Name = "btnLocalidadLista";
+            btnLocalidadLista.Size = new Size(131, 47);
+            btnLocalidadLista.TabIndex = 0;
+            btnLocalidadLista.Text = "Localidades";
+            btnLocalidadLista.UseVisualStyleBackColor = true;
+            btnLocalidadLista.Click += btnLocalidadLista_Click;
             // 
             // label1
             // 
@@ -149,6 +149,7 @@
             MainMenuStrip = mnsPrincipal;
             Name = "FormMain";
             Text = "Carpooling";
+            WindowState = FormWindowState.Maximized;
             Shown += FormMain_Shown;
             mnsPrincipal.ResumeLayout(false);
             mnsPrincipal.PerformLayout();
