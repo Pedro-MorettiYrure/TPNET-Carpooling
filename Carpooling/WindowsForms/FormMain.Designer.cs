@@ -28,40 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            mnsPrincipal = new MenuStrip();
-            mnuArchivo = new ToolStripMenuItem();
-            mnuSalir = new ToolStripMenuItem();
             tlMain = new TableLayoutPanel();
             lbMain = new Label();
             btnVehiculoLista = new Button();
             btnLocalidadLista = new Button();
             label1 = new Label();
-            mnsPrincipal.SuspendLayout();
             tlMain.SuspendLayout();
             SuspendLayout();
-            // 
-            // mnsPrincipal
-            // 
-            mnsPrincipal.Items.AddRange(new ToolStripItem[] { mnuArchivo });
-            mnsPrincipal.Location = new Point(0, 0);
-            mnsPrincipal.Name = "mnsPrincipal";
-            mnsPrincipal.Size = new Size(800, 24);
-            mnsPrincipal.TabIndex = 1;
-            mnsPrincipal.Text = "menuStrip1";
-            // 
-            // mnuArchivo
-            // 
-            mnuArchivo.DropDownItems.AddRange(new ToolStripItem[] { mnuSalir });
-            mnuArchivo.Name = "mnuArchivo";
-            mnuArchivo.Size = new Size(60, 20);
-            mnuArchivo.Text = "Archivo";
-            // 
-            // mnuSalir
-            // 
-            mnuSalir.Name = "mnuSalir";
-            mnuSalir.Size = new Size(96, 22);
-            mnuSalir.Text = "Salir";
-            mnuSalir.Click += mnuSalir_Click;
             // 
             // tlMain
             // 
@@ -74,14 +47,14 @@
             tlMain.Controls.Add(btnLocalidadLista, 1, 2);
             tlMain.Controls.Add(label1, 1, 1);
             tlMain.Dock = DockStyle.Fill;
-            tlMain.Location = new Point(0, 24);
+            tlMain.Location = new Point(0, 0);
             tlMain.Name = "tlMain";
             tlMain.RowCount = 4;
             tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
             tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlMain.Size = new Size(800, 426);
+            tlMain.Size = new Size(800, 450);
             tlMain.TabIndex = 3;
             // 
             // lbMain
@@ -104,7 +77,7 @@
             // 
             btnVehiculoLista.Anchor = AnchorStyles.Top;
             btnVehiculoLista.ForeColor = SystemColors.ControlText;
-            btnVehiculoLista.Location = new Point(334, 321);
+            btnVehiculoLista.Location = new Point(334, 339);
             btnVehiculoLista.Name = "btnVehiculoLista";
             btnVehiculoLista.Size = new Size(131, 47);
             btnVehiculoLista.TabIndex = 1;
@@ -122,6 +95,11 @@
             btnLocalidadLista.Text = "Localidades";
             btnLocalidadLista.UseVisualStyleBackColor = true;
             btnLocalidadLista.Click += btnLocalidadLista_Click;
+            lbMain.RightToLeft = RightToLeft.No;
+            lbMain.Size = new Size(353, 76);
+            lbMain.TabIndex = 2;
+            lbMain.Text = "Menú principal";
+            lbMain.Click += lbMain_Click;
             // 
             // label1
             // 
@@ -130,7 +108,7 @@
             label1.FlatStyle = FlatStyle.Popup;
             label1.Font = new Font("Calibri", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = SystemColors.ControlText;
-            label1.Location = new Point(223, 106);
+            label1.Location = new Point(223, 112);
             label1.Name = "label1";
             label1.RightToLeft = RightToLeft.No;
             label1.Size = new Size(353, 23);
@@ -144,26 +122,17 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(tlMain);
-            Controls.Add(mnsPrincipal);
             IsMdiContainer = true;
-            MainMenuStrip = mnsPrincipal;
             Name = "FormMain";
             Text = "Carpooling";
             WindowState = FormWindowState.Maximized;
             Shown += FormMain_Shown;
-            mnsPrincipal.ResumeLayout(false);
-            mnsPrincipal.PerformLayout();
             tlMain.ResumeLayout(false);
             tlMain.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-
-        private MenuStrip mnsPrincipal;
-        private ToolStripMenuItem mnuArchivo;
-        private ToolStripMenuItem mnuSalir;
         private TableLayoutPanel tlMain;
         private Button btnLocalidadLista;
         private Button btnVehiculoLista;

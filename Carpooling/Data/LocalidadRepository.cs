@@ -51,14 +51,15 @@ namespace Data
         public bool Delete(string cod)
         {
             using var context = CreateContext();
-            var persona = context.Localidades.Find(cod);
-            if (persona != null)
+            var localidad = context.Localidades.Find(cod);  
+            if (localidad != null)
             {
-                context.Localidades.Remove(persona);
+                context.Localidades.Remove(localidad);
                 context.SaveChanges();
                 return true;
             }
             return false;
         }
+
     }
 }

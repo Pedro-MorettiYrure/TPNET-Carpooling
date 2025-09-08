@@ -7,6 +7,8 @@ namespace Domain.Model
         public string codPostal { get; set; }
         public string nombreLoc { get; set; }
 
+        public Localidad() { }
+
         public Localidad(string codigopostal, string nombre)
         {
             SetCodPostal(codigopostal);
