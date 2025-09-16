@@ -1,47 +1,28 @@
 ﻿using Domain.Model;
-using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer;
 
 namespace Data
 {
     public class TPIContext : DbContext
     {
-        //public DbSet<Persona> Personas { get; set; }
         public DbSet<Localidad> Localidades { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
-        internal TPIContext()
-        {
-            this.Database.EnsureCreated(); // crea la BD si no existe
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                var configuration = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .Build();
-
-                string connectionString = configuration.GetConnectionString("DefaultConnection");
-                optionsBuilder.UseSqlServer(connectionString);
-            }
-        }
+        // Constructor que EF y DI usarán
+        public TPIContext(DbContextOptions<TPIContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configuración de Persona
-            /*modelBuilder.Entity<Persona>(entity =>
+            // Configuración de Usuario
+            modelBuilder.Entity<Usuario>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.ToTable("Usuario");
+                entity.HasKey(e => e.IdUsuario);
                 entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Apellido).IsRequired().HasMaxLength(100);
-
-                entity.HasOne(e => e.Localidad)
-                      .WithMany()
-                      .HasForeignKey(e => e.LocalidadId);
-            });*/
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.ContraseñaHash).IsRequired();
+            });
 
             // Configuración de Localidad
             modelBuilder.Entity<Localidad>(entity =>

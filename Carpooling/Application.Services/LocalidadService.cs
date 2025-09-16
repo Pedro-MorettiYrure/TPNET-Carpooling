@@ -1,18 +1,22 @@
 ﻿using Data;
 using Domain.Model;
 using DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Application.Services
 {
     public class LocalidadService
     {
-
         private readonly LocalidadRepository _repo;
 
-        public LocalidadService()
+        // Recibe el repositorio por constructor
+        public LocalidadService(LocalidadRepository repo)
         {
-            _repo = new LocalidadRepository();
+            _repo = repo;
         }
+
         public LocalidadDTO Add(LocalidadDTO dto)
         {
             // Validar que no exista en DB
@@ -24,12 +28,13 @@ namespace Application.Services
 
             return dto;
         }
+
         public bool Delete(string cod)
         {
             return _repo.Delete(cod);
         }
 
-        public LocalidadDTO Get(string cod)
+        public LocalidadDTO? Get(string cod)
         {
             var loc = _repo.Get(cod);
             if (loc == null) return null;
@@ -56,6 +61,4 @@ namespace Application.Services
             return _repo.Update(loc);
         }
     }
-
 }
-

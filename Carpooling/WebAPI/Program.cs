@@ -3,25 +3,32 @@ using Data;
 using Domain.Model;
 using DTOs;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.OpenApi; // Este using lo usas para el .WithOpenApi()
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore; // Si bien el using está, el paquete se usa por debajo con AddSwaggerGen()
+using Swashbuckle.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Add services to the container.
-
-//builder.Services.AddControllers(); esta se usa si tuvieramos que crear controladores manualmente, pero en este caso usamos los de ASP.NET Core
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add services to the container
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpLogging(o => { });
 
+// Configuración de DbContext con DI
+builder.Services.AddDbContext<TPIContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Inyección de repositorios
+builder.Services.AddScoped<LocalidadRepository>();
+builder.Services.AddScoped<UsuarioRepository>();
+
+// Inyección de servicios
+builder.Services.AddScoped<LocalidadService>();
+builder.Services.AddScoped<UsuarioService>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -31,49 +38,32 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//app.UseAuthorization();
+// ==================== Localidades ====================
 
-//app.MapControllers(); esta se usa si tuvieramos que crear controladores manualmente, pero en este caso usamos los de ASP.NET Core por ahora 
-
-app.MapGet("/localidades/{CodPostal}", (string CodPostal) =>
+app.MapGet("/localidades/{CodPostal}", (string CodPostal, LocalidadService localidadService) =>
 {
-    LocalidadService localidadService = new LocalidadService();
-
     LocalidadDTO dto = localidadService.Get(CodPostal);
-
-    if (dto == null)
-    {
-        return Results.NotFound();
-    }
-
-    return Results.Ok(dto);
+    return dto == null ? Results.NotFound() : Results.Ok(dto);
 })
 .WithName("GetLocalidad")
 .Produces<LocalidadDTO>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
-app.MapGet("/localidades", () =>
+app.MapGet("/localidades", (LocalidadService localidadService) =>
 {
-    LocalidadService localidadService = new LocalidadService();
-
     var dtos = localidadService.GetAll();
-
     return Results.Ok(dtos);
-
 })
 .WithName("GetAllLocalidades")
 .Produces<List<LocalidadDTO>>(StatusCodes.Status200OK)
 .WithOpenApi();
 
-app.MapPost("/localidades", (LocalidadDTO dto) =>
+app.MapPost("/localidades", (LocalidadDTO dto, LocalidadService localidadService) =>
 {
     try
     {
-        LocalidadService localidadService = new LocalidadService();
-
         LocalidadDTO localidadDTO = localidadService.Add(dto);
-
         return Results.Created($"/localidades/{localidadDTO.CodPostal}", localidadDTO);
     }
     catch (ArgumentException ex)
@@ -86,129 +76,44 @@ app.MapPost("/localidades", (LocalidadDTO dto) =>
 .Produces(StatusCodes.Status400BadRequest)
 .WithOpenApi();
 
-app.MapPut("/localidades", (LocalidadDTO dto) =>
+// Repetís lo mismo para PUT y DELETE usando LocalidadService inyectado
+// ==================== Usuarios ====================
+
+app.MapPost("/usuarios", (UsuarioDTO dto, UsuarioService usuarioService) =>
 {
     try
     {
-        LocalidadService localidadService = new LocalidadService();
-
-        var found = localidadService.Update(dto);
-
-        if (!found)
-        {
-            return Results.NotFound();
-        }
-
-        return Results.NoContent();
+        UsuarioDTO usuarioDTO = usuarioService.Registrar(dto, dto.Contraseña);
+        return Results.Created($"/usuarios/{usuarioDTO.IdUsuario}", usuarioDTO);
     }
     catch (ArgumentException ex)
     {
         return Results.BadRequest(new { error = ex.Message });
     }
 })
-.WithName("UpdateLocalidad")
-.Produces(StatusCodes.Status404NotFound)
+.WithName("AddUsuario")
+.Produces<UsuarioDTO>(StatusCodes.Status201Created)
 .Produces(StatusCodes.Status400BadRequest)
 .WithOpenApi();
 
-app.MapDelete("/localidades/{codPostal}", (string codPostal) =>
+app.MapPost("/usuarios/login", (UsuarioDTO dto, UsuarioService usuarioService) =>
 {
-    LocalidadService localidadService = new LocalidadService();
-
-    var deleted = localidadService.Delete(codPostal);
-
-    if (!deleted)
-    {
-        return Results.NotFound();
-    }
-
-    return Results.NoContent();
-
+    bool ok = usuarioService.Login(dto.Email, dto.Contraseña);
+    return ok ? Results.Ok(true) : Results.NotFound(false);
 })
-.WithName("DeleteLocalidad")
-.Produces(StatusCodes.Status204NoContent)
+.WithName("LoginUsuario")
+.Produces<bool>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
-app.MapGet("/vehiculos/{patente}", (string patente) =>
+app.MapGet("/usuarios/{email}", (string email, UsuarioService usuarioService) =>
 {
-    VehiculoService vehiculoService = new VehiculoService();
-    VehiculoDTO dto = vehiculoService.Get(patente);
-    if (dto == null)
-    {
-        return Results.NotFound();
-    }
-    return Results.Ok(dto);
+    UsuarioDTO? dto = usuarioService.GetByEmail(email);
+    return dto == null ? Results.NotFound() : Results.Ok(dto);
 })
-.WithName("GetVehiculo")
-.Produces<VehiculoDTO>(StatusCodes.Status200OK)
+.WithName("GetUsuarioByEmail")
+.Produces<UsuarioDTO>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
-
-app.MapGet("/vehiculos", () =>
-{
-    VehiculoService vehiculoService = new VehiculoService();
-    var dtos = vehiculoService.GetAll();
-    return Results.Ok(dtos);
-})
-.WithName("GetAllVehiculos")
-.Produces<List<VehiculoDTO>>(StatusCodes.Status200OK)
-.WithOpenApi();
-
-app.MapPost("/vehiculos", (VehiculoDTO dto) =>
-{
-    try
-    {
-        VehiculoService vehiculoService = new VehiculoService();
-        VehiculoDTO vehiculoDTO = vehiculoService.Add(dto);
-        return Results.Created($"/vehiculos/{vehiculoDTO.Patente}", vehiculoDTO);
-    }
-    catch (ArgumentException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-})
-.WithName("AddVehiculo")
-.Produces<VehiculoDTO>(StatusCodes.Status201Created)
-.Produces(StatusCodes.Status400BadRequest)
-.WithOpenApi();
-
-app.MapPut("/vehiculos", (VehiculoDTO dto) =>
-{
-    try
-    {
-        VehiculoService vehiculoService = new VehiculoService();
-        var found = vehiculoService.Update(dto);
-        if (!found)
-        {
-            return Results.NotFound();
-        }
-        return Results.NoContent();
-    }
-    catch (ArgumentException ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-})
-.WithName("UpdateVehiculo")
-.Produces(StatusCodes.Status404NotFound)
-.Produces(StatusCodes.Status400BadRequest)
-.WithOpenApi();
-
-app.MapDelete("/vehiculos/{patente}", (string patente) =>
-{
-    VehiculoService vehiculoService = new VehiculoService();
-    var deleted = vehiculoService.Delete(patente);
-    if (!deleted)
-    {
-        return Results.NotFound();
-    }
-    return Results.NoContent();
-})
-.WithName("DeleteVehiculo")
-.Produces(StatusCodes.Status204NoContent)
-.Produces(StatusCodes.Status404NotFound)
-.WithOpenApi();
-
 
 app.Run();

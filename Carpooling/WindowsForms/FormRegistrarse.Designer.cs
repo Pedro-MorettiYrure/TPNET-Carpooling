@@ -1,0 +1,184 @@
+﻿namespace WindowsForms
+{
+    partial class FormRegistrarse
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            label1 = new Label();
+            labelEmail = new Label();
+            labelContra = new Label();
+            btnCrearUsuario = new Button();
+            txtEmail = new TextBox();
+            txtBoxContra = new TextBox();
+            labelConfirmarContra = new Label();
+            txtBoxConfirmaCon = new TextBox();
+            label2 = new Label();
+            label3 = new Label();
+            txtBoxNombre = new TextBox();
+            txtBoxApellido = new TextBox();
+            SuspendLayout();
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.Location = new Point(211, 40);
+            label1.Name = "label1";
+            label1.Size = new Size(259, 30);
+            label1.TabIndex = 0;
+            label1.Text = "Registrate como pasajero\r\nAl ingresar podras solicitar para ser conductor";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // labelEmail
+            // 
+            labelEmail.AutoSize = true;
+            labelEmail.Location = new Point(343, 109);
+            labelEmail.Name = "labelEmail";
+            labelEmail.Size = new Size(94, 15);
+            labelEmail.TabIndex = 1;
+            labelEmail.Text = "Ingresa tu email:";
+            // 
+            // labelContra
+            // 
+            labelContra.AutoSize = true;
+            labelContra.Location = new Point(314, 147);
+            labelContra.Name = "labelContra";
+            labelContra.Size = new Size(123, 15);
+            labelContra.TabIndex = 2;
+            labelContra.Text = "Ingresa tu contraseña:";
+            // 
+            // btnCrearUsuario
+            // 
+            btnCrearUsuario.Location = new Point(508, 254);
+            btnCrearUsuario.Name = "btnCrearUsuario";
+            btnCrearUsuario.Size = new Size(99, 32);
+            btnCrearUsuario.TabIndex = 3;
+            btnCrearUsuario.Text = "Crear Usuario";
+            btnCrearUsuario.UseVisualStyleBackColor = true;
+            btnCrearUsuario.Click += btnCrearUsuario_Click;
+            // 
+            // txtEmail
+            // 
+            txtEmail.Location = new Point(443, 101);
+            txtEmail.Name = "txtEmail";
+            txtEmail.Size = new Size(128, 23);
+            txtEmail.TabIndex = 4;
+            // 
+            // txtBoxContra
+            // 
+            txtBoxContra.Location = new Point(443, 144);
+            txtBoxContra.Name = "txtBoxContra";
+            txtBoxContra.Size = new Size(128, 23);
+            txtBoxContra.TabIndex = 5;
+            // 
+            // labelConfirmarContra
+            // 
+            labelConfirmarContra.AutoSize = true;
+            labelConfirmarContra.Location = new Point(316, 189);
+            labelConfirmarContra.Name = "labelConfirmarContra";
+            labelConfirmarContra.Size = new Size(121, 15);
+            labelConfirmarContra.TabIndex = 6;
+            labelConfirmarContra.Text = "Confirma contraseña:";
+            // 
+            // txtBoxConfirmaCon
+            // 
+            txtBoxConfirmaCon.Location = new Point(443, 186);
+            txtBoxConfirmaCon.Name = "txtBoxConfirmaCon";
+            txtBoxConfirmaCon.Size = new Size(128, 23);
+            txtBoxConfirmaCon.TabIndex = 7;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(29, 109);
+            label2.Name = "label2";
+            label2.Size = new Size(127, 15);
+            label2.TabIndex = 8;
+            label2.Text = "Ingresa tu/s nombre/s:";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(49, 144);
+            label3.Name = "label3";
+            label3.Size = new Size(107, 15);
+            label3.TabIndex = 9;
+            label3.Text = "Ingresa tu apellido:";
+            // 
+            // txtBoxNombre
+            // 
+            txtBoxNombre.Location = new Point(162, 106);
+            txtBoxNombre.Name = "txtBoxNombre";
+            txtBoxNombre.Size = new Size(128, 23);
+            txtBoxNombre.TabIndex = 10;
+            // 
+            // txtBoxApellido
+            // 
+            txtBoxApellido.Location = new Point(162, 141);
+            txtBoxApellido.Name = "txtBoxApellido";
+            txtBoxApellido.Size = new Size(128, 23);
+            txtBoxApellido.TabIndex = 11;
+            // 
+            // FormRegistarse
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(655, 318);
+            Controls.Add(txtBoxApellido);
+            Controls.Add(txtBoxNombre);
+            Controls.Add(label3);
+            Controls.Add(label2);
+            Controls.Add(txtBoxConfirmaCon);
+            Controls.Add(labelConfirmarContra);
+            Controls.Add(txtBoxContra);
+            Controls.Add(txtEmail);
+            Controls.Add(btnCrearUsuario);
+            Controls.Add(labelContra);
+            Controls.Add(labelEmail);
+            Controls.Add(label1);
+            Name = "FormRegistarse";
+            Text = "FormRegistarse";
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        #endregion
+
+        private Label label1;
+        private Label labelEmail;
+        private Label labelContra;
+        private Button btnCrearUsuario;
+        private TextBox txtEmail;
+        private TextBox txtBoxContra;
+        private Label labelConfirmarContra;
+        private TextBox txtBoxConfirmaCon;
+        private Label label2;
+        private Label label3;
+        private TextBox txtBoxNombre;
+        private TextBox txtBoxApellido;
+    }
+}

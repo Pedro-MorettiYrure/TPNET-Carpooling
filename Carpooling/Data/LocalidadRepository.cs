@@ -1,48 +1,42 @@
 ﻿using Domain.Model;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Data
 {
     public class LocalidadRepository
     {
-        private TPIContext CreateContext()
+        private readonly TPIContext _context;
+
+        public LocalidadRepository(TPIContext context)
         {
-            return new TPIContext();
+            _context = context; // DI inyecta el contexto
         }
 
         public void Add(Localidad localidad)
         {
-            using var context = CreateContext();
-            context.Localidades.Add(localidad);
-            context.SaveChanges();
+            _context.Localidades.Add(localidad);
+            _context.SaveChanges();
         }
 
         public IEnumerable<Localidad> GetAll()
         {
-            using var context = CreateContext();
-            return context.Localidades
-                //.Include(p => p.Localidad)
-                .ToList();
+            return _context.Localidades.ToList();
         }
 
         public Localidad? Get(string cod)
         {
-            using var context = CreateContext();
-            return context.Localidades
-                //.Include(p => p.Localidad)
-                .FirstOrDefault(p => p.codPostal == cod);
+            return _context.Localidades.FirstOrDefault(p => p.codPostal == cod);
         }
 
         public bool Update(Localidad localidad)
         {
-            using var context = CreateContext();
-            var existing = context.Localidades.Find(localidad.codPostal);
+            var existing = _context.Localidades.Find(localidad.codPostal);
             if (existing != null)
             {
                 existing.SetNombreLoc(localidad.nombreLoc);
-                //existing.SetApellido(persona.Apellido);
                 existing.SetCodPostal(localidad.codPostal);
-                context.SaveChanges();
+                _context.SaveChanges();
                 return true;
             }
             return false;
@@ -50,16 +44,14 @@ namespace Data
 
         public bool Delete(string cod)
         {
-            using var context = CreateContext();
-            var localidad = context.Localidades.Find(cod);  
+            var localidad = _context.Localidades.Find(cod);
             if (localidad != null)
             {
-                context.Localidades.Remove(localidad);
-                context.SaveChanges();
+                _context.Localidades.Remove(localidad);
+                _context.SaveChanges();
                 return true;
             }
             return false;
         }
-
     }
 }

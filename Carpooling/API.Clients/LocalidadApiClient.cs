@@ -15,7 +15,7 @@ namespace API.Clients
         private static HttpClient loc = new HttpClient();
         static LocalidadApiClient()
         {
-            loc.BaseAddress = new Uri("http://localhost:5011/");
+            loc.BaseAddress = new Uri("https://localhost:7139/");
             loc.DefaultRequestHeaders.Accept.Clear();
             loc.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));

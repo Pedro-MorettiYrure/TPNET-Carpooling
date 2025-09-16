@@ -7,6 +7,12 @@
     <Compile Update="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="FormMenu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormRegistrarse.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="LocalidadDetalle.cs">
       <SubType>Form</SubType>
     </Compile>

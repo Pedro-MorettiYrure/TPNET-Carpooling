@@ -44,5 +44,17 @@ namespace WindowsForms
         {
 
         }
+
+        private void btnIniciarSesion_Click(object sender, EventArgs e)
+        {
+            FormLogin formLogin = new FormLogin();
+            formLogin.ShowDialog();
+        }
+
+        private void btnRegistrar_Click_1(object sender, EventArgs e)
+        {
+            FormRegistrarse formRegistarse = new FormRegistrarse();
+            formRegistarse.ShowDialog();
+        }
     }
 }

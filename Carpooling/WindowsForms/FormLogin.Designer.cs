@@ -35,18 +35,19 @@
             btnIngresar = new Button();
             txtEmail = new TextBox();
             txtPass = new TextBox();
+            label4 = new Label();
+            lnkRegistrate = new LinkLabel();
             SuspendLayout();
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(140, 46);
+            label1.Location = new Point(149, 70);
             label1.Name = "label1";
-            label1.Size = new Size(240, 30);
+            label1.Size = new Size(241, 30);
             label1.TabIndex = 0;
-            label1.Text = "¡Bienvenido a Carpooling!\r\nPor favor ingrese su información de Ingreso.";
+            label1.Text = "¡Bienvenido a Carpooling!\r\nPor favor ingrese su información de Usuario.";
             label1.TextAlign = ContentAlignment.MiddleCenter;
-            label1.Click += label1_Click;
             // 
             // label2
             // 
@@ -69,7 +70,7 @@
             // lnkOlvidaPass
             // 
             lnkOlvidaPass.AutoSize = true;
-            lnkOlvidaPass.Location = new Point(84, 227);
+            lnkOlvidaPass.Location = new Point(84, 223);
             lnkOlvidaPass.Name = "lnkOlvidaPass";
             lnkOlvidaPass.Size = new Size(119, 15);
             lnkOlvidaPass.TabIndex = 3;
@@ -102,11 +103,33 @@
             txtPass.Size = new Size(268, 23);
             txtPass.TabIndex = 6;
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(260, 288);
+            label4.Name = "label4";
+            label4.Size = new Size(129, 15);
+            label4.TabIndex = 7;
+            label4.Text = "¿No tienes una cuenta?";
+            // 
+            // lnkRegistrate
+            // 
+            lnkRegistrate.AutoSize = true;
+            lnkRegistrate.Location = new Point(386, 288);
+            lnkRegistrate.Name = "lnkRegistrate";
+            lnkRegistrate.Size = new Size(59, 15);
+            lnkRegistrate.TabIndex = 8;
+            lnkRegistrate.TabStop = true;
+            lnkRegistrate.Text = "Registrate";
+            lnkRegistrate.LinkClicked += lnkRegistrate_LinkClicked;
+            // 
             // FormLogin
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(523, 373);
+            Controls.Add(lnkRegistrate);
+            Controls.Add(label4);
             Controls.Add(txtPass);
             Controls.Add(txtEmail);
             Controls.Add(btnIngresar);
@@ -129,5 +152,7 @@
         private Button btnIngresar;
         private TextBox txtEmail;
         private TextBox txtPass;
+        private Label label4;
+        private LinkLabel lnkRegistrate;
     }
 }
