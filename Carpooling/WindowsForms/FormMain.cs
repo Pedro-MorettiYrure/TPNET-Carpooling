@@ -23,27 +23,10 @@ namespace WindowsForms
         }
 
         private void FormMain_Shown(object sender, EventArgs e)
-        {
-
-
-        }
-
-        private void btnLocalidadLista_Click(object sender, EventArgs e)
-        {
-            LocalidadLista appLocalidad = new LocalidadLista();
-            appLocalidad.ShowDialog();
-        }
-
-        private void btnVehiculoLista_Click(object sender, EventArgs e)
-        {
-            VehiculosLista appVehiculo = new VehiculosLista();
-            appVehiculo.ShowDialog();
-        }
+        {}
 
         private void lbMain_Click(object sender, EventArgs e)
-        {
-
-        }
+        {}
 
         private void btnIniciarSesion_Click(object sender, EventArgs e)
         {

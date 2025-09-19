@@ -6,72 +6,75 @@ namespace Application.Services
 {
     public class VehiculoService
     {
+        private readonly VehiculoRepository _repo;
+
+        public VehiculoService(VehiculoRepository repo)
+        {
+            _repo = repo;
+        }
+
         public VehiculoDTO Add(VehiculoDTO dto)
         {
-            // Validar que la patente no esté duplicada
-            if (VehiculoInMemory.Vehiculos.Any(v => v.patente.Equals(dto.Patente, StringComparison.OrdinalIgnoreCase)))
-            {
+            // Primero verificamos si ya existe un vehículo con la misma patente
+            if (_repo.Get(dto.Patente) != null)
                 throw new ArgumentException($"Ya existe un vehículo con la patente '{dto.Patente}'.");
-            }
-            Vehiculo vehiculo = new Vehiculo(dto.Patente, dto.Modelo, dto.CantLugares, dto.Color, dto.Marca);
-            VehiculoInMemory.Vehiculos.Add(vehiculo);
+
+            
+            Vehiculo vehiculo = new Vehiculo(
+                dto.Patente,
+                dto.Modelo,
+                dto.CantLugares,
+                dto.Color,
+                dto.Marca,
+                dto.IdUsuario  
+            );
+          
+            _repo.Add(vehiculo);
+
             return dto;
         }
-        public bool Delete(string patente)
+
+
+        public bool Delete(string patente, int idUsuario)
         {
-            Vehiculo? vehiculoToDelete = VehiculoInMemory.Vehiculos.Find(x => x.patente == patente);
-            if (vehiculoToDelete != null)
+            var vehiculo = _repo.Get(patente);
+            if (vehiculo != null && vehiculo.IdUsuario == idUsuario)
             {
-                VehiculoInMemory.Vehiculos.Remove(vehiculoToDelete);
+                _repo.Delete(vehiculo);
                 return true;
             }
-            else
-            {
-                return false;
-            }
-        }
-        public VehiculoDTO Get(string patente)
-        {
-            Vehiculo? vehiculo = VehiculoInMemory.Vehiculos.Find(x => x.patente == patente);
-            if (vehiculo == null)
-                return null;
-            return new VehiculoDTO
-            {
-                Patente = vehiculo.patente,
-                Modelo = vehiculo.modelo,
-                CantLugares = vehiculo.cantLugares,
-                Color = vehiculo.color,
-                Marca = vehiculo.marca,
-            };
-        }
-        public IEnumerable<VehiculoDTO> GetAll()
-        {
-            return VehiculoInMemory.Vehiculos.Select(vehiculo => new VehiculoDTO
-            {
-                Patente = vehiculo.patente,
-                Modelo = vehiculo.modelo,
-                CantLugares = vehiculo.cantLugares,
-                Color = vehiculo.color,
-                Marca = vehiculo.marca,
-            }).ToList();
+            return false;
         }
 
         public bool Update(VehiculoDTO dto)
         {
-            Vehiculo? vehiculoToUpdate = VehiculoInMemory.Vehiculos.Find(x => x.patente == dto.Patente);
-            if (vehiculoToUpdate != null)
+            var vehiculo = _repo.Get(dto.Patente);
+            if (vehiculo != null && vehiculo.IdUsuario == dto.IdUsuario)
             {
-                
-                vehiculoToUpdate.SetModelo(dto.Modelo);
-                vehiculoToUpdate.SetCantLugares(dto.CantLugares);
-                vehiculoToUpdate.SetColor(dto.Color);
-                vehiculoToUpdate.SetMarca(dto.Marca);
+                vehiculo.SetModelo(dto.Modelo);
+                vehiculo.SetCantLugares(dto.CantLugares);
+                vehiculo.SetColor(dto.Color);
+                vehiculo.SetMarca(dto.Marca);
+
+                _repo.Update(vehiculo);
                 return true;
             }
-            else
+            return false;
+        }
+
+        public IEnumerable<VehiculoDTO> GetByUsuario(int idUsuario)
+        {
+            return _repo.GetAllByUsuario(idUsuario).Select(v => new VehiculoDTO
             {
-                return false;
-            }
+                Patente = v.Patente,
+                Modelo = v.Modelo,
+                CantLugares = v.CantLugares,
+                Color = v.Color,
+                Marca = v.Marca,
+                IdUsuario = v.IdUsuario
+            }).ToList();
         }
     }
+
 }
+

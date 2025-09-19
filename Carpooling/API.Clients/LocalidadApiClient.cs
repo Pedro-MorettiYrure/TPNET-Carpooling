@@ -26,7 +26,7 @@ namespace API.Clients
         {
             try
             {
-                HttpResponseMessage response = await loc.GetAsync("clientes/" + codPos);
+                HttpResponseMessage response = await loc.GetAsync("localidades/" + codPos);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -47,6 +47,7 @@ namespace API.Clients
                 throw new Exception($"Timeout al obtener localidad con codigo postal {codPos}: {ex.Message}", ex);
             }
         }
+
 
         public static async Task<IEnumerable<LocalidadDTO>> GetAllAsync()
         {
@@ -122,7 +123,7 @@ namespace API.Clients
         {
             try
             {
-                HttpResponseMessage response = await loc.PutAsJsonAsync("localidades", localidad);
+                HttpResponseMessage response = await loc.PutAsJsonAsync("localidades/" + localidad.CodPostal, localidad);
 
                 if (!response.IsSuccessStatusCode)
                 {

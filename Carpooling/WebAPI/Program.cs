@@ -3,6 +3,7 @@ using Data;
 using Domain.Model;
 using DTOs;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -26,6 +27,9 @@ builder.Services.AddScoped<UsuarioRepository>();
 // Inyección de servicios
 builder.Services.AddScoped<LocalidadService>();
 builder.Services.AddScoped<UsuarioService>();
+
+builder.Services.AddScoped<VehiculoService>();
+builder.Services.AddScoped<VehiculoRepository>();
 
 var app = builder.Build();
 
@@ -76,7 +80,40 @@ app.MapPost("/localidades", (LocalidadDTO dto, LocalidadService localidadService
 .Produces(StatusCodes.Status400BadRequest)
 .WithOpenApi();
 
-// Repetís lo mismo para PUT y DELETE usando LocalidadService inyectado
+// PUT: actualizar una localidad
+app.MapPut("/localidades/{codPostal}", ([FromRoute] string codPostal, [FromBody] LocalidadDTO dto, [FromServices] LocalidadService localidadService) =>
+{
+    try
+    {
+        dto.CodPostal = codPostal;
+        bool updated = localidadService.Update(dto);
+
+        return updated ? Results.Ok(dto) : Results.NotFound();
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+})
+.WithName("UpdateLocalidad")
+.Produces<LocalidadDTO>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound)
+.Produces(StatusCodes.Status400BadRequest)
+.WithOpenApi();
+
+
+
+// DELETE: eliminar una localidad
+app.MapDelete("/localidades/{codPostal}", (string codPostal, LocalidadService localidadService) =>
+{
+    bool deleted = localidadService.Delete(codPostal);
+
+    return deleted ? Results.NoContent() : Results.NotFound();
+})
+.WithName("DeleteLocalidad")
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound)
+.WithOpenApi();
 // ==================== Usuarios ====================
 
 app.MapPost("/usuarios", (UsuarioDTO dto, UsuarioService usuarioService) =>
@@ -115,5 +152,51 @@ app.MapGet("/usuarios/{email}", (string email, UsuarioService usuarioService) =>
 .Produces<UsuarioDTO>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
+
+// ==================== Vehiculos ====================
+
+// GET: todos los vehículos de un usuario
+app.MapGet("/vehiculos/{idUsuario}", ([FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
+{
+    var vehiculos = vehiculoService.GetByUsuario(idUsuario);
+    return Results.Ok(vehiculos);
+});
+
+// GET: un vehículo por patente y usuario
+app.MapGet("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
+{
+    var vehiculo = vehiculoService.GetByUsuario(idUsuario)
+                     .FirstOrDefault(v => v.Patente == patente);
+
+    if (vehiculo == null) return Results.NotFound();
+    return Results.Ok(vehiculo);
+});
+
+// POST: agregar un vehículo
+app.MapPost("/vehiculos/{idUsuario}", ([FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
+{
+    vehiculoDto.IdUsuario = idUsuario; // aseguramos que el dto tenga el idUsuario correcto
+    var created = vehiculoService.Add(vehiculoDto);
+    return Results.Created($"/vehiculos/{created.Patente}/{idUsuario}", created);
+});
+
+// PUT: actualizar un vehículo
+app.MapPut("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
+{
+    vehiculoDto.Patente = patente;
+    vehiculoDto.IdUsuario = idUsuario;
+
+    var updated = vehiculoService.Update(vehiculoDto);
+    if (!updated) return Results.NotFound();
+    return Results.Ok(vehiculoDto);
+});
+
+// DELETE: eliminar un vehículo
+app.MapDelete("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
+{
+    var deleted = vehiculoService.Delete(patente, idUsuario);
+    if (!deleted) return Results.NotFound();
+    return Results.NoContent();
+});
 
 app.Run();

@@ -1,13 +1,7 @@
 ﻿using API.Clients;
 using DTOs;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static WindowsForms.VehiculoDetalle;
 
@@ -15,63 +9,26 @@ namespace WindowsForms
 {
     public partial class VehiculosLista : Form
     {
-        public VehiculosLista()
+        private readonly UsuarioDTO _usuario;
+
+        public VehiculosLista(UsuarioDTO usuario)
         {
             InitializeComponent();
+            _usuario = usuario;
         }
 
         private void VehiculosLista_Load(object sender, EventArgs e)
         {
             this.GetAllAndLoad();
         }
-        /*
-        private async void tsbEliminar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string patente = this.SelectedItem().Patente;
-
-                var result = MessageBox.Show($"¿Está seguro que desea eliminar el vehiculo con patente {patente}?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                {
-                    await API.Clients.VehiculoApiClient.DeleteAsync(patente);
-                    this.GetAllAndLoad();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al eliminar vehiculo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async void tsbEditar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                VehiculoDetalle formEditar = new VehiculoDetalle();
-                string patente = this.SelectedItem().Patente;
-
-                VehiculoDTO vehiculo = await API.Clients.VehiculoApiClient.GetAsync(patente);
-
-                formEditar.Mode = FormMode.Update;
-                formEditar.Vehiculo = vehiculo;
-
-                formEditar.ShowDialog();
-
-                this.GetAllAndLoad();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar localidad para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        */
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
             VehiculoDetalle formCrear = new VehiculoDetalle();
-            VehiculoDTO vehiculoNuevo = new VehiculoDTO();
+            VehiculoDTO vehiculoNuevo = new VehiculoDTO
+            {
+                IdUsuario = _usuario.IdUsuario // asignamos al usuario logueado
+            };
 
             formCrear.Mode = FormMode.Add;
             formCrear.Vehiculo = vehiculoNuevo;
@@ -79,8 +36,6 @@ namespace WindowsForms
             formCrear.ShowDialog();
 
             this.GetAllAndLoad();
-
-
         }
 
         private void btnSalir_Click(object sender, EventArgs e)
@@ -93,36 +48,33 @@ namespace WindowsForms
             try
             {
                 this.dgvVehiculos.DataSource = null;
-                this.dgvVehiculos.DataSource = await API.Clients.VehiculoApiClient.GetAllAsync();
+                var vehiculos = await VehiculoApiClient.GetByUsuarioAsync(_usuario.IdUsuario);
+                this.dgvVehiculos.DataSource = vehiculos.ToList();
 
-                if (this.dgvVehiculos.Rows.Count > 0)
-                {
+                // Ocultás la columna IdUsuario
+                if (dgvVehiculos.Columns["IdUsuario"] != null)
+                    dgvVehiculos.Columns["IdUsuario"].Visible = false;
+                if (dgvVehiculos.Columns["IdVehiculo"] != null)
+                    dgvVehiculos.Columns["IdVehiculo"].Visible = false;
+
+                bool tieneFilas = this.dgvVehiculos.Rows.Count > 0;
+                this.btnEditar.Enabled = tieneFilas;
+                this.btnEliminar.Enabled = tieneFilas;
+
+                if (tieneFilas)
                     this.dgvVehiculos.Rows[0].Selected = true;
-                    this.btnEliminar.Enabled = true;
-                    this.btnEditar.Enabled = true;
-                }
-                else
-                {
-                    this.btnEditar.Enabled = false;
-                    this.btnEliminar.Enabled = false;
-                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar la lista de vehiculos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar la lista de vehículos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.btnEliminar.Enabled = false;
                 this.btnEditar.Enabled = false;
             }
-
         }
 
         private VehiculoDTO SelectedItem()
         {
-            VehiculoDTO vehiculo;
-
-            vehiculo = (VehiculoDTO)dgvVehiculos.SelectedRows[0].DataBoundItem;
-
-            return vehiculo;
+            return (VehiculoDTO)dgvVehiculos.SelectedRows[0].DataBoundItem;
         }
 
         private async void btnEliminar_Click(object sender, EventArgs e)
@@ -131,17 +83,18 @@ namespace WindowsForms
             {
                 string patente = this.SelectedItem().Patente;
 
-                var result = MessageBox.Show($"¿Está seguro que desea eliminar el vehiculo con patente {patente}?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var result = MessageBox.Show($"¿Está seguro que desea eliminar el vehículo con patente {patente}?",
+                    "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                 if (result == DialogResult.Yes)
                 {
-                    await API.Clients.VehiculoApiClient.DeleteAsync(patente);
+                    await VehiculoApiClient.DeleteAsync(patente, _usuario.IdUsuario);
                     this.GetAllAndLoad();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al eliminar vehiculo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al eliminar vehículo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -150,9 +103,7 @@ namespace WindowsForms
             try
             {
                 VehiculoDetalle formEditar = new VehiculoDetalle();
-                string patente = this.SelectedItem().Patente;
-
-                VehiculoDTO vehiculo = await API.Clients.VehiculoApiClient.GetAsync(patente);
+                var vehiculo = await VehiculoApiClient.GetAsync(SelectedItem().Patente, _usuario.IdUsuario);
 
                 formEditar.Mode = FormMode.Update;
                 formEditar.Vehiculo = vehiculo;
@@ -163,13 +114,8 @@ namespace WindowsForms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar localidad para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar vehículo para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void tscVehiculos_TopToolStripPanel_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }

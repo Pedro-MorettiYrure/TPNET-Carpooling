@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Domain.Model
 {
@@ -13,14 +14,15 @@ namespace Domain.Model
         public string Email { get; set; }
         public string ContraseñaHash { get; private set; }
 
+        // Colección de vehículos del usuario
+        public ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
+
         private const int SaltSize = 16;
         private const int KeySize = 32;
         private const int Iterations = 10000;
 
-        // Constructor vacío para EF Core
         public Usuario() { }
 
-        // Método de fábrica para crear usuarios
         public static Usuario Crear(string nombre, string apellido, string email, string contraseña)
         {
             var u = new Usuario();

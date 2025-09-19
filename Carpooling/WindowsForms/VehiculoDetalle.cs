@@ -1,13 +1,6 @@
 ﻿using DTOs;
 using API.Clients;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsForms
@@ -35,45 +28,35 @@ namespace WindowsForms
             set
             {
                 vehiculo = value;
-                this.SetVehiculo();
+                SetVehiculo();
             }
         }
 
         public FormMode Mode
         {
-            get
-            {
-                return mode;
-            }
-            set
-            {
-                SetFormMode(value);
-            }
+            get { return mode; }
+            set { SetFormMode(value); }
         }
 
         private async void btnConfirmar_Click(object sender, EventArgs e)
         {
-            if (this.ValidateVehiculo())
+            if (ValidateVehiculo())
             {
                 try
                 {
-                    this.Vehiculo.Patente = txtPatente.Text;
-                    this.Vehiculo.Color = txtColor.Text;
-                    this.Vehiculo.Marca = txtMarca.Text;
-                    this.Vehiculo.Modelo = txtModelo.Text;
-                    //this.Vehiculo.CantLugares = txtCantLugares.Text;
-                    //El Detalle se esta llevando la responsabilidad de llamar al servicio
-                    //pero tal vez deberia ser solo una vista y que esta responsabilidad quede
-                    //en la Lista o tal vez en un Presenter o Controler
-                    this.Vehiculo.CantLugares = int.Parse(txtCantLugares.Text);
+                    vehiculo.Patente = txtPatente.Text;
+                    vehiculo.Color = txtColor.Text;
+                    vehiculo.Marca = txtMarca.Text;
+                    vehiculo.Modelo = txtModelo.Text;
+                    vehiculo.CantLugares = int.Parse(txtCantLugares.Text);
 
-                    if (this.Mode == FormMode.Update)
+                    if (Mode == FormMode.Update)
                     {
-                        await API.Clients.VehiculoApiClient.UpdateAsync(this.Vehiculo);
+                        await VehiculoApiClient.UpdateAsync(vehiculo);
                     }
                     else
                     {
-                        await API.Clients.VehiculoApiClient.AddAsync(this.Vehiculo);
+                        await VehiculoApiClient.AddAsync(vehiculo);
                     }
 
                     this.Dispose();
@@ -87,82 +70,56 @@ namespace WindowsForms
 
         private void SetVehiculo()
         {
-            this.txtPatente.Text = this.Vehiculo.Patente;
-            this.txtModelo.Text = this.Vehiculo.Modelo;
-            this.txtMarca.Text = this.Vehiculo.Marca;
-            this.txtColor.Text = this.Vehiculo.Color;
-            this.txtCantLugares.Text= this.Vehiculo.CantLugares.ToString();
+            txtPatente.Text = vehiculo.Patente;
+            txtModelo.Text = vehiculo.Modelo;
+            txtMarca.Text = vehiculo.Marca;
+            txtColor.Text = vehiculo.Color;
+            txtCantLugares.Text = vehiculo.CantLugares.ToString();
         }
 
         private void SetFormMode(FormMode value)
         {
             mode = value;
 
-            if (Mode == FormMode.Add)
-            {
-                labelMarca.Visible = true;
-                labelModelo.Visible = true;
-                labelCantLugares.Visible = true;
-                labelColor.Visible = true;
-                labelPatente.Visible = true;
-            }
+            txtPatente.Enabled = mode == FormMode.Add;
 
-            if (Mode == FormMode.Update)
-            {
-                labelMarca.Visible = true;
-                labelModelo.Visible = true;
-                labelCantLugares.Visible = true;
-                labelColor.Visible = true;
-                labelPatente.Visible = true;
-                txtPatente.Enabled = false;
-            }
+            labelMarca.Visible = true;
+            labelModelo.Visible = true;
+            labelCantLugares.Visible = true;
+            labelColor.Visible = true;
+            labelPatente.Visible = true;
         }
 
         private bool ValidateVehiculo()
         {
             bool isValid = true;
+            errorProvider1.Clear();
 
-            errorProvider1.SetError(txtPatente, string.Empty);
-            errorProvider1.SetError(txtModelo, string.Empty);
-            errorProvider1.SetError(txtMarca, string.Empty);
-            errorProvider1.SetError(txtColor, string.Empty);
-            errorProvider1.SetError(txtCantLugares, string.Empty);
-
-
-            if (this.txtPatente.Text == string.Empty)
+            if (string.IsNullOrWhiteSpace(txtPatente.Text))
             {
                 isValid = false;
                 errorProvider1.SetError(txtPatente, "La patente es requerida");
             }
-            if (this.txtModelo.Text == string.Empty)
+            if (string.IsNullOrWhiteSpace(txtModelo.Text))
             {
                 isValid = false;
-                errorProvider1.SetError(txtModelo, "El Modelo es Requerido");
+                errorProvider1.SetError(txtModelo, "El modelo es requerido");
             }
-            if (this.txtMarca.Text == string.Empty)
+            if (string.IsNullOrWhiteSpace(txtMarca.Text))
             {
                 isValid = false;
-                errorProvider1.SetError(txtMarca, "La marca es Requerida");
+                errorProvider1.SetError(txtMarca, "La marca es requerida");
             }
-            if (this.txtColor.Text == string.Empty)
+            if (string.IsNullOrWhiteSpace(txtColor.Text))
             {
                 isValid = false;
-                errorProvider1.SetError(txtColor, "El Color es Requerido");
+                errorProvider1.SetError(txtColor, "El color es requerido");
             }
-            if (this.txtCantLugares.Text == string.Empty)
+            if (!int.TryParse(txtCantLugares.Text, out int cant) || cant <= 0)
             {
                 isValid = false;
-                errorProvider1.SetError(txtCantLugares, "La cantidad de lugares es Requerida");
+                errorProvider1.SetError(txtCantLugares, "La cantidad de lugares debe ser un número positivo");
             }
-            else
-            {
-                if (!int.TryParse(this.txtCantLugares.Text, out int cantLugares) || cantLugares <= 0)
-                {
-                    isValid = false;
-                    errorProvider1.SetError(txtCantLugares, "La cantidad de lugares debe ser un número positivo");
-                }
-            }
-
 
             return isValid;
         }

@@ -8,6 +8,8 @@ namespace Data
         public DbSet<Localidad> Localidades { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
+        public DbSet<Vehiculo> Vehiculos { get; set; }
+
         // Constructor que EF y DI usarán
         public TPIContext(DbContextOptions<TPIContext> options) : base(options) { }
 
@@ -35,6 +37,24 @@ namespace Data
                     new { codPostal = "2607", nombreLoc = "Villa Cañas" }
                 );
             });
+
+            modelBuilder.Entity<Vehiculo>(entity =>
+            {
+                entity.ToTable("Vehiculos");
+                entity.HasKey(e => e.IdVehiculo); // PK
+                entity.Property(e => e.Patente).IsRequired().HasMaxLength(10);
+                entity.Property(e => e.Modelo).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Color).IsRequired().HasMaxLength(30);
+                entity.Property(e => e.Marca).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CantLugares).IsRequired();
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany(u => u.Vehiculos)
+                      .HasForeignKey(e => e.IdUsuario)
+                      .IsRequired();
+            });
+
+
         }
     }
 }

@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using DTOs;
 
 namespace WindowsForms
 {
     public partial class FormMenu : Form
     {
-        public FormMenu()
+        private readonly UsuarioDTO _usuarioLogueado; // <-- usuario logueado
+
+        public FormMenu(UsuarioDTO usuarioLogueado)
         {
             InitializeComponent();
+            _usuarioLogueado = usuarioLogueado;
         }
 
         private void btnLocalidadLista_Click(object sender, EventArgs e)
@@ -25,7 +22,8 @@ namespace WindowsForms
 
         private void btnVehiculoLista_Click(object sender, EventArgs e)
         {
-            VehiculosLista appVehiculo = new VehiculosLista();
+            // Le pasamos el usuario logueado al constructor
+            VehiculosLista appVehiculo = new VehiculosLista(_usuarioLogueado);
             appVehiculo.ShowDialog();
         }
     }

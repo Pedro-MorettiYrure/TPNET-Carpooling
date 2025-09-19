@@ -74,6 +74,33 @@ namespace API.Clients
                 return false;
             }
         }
+
+        public static async Task<UsuarioDTO> GetByEmailAsync(string email)
+        {
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync($"usuarios/{email}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<UsuarioDTO>();
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al obtener usuario {email}. Status: {response.StatusCode}, Detalle: {errorContent}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"Error de conexión al obtener usuario {email}: {ex.Message}", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new Exception($"Timeout al obtener usuario {email}: {ex.Message}", ex);
+            }
+        }
+
     }
 }
 

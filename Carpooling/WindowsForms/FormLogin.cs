@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using API.Clients;
+using DTOs; // para UsuarioDTO
 
 namespace WindowsForms
 {
@@ -9,37 +10,6 @@ namespace WindowsForms
         public FormLogin()
         {
             InitializeComponent();
-        }
-
-        private async void btnIngresar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                bool loginOk = await UsuarioApiClient.LoginAsync(txtEmail.Text, txtPass.Text);
-
-                if (loginOk)
-                {
-                    MessageBox.Show("Usted ha ingresado al sistema correctamente.",
-                        "Login", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // Abrir el FormMenu
-                    FormMenu formMenu = new FormMenu();
-                    formMenu.ShowDialog();
-
-                    // Cerrar el FormLogin
-                    this.Hide(); // opcional: Hide() mantiene el form en memoria, Close() lo destruye
-                }
-                else
-                {
-                    MessageBox.Show("Usuario y/o contraseña incorrectos", "Login",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al intentar ingresar: {ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void lnkOlvidaPass_Click(object sender, EventArgs e)
@@ -52,6 +22,37 @@ namespace WindowsForms
         {
             var formReg = new FormRegistrarse();
             formReg.ShowDialog();
+        }
+
+        private async void btnIngresar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string email = txtEmail.Text;
+                string contraseña = txtPass.Text;
+
+                bool loginOk = await UsuarioApiClient.LoginAsync(email, contraseña);
+
+                if (loginOk)
+                {
+                    // Obtener datos completos del usuario
+                    UsuarioDTO usuarioLogueado = await UsuarioApiClient.GetByEmailAsync(email);
+
+                    // Abrir el menú y pasar el usuario logueado
+                    FormMenu menu = new FormMenu(usuarioLogueado);
+                    this.Hide();
+                    menu.ShowDialog();
+                    this.Show(); // opcional si querés volver al login al cerrar el menú
+                }
+                else
+                {
+                    MessageBox.Show("Email o contraseña incorrectos.", "Error de login", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de conexión o inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
