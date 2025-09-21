@@ -57,8 +57,9 @@ namespace WindowsForms
 
         public static async Task UpdateAsync(LocalidadDTO localidad)
         {
-            HttpResponseMessage response = await loc.PutAsJsonAsync("localidades", localidad);
+            HttpResponseMessage response = await loc.PutAsJsonAsync("localidades/" + localidad.CodPostal, localidad);
             response.EnsureSuccessStatusCode();
         }
+
     }
 }

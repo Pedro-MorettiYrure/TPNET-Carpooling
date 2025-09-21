@@ -12,6 +12,7 @@ namespace Domain.Model
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Email { get; set; }
+        public string TipoUsuario { get; set; }
         public string ContraseñaHash { get; private set; }
 
         // Colección de vehículos del usuario
@@ -30,6 +31,7 @@ namespace Domain.Model
             u.SetApellido(apellido);
             u.SetEmail(email);
             u.SetContraseña(contraseña);
+            u.TipoUsuario = "Pasajero"; // Asignar el tipo "Pasajero" por defecto
             return u;
         }
 
@@ -104,5 +106,8 @@ namespace Domain.Model
                 return false;
             }
         }
+
+    
     }
 }
+        

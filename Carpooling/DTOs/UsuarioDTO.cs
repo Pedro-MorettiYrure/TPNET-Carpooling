@@ -12,6 +12,7 @@ namespace DTOs
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Email { get; set; }
+        public string TipoUsuario { get; set; }
 
         // El cliente manda la contraseña en texto plano.
         // El dominio (Usuario.cs) la va a hashear.

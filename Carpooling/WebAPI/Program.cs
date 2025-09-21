@@ -153,6 +153,18 @@ app.MapGet("/usuarios/{email}", (string email, UsuarioService usuarioService) =>
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
+app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", (int idUsuario, UsuarioService usuarioService) =>
+{
+    // Llama al método del servicio para actualizar el tipo de usuario
+    bool ok = usuarioService.ConvertirAConductor(idUsuario);
+    // Devuelve una respuesta HTTP
+    return ok ? Results.Ok() : Results.BadRequest();
+})
+.WithName("ConvertirAConductor")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest)
+.WithOpenApi();
+
 // ==================== Vehiculos ====================
 
 // GET: todos los vehículos de un usuario

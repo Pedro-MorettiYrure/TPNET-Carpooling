@@ -19,9 +19,20 @@ namespace Data
             _context.SaveChanges();
         }
 
+        public void Update(Usuario usuario)
+        {
+            _context.Usuarios.Update(usuario);
+            _context.SaveChanges();
+        }
+
         public Usuario? GetByEmail(string email)
         {
             return _context.Usuarios.FirstOrDefault(u => u.Email == email);
+        }
+
+        public Usuario? GetById(int id)
+        {
+            return _context.Usuarios.FirstOrDefault(u => u.IdUsuario == id);
         }
     }
 }

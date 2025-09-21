@@ -26,7 +26,8 @@ namespace Application.Services
                 Nombre = usuario.Nombre,
                 Apellido = usuario.Apellido,
                 Email = usuario.Email,
-                Contraseña = usuario.ContraseñaHash
+                Contraseña = usuario.ContraseñaHash,
+                TipoUsuario = usuario.TipoUsuario
             };
         }
 
@@ -49,8 +50,24 @@ namespace Application.Services
                 Nombre = usuario.Nombre,
                 Apellido = usuario.Apellido,
                 Email = usuario.Email,
-                Contraseña = usuario.ContraseñaHash
+                Contraseña = usuario.ContraseñaHash,
+                TipoUsuario = usuario.TipoUsuario
             };
+        }
+
+        // Método para convertir al usuario a conductor
+        public bool ConvertirAConductor(int idUsuario)
+        {
+            var usuario = _repo.GetById(idUsuario);
+
+            if (usuario != null && usuario.TipoUsuario == "Pasajero")
+            {
+                usuario.TipoUsuario = "Pasajero-Conductor";
+                // Aquí podrías agregar lógica para guardar los datos adicionales del conductor
+                _repo.Update(usuario); // Asume que tienes un método Update en el repositorio
+                return true;
+            }
+            return false;
         }
     }
 }
