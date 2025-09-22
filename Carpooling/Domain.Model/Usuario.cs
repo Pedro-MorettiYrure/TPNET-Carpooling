@@ -15,6 +15,12 @@ namespace Domain.Model
         public string TipoUsuario { get; set; }
         public string ContraseñaHash { get; private set; }
 
+        //public string Telefono { get; set; } FALTA
+
+        public string? nroLicenciaConductor { get; set; } // Solo para conductores
+
+        public DateTime? fechaVencimientoLicencia { get; set; } // Solo para conductores
+
         // Colección de vehículos del usuario
         public ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
 
@@ -106,8 +112,19 @@ namespace Domain.Model
                 return false;
             }
         }
+        public void ConvertirAConductor(string nroLicencia, DateTime fechaVencimiento)
+        {
+            if (string.IsNullOrWhiteSpace(nroLicencia))
+            {
+                throw new ArgumentException("El número de licencia no puede ser nulo o vacío.", nameof(nroLicencia));
+            }
 
-    
+            this.TipoUsuario = "Pasajero-Conductor";
+            this.nroLicenciaConductor = nroLicencia;
+            this.fechaVencimientoLicencia = fechaVencimiento;
+        }
+
+
     }
 }
         

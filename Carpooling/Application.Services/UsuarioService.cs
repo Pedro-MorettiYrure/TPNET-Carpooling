@@ -1,6 +1,7 @@
 ﻿using Data;
 using Domain.Model;
 using DTOs;
+using static DTOs.UsuarioDTO;
 
 namespace Application.Services
 {
@@ -56,16 +57,26 @@ namespace Application.Services
         }
 
         // Método para convertir al usuario a conductor
-        public bool ConvertirAConductor(int idUsuario)
+        public bool ConvertirAConductor(int idUsuario, ConductorUpgradeDTO dto)
         {
             var usuario = _repo.GetById(idUsuario);
 
-            if (usuario != null && usuario.TipoUsuario == "Pasajero")
+            if (usuario == null)
             {
-                usuario.TipoUsuario = "Pasajero-Conductor";
-                // Aquí podrías agregar lógica para guardar los datos adicionales del conductor
-                _repo.Update(usuario); // Asume que tienes un método Update en el repositorio
-                return true;
+                return false;
+            }
+            if (usuario.TipoUsuario == "Pasajero")
+            {
+                try
+                {
+                    usuario.ConvertirAConductor(dto.nroLicenciaConductor, dto.fechaVencimientoLicencia);
+                    _repo.Update(usuario);
+                    return true;
+                }
+                catch (ArgumentException)
+                {
+                    return false; // Retorna false si los datos del DTO no son válidos
+                }
             }
             return false;
         }

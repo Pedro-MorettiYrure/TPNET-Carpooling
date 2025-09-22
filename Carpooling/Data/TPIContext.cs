@@ -24,6 +24,8 @@ namespace Data
                 entity.Property(e => e.Apellido).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.ContraseñaHash).IsRequired();
+                entity.Property(e => e.nroLicenciaConductor).HasMaxLength(50);
+                entity.Property(e => e.fechaVencimientoLicencia).HasColumnType("datetime2");
             });
 
             // Configuración de Localidad

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore;
+using static DTOs.UsuarioDTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -153,11 +154,11 @@ app.MapGet("/usuarios/{email}", (string email, UsuarioService usuarioService) =>
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
-app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", (int idUsuario, UsuarioService usuarioService) =>
+// web api.cs
+app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", (int idUsuario, [FromBody] ConductorUpgradeDTO dto, UsuarioService usuarioService) =>
 {
-    // Llama al método del servicio para actualizar el tipo de usuario
-    bool ok = usuarioService.ConvertirAConductor(idUsuario);
-    // Devuelve una respuesta HTTP
+    bool ok = usuarioService.ConvertirAConductor(idUsuario, dto);
+
     return ok ? Results.Ok() : Results.BadRequest();
 })
 .WithName("ConvertirAConductor")

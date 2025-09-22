@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using static DTOs.UsuarioDTO;
 
 namespace API.Clients
 {
@@ -101,6 +102,18 @@ namespace API.Clients
             }
         }
 
+        public static async Task<bool> ConvertirAConductorAsync(int idUsuario, ConductorUpgradeDTO dto)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync($"usuarios/{idUsuario}/convertir-a-conductor", dto);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }
 
