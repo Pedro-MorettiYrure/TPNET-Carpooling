@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DTOs.UsuarioDTO;
+using Domain.Model;
 
 namespace WindowsForms
 {
@@ -47,7 +48,7 @@ namespace WindowsForms
                 {
                     MessageBox.Show("¡Felicidades! Ahora eres un conductor. Se ha guardado tu información.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     // Opcional: actualizar el DTO local para que la aplicación refleje el cambio de rol
-                    _usuarioLogueado.TipoUsuario = "Pasajero-Conductor";
+                    _usuarioLogueado.TipoUsuario = TipoUsuario.PasajeroConductor;
                     this.DialogResult = DialogResult.OK; // Para cerrar el formulario
                     this.Close();
                 }

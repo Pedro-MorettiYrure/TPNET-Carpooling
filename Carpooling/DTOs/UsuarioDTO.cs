@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Model;
 
 namespace DTOs
 {
@@ -12,7 +13,7 @@ namespace DTOs
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Email { get; set; }
-        public string TipoUsuario { get; set; }
+        public TipoUsuario TipoUsuario { get; set; }
 
        // public string Telefono { get; set; }  FALTA
 

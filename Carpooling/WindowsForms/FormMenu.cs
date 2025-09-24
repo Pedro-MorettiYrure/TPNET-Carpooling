@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 using DTOs;
+using Domain.Model;
+
 
 namespace WindowsForms
 {
@@ -13,12 +15,12 @@ namespace WindowsForms
             InitializeComponent();
             _usuarioLogueado = usuarioLogueado;
 
-            if (_usuarioLogueado.TipoUsuario == "Pasajero")
+            if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero)
             {
                 btnConvertirAConductor.Visible = true;
                 btnVehiculoLista.Visible = false; // El pasajero no puede ver vehículos
             }
-            else if (_usuarioLogueado.TipoUsuario == "Pasajero-Conductor" || _usuarioLogueado.TipoUsuario == "Administrador")
+            else if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor || _usuarioLogueado.TipoUsuario == TipoUsuario.Administrador)
             {
                 btnConvertirAConductor.Visible = false;
                 btnVehiculoLista.Visible = true; // El conductor y admin sí pueden

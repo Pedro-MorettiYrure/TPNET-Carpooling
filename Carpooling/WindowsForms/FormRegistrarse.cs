@@ -47,11 +47,12 @@ namespace WindowsForms
                 MessageBox.Show("Usuario registrado exitosamente.", "Éxito",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                this.Close(); // cierra el FormRegistrarse
+                //this.Close(); // cierra el FormRegistrarse
 
-                // Abrir FormLogin
-                FormLogin formLogin = new FormLogin();
-                formLogin.ShowDialog();
+                //// Abrir FormLogin
+                //FormLogin formLogin = new FormLogin();
+                //formLogin.ShowDialog();
+                this.DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {

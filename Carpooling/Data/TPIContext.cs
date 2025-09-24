@@ -7,11 +7,13 @@ namespace Data
     {
         public DbSet<Localidad> Localidades { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
-
         public DbSet<Vehiculo> Vehiculos { get; set; }
 
         // Constructor que EF y DI usarán
-        public TPIContext(DbContextOptions<TPIContext> options) : base(options) { }
+        public TPIContext(DbContextOptions<TPIContext> options) : base(options) 
+        {
+            //this.Database.EnsureCreated();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +26,8 @@ namespace Data
                 entity.Property(e => e.Apellido).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.ContraseñaHash).IsRequired();
+                entity.Property(e => e.TipoUsuario).IsRequired();
+                entity.Property(e => e.Telefono).HasMaxLength(200);     //required?
                 entity.Property(e => e.nroLicenciaConductor).HasMaxLength(50);
                 entity.Property(e => e.fechaVencimientoLicencia).HasColumnType("datetime2");
             });

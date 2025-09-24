@@ -65,7 +65,7 @@ namespace Application.Services
             {
                 return false;
             }
-            if (usuario.TipoUsuario == "Pasajero")
+            if (usuario.TipoUsuario == TipoUsuario.Pasajero)
             {
                 try
                 {

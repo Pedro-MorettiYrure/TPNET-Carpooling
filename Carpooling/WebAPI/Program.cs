@@ -41,6 +41,15 @@ if (app.Environment.IsDevelopment())
     app.UseHttpLogging();
 }
 
+IServiceScope scope = app.Services.CreateScope();
+TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();
+context.Database.Migrate();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
+//    db.Database.Migrate();
+//}
+
 app.UseHttpsRedirection();
 
 // ==================== Localidades ====================

@@ -12,10 +12,9 @@ namespace Domain.Model
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Email { get; set; }
-        public string TipoUsuario { get; set; }
+        public TipoUsuario TipoUsuario { get; set; }
         public string ContraseñaHash { get; private set; }
-
-        //public string Telefono { get; set; } FALTA
+        public string Telefono { get; set; }
 
         public string? nroLicenciaConductor { get; set; } // Solo para conductores
 
@@ -37,7 +36,7 @@ namespace Domain.Model
             u.SetApellido(apellido);
             u.SetEmail(email);
             u.SetContraseña(contraseña);
-            u.TipoUsuario = "Pasajero"; // Asignar el tipo "Pasajero" por defecto
+            u.TipoUsuario = TipoUsuario.Pasajero; // Asignar el tipo "Pasajero" por defecto
             return u;
         }
 
@@ -119,7 +118,7 @@ namespace Domain.Model
                 throw new ArgumentException("El número de licencia no puede ser nulo o vacío.", nameof(nroLicencia));
             }
 
-            this.TipoUsuario = "Pasajero-Conductor";
+            this.TipoUsuario = TipoUsuario.PasajeroConductor;
             this.nroLicenciaConductor = nroLicencia;
             this.fechaVencimientoLicencia = fechaVencimiento;
         }

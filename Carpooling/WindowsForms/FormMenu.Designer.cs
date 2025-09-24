@@ -52,11 +52,11 @@
             tlMain.Location = new Point(0, 0);
             tlMain.Name = "tlMain";
             tlMain.RowCount = 5;
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 25F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
             tlMain.Size = new Size(766, 374);
             tlMain.TabIndex = 4;
             // 
@@ -68,10 +68,10 @@
             lbMain.Font = new Font("Papyrus", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lbMain.ForeColor = SystemColors.HotTrack;
             lbMain.ImageAlign = ContentAlignment.TopCenter;
-            lbMain.Location = new Point(206, 6);
+            lbMain.Location = new Point(206, 0);
             lbMain.Name = "lbMain";
             lbMain.RightToLeft = RightToLeft.No;
-            lbMain.Size = new Size(353, 76);
+            lbMain.Size = new Size(353, 74);
             lbMain.TabIndex = 2;
             lbMain.Text = "Menu principal";
             // 
@@ -79,7 +79,7 @@
             // 
             btnVehiculoLista.Anchor = AnchorStyles.Top;
             btnVehiculoLista.ForeColor = SystemColors.ControlText;
-            btnVehiculoLista.Location = new Point(317, 267);
+            btnVehiculoLista.Location = new Point(317, 225);
             btnVehiculoLista.Name = "btnVehiculoLista";
             btnVehiculoLista.Size = new Size(131, 47);
             btnVehiculoLista.TabIndex = 1;
@@ -90,7 +90,7 @@
             // btnLocalidadLista
             // 
             btnLocalidadLista.Anchor = AnchorStyles.Top;
-            btnLocalidadLista.Location = new Point(317, 179);
+            btnLocalidadLista.Location = new Point(317, 151);
             btnLocalidadLista.Name = "btnLocalidadLista";
             btnLocalidadLista.Size = new Size(131, 47);
             btnLocalidadLista.TabIndex = 0;
@@ -105,7 +105,7 @@
             label1.FlatStyle = FlatStyle.Popup;
             label1.Font = new Font("Calibri", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = SystemColors.ControlText;
-            label1.Location = new Point(206, 88);
+            label1.Location = new Point(206, 74);
             label1.Name = "label1";
             label1.RightToLeft = RightToLeft.No;
             label1.Size = new Size(353, 23);
@@ -116,9 +116,9 @@
             // btnConvertirAConductor
             // 
             btnConvertirAConductor.Anchor = AnchorStyles.Top;
-            btnConvertirAConductor.Location = new Point(317, 355);
+            btnConvertirAConductor.Location = new Point(317, 299);
             btnConvertirAConductor.Name = "btnConvertirAConductor";
-            btnConvertirAConductor.Size = new Size(131, 16);
+            btnConvertirAConductor.Size = new Size(131, 26);
             btnConvertirAConductor.TabIndex = 1;
             btnConvertirAConductor.Text = "Quiero ser conductor";
             btnConvertirAConductor.UseVisualStyleBackColor = true;
