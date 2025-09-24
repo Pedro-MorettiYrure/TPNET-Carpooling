@@ -24,11 +24,13 @@ namespace WindowsForms
             {
                 btnConvertirAConductor.Visible = true;
                 btnVehiculoLista.Visible = false; // El pasajero no puede ver vehículos
+                btnViajeLista.Visible = false;
             }
             else if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor || _usuarioLogueado.TipoUsuario == TipoUsuario.Administrador)
             {
                 btnConvertirAConductor.Visible = false;
                 btnVehiculoLista.Visible = true; // El conductor y admin sí pueden
+                btnViajeLista.Visible=true;
             }
         }
 

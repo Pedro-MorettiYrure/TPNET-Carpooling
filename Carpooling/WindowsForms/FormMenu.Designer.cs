@@ -30,10 +30,10 @@
         {
             tlMain = new TableLayoutPanel();
             lbMain = new Label();
-            btnVehiculoLista = new Button();
             btnLocalidadLista = new Button();
             label1 = new Label();
             btnConvertirAConductor = new Button();
+            btnVehiculoLista = new Button();
             btnViajeLista = new Button();
             tlMain.SuspendLayout();
             SuspendLayout();
@@ -49,8 +49,8 @@
             tlMain.Controls.Add(btnLocalidadLista, 1, 2);
             tlMain.Controls.Add(label1, 1, 1);
             tlMain.Controls.Add(btnConvertirAConductor, 1, 4);
-            tlMain.Controls.Add(btnVehiculoLista, 2, 2);
-            tlMain.Controls.Add(btnViajeLista, 1, 3);
+            tlMain.Controls.Add(btnViajeLista, 2, 3);
+            tlMain.Controls.Add(btnVehiculoLista, 1, 3);
             tlMain.Dock = DockStyle.Fill;
             tlMain.Location = new Point(0, 0);
             tlMain.Name = "tlMain";
@@ -79,22 +79,11 @@
             lbMain.TabIndex = 2;
             lbMain.Text = "Menu principal";
             // 
-            // btnVehiculoLista
-            // 
-            btnVehiculoLista.Anchor = AnchorStyles.Top;
-            btnVehiculoLista.ForeColor = SystemColors.ControlText;
-            btnVehiculoLista.Location = new Point(417, 151);
-            btnVehiculoLista.Name = "btnVehiculoLista";
-            btnVehiculoLista.Size = new Size(131, 47);
-            btnVehiculoLista.TabIndex = 1;
-            btnVehiculoLista.Text = "Vehiculos";
-            btnVehiculoLista.UseVisualStyleBackColor = true;
-            btnVehiculoLista.Click += btnVehiculoLista_Click;
-            // 
             // btnLocalidadLista
             // 
             btnLocalidadLista.Anchor = AnchorStyles.Top;
-            btnLocalidadLista.Location = new Point(217, 151);
+            tlMain.SetColumnSpan(btnLocalidadLista, 2);
+            btnLocalidadLista.Location = new Point(317, 151);
             btnLocalidadLista.Name = "btnLocalidadLista";
             btnLocalidadLista.Size = new Size(131, 47);
             btnLocalidadLista.TabIndex = 0;
@@ -130,10 +119,22 @@
             btnConvertirAConductor.UseVisualStyleBackColor = true;
             btnConvertirAConductor.Click += btnConvertirAConductor_Click;
             // 
+            // btnVehiculoLista
+            // 
+            btnVehiculoLista.Anchor = AnchorStyles.Top;
+            btnVehiculoLista.ForeColor = SystemColors.ControlText;
+            btnVehiculoLista.Location = new Point(217, 225);
+            btnVehiculoLista.Name = "btnVehiculoLista";
+            btnVehiculoLista.Size = new Size(131, 47);
+            btnVehiculoLista.TabIndex = 1;
+            btnVehiculoLista.Text = "Vehiculos";
+            btnVehiculoLista.UseVisualStyleBackColor = true;
+            btnVehiculoLista.Click += btnVehiculoLista_Click;
+            // 
             // btnViajeLista
             // 
             btnViajeLista.Anchor = AnchorStyles.Top;
-            btnViajeLista.Location = new Point(217, 225);
+            btnViajeLista.Location = new Point(417, 225);
             btnViajeLista.Name = "btnViajeLista";
             btnViajeLista.Size = new Size(131, 47);
             btnViajeLista.TabIndex = 4;
