@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TPIContext))]
-    [Migration("20250923190518_prueba1Removed")]
-    partial class prueba1Removed
+    [Migration("20250924214425_InitialFix2")]
+    partial class InitialFix2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,9 +79,12 @@ namespace Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("TipoUsuario")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Telefono")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("TipoUsuario")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("fechaVencimientoLicencia")
                         .HasColumnType("datetime2");
@@ -134,6 +137,37 @@ namespace Data.Migrations
                     b.HasIndex("IdUsuario");
 
                     b.ToTable("Vehiculos", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Model.Viaje", b =>
+                {
+                    b.Property<int>("IdViaje")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdViaje"));
+
+                    b.Property<int>("CantLugares")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comentario")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Hora")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("Precio")
+                        .HasColumnType("real");
+
+                    b.HasKey("IdViaje");
+
+                    b.ToTable("Viajes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Model.Vehiculo", b =>

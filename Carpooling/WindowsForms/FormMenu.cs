@@ -15,6 +15,11 @@ namespace WindowsForms
             InitializeComponent();
             _usuarioLogueado = usuarioLogueado;
 
+            MostrarBtnsTipoUsuario();
+        }
+
+        private void MostrarBtnsTipoUsuario()
+        {
             if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero)
             {
                 btnConvertirAConductor.Visible = true;
@@ -44,6 +49,12 @@ namespace WindowsForms
         {
             FormConductorUpgrade formUpgrade = new FormConductorUpgrade(_usuarioLogueado);
             formUpgrade.ShowDialog();
+            MostrarBtnsTipoUsuario();
+        }
+
+        private void btnViajeLista_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Domain.Model
         public string Email { get; set; }
         public TipoUsuario TipoUsuario { get; set; }
         public string ContraseñaHash { get; private set; }
-        public string Telefono { get; set; }
+        public string? Telefono { get; set; }
 
         public string? nroLicenciaConductor { get; set; } // Solo para conductores
 

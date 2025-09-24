@@ -5,22 +5,33 @@
 namespace Data.Migrations
 {
     /// <inheritdoc />
-    public partial class prueba1Removed : Migration
+    public partial class InitialFix2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Prueba",
-                table: "Usuario");
+                name: "DestinoCodPostal",
+                table: "Viajes");
+
+            migrationBuilder.DropColumn(
+                name: "OrigenCodPostal",
+                table: "Viajes");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Prueba",
-                table: "Usuario",
+                name: "DestinoCodPostal",
+                table: "Viajes",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "OrigenCodPostal",
+                table: "Viajes",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");

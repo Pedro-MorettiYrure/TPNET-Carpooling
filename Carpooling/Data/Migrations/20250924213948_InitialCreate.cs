@@ -34,14 +34,47 @@ namespace Data.Migrations
                     Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Apellido = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    TipoUsuario = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TipoUsuario = table.Column<int>(type: "int", nullable: false),
                     ContraseñaHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Telefono = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     nroLicenciaConductor = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     fechaVencimientoLicencia = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Usuario", x => x.IdUsuario);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Viajes",
+                columns: table => new
+                {
+                    IdViaje = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Hora = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CantLugares = table.Column<int>(type: "int", nullable: false),
+                    Estado = table.Column<int>(type: "int", nullable: false),
+                    Comentario = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Precio = table.Column<float>(type: "real", nullable: false),
+                    OrigenCodPostal = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DestinoCodPostal = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Viajes", x => x.IdViaje);
+                    table.ForeignKey(
+                        name: "FK_Viajes_Localidades_DestinoCodPostal",
+                        column: x => x.DestinoCodPostal,
+                        principalTable: "Localidades",
+                        principalColumn: "codPostal",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Viajes_Localidades_OrigenCodPostal",
+                        column: x => x.OrigenCodPostal,
+                        principalTable: "Localidades",
+                        principalColumn: "codPostal",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,19 +114,32 @@ namespace Data.Migrations
                 name: "IX_Vehiculos_IdUsuario",
                 table: "Vehiculos",
                 column: "IdUsuario");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Viajes_DestinoCodPostal",
+                table: "Viajes",
+                column: "DestinoCodPostal");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Viajes_OrigenCodPostal",
+                table: "Viajes",
+                column: "OrigenCodPostal");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Localidades");
-
-            migrationBuilder.DropTable(
                 name: "Vehiculos");
 
             migrationBuilder.DropTable(
+                name: "Viajes");
+
+            migrationBuilder.DropTable(
                 name: "Usuario");
+
+            migrationBuilder.DropTable(
+                name: "Localidades");
         }
     }
 }

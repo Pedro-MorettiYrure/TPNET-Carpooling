@@ -8,6 +8,7 @@ namespace Data
         public DbSet<Localidad> Localidades { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Vehiculo> Vehiculos { get; set; }
+        public DbSet<Viaje> Viajes { get; set; }
 
         // Constructor que EF y DI usarán
         public TPIContext(DbContextOptions<TPIContext> options) : base(options) 
@@ -57,7 +58,33 @@ namespace Data
                 entity.HasOne(e => e.Usuario)
                       .WithMany(u => u.Vehiculos)
                       .HasForeignKey(e => e.IdUsuario)
-                      .IsRequired();
+                      .IsRequired()
+                      //.OnDelete(DeleteBehavior.Cascade)
+                      ; 
+            });
+
+            modelBuilder.Entity<Viaje>(entity =>
+            {
+                entity.ToTable("Viajes");
+                entity.HasKey(v => v.IdViaje);
+                entity.Property(v => v.Fecha).IsRequired();
+                entity.Property(v => v.Hora).IsRequired();
+                entity.Property(v => v.CantLugares).IsRequired();
+                entity.Property(v => v.Estado).IsRequired();
+                entity.Property(v => v.Comentario);
+                entity.Property(v => v.Precio);
+                entity.HasOne(v => v.Origen)
+                      .WithMany()
+                      .HasForeignKey(v => v.OrigenCodPostal)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(v => v.Destino)
+                      .WithMany()
+                      .HasForeignKey(v => v.DestinoCodPostal)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction);
+
+
             });
 
 

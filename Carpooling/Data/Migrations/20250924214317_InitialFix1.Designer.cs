@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TPIContext))]
-    [Migration("20250923192224_addedConstrains")]
-    partial class addedConstrains
+    [Migration("20250924214317_InitialFix1")]
+    partial class InitialFix1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,14 +80,11 @@ namespace Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Telefono")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("TipoUsuario")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<int>("TipoUsuario")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("fechaVencimientoLicencia")
                         .HasColumnType("datetime2");
@@ -140,6 +137,45 @@ namespace Data.Migrations
                     b.HasIndex("IdUsuario");
 
                     b.ToTable("Vehiculos", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Model.Viaje", b =>
+                {
+                    b.Property<int>("IdViaje")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdViaje"));
+
+                    b.Property<int>("CantLugares")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comentario")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DestinoCodPostal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Hora")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrigenCodPostal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Precio")
+                        .HasColumnType("real");
+
+                    b.HasKey("IdViaje");
+
+                    b.ToTable("Viajes", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Model.Vehiculo", b =>

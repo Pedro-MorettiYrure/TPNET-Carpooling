@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TPIContext))]
-    [Migration("20250923190244_prueba1")]
-    partial class prueba1
+    [Migration("20250924215026_InitialFix3")]
+    partial class InitialFix3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,13 +79,12 @@ namespace Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Prueba")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Telefono")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("TipoUsuario")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("TipoUsuario")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("fechaVencimientoLicencia")
                         .HasColumnType("datetime2");
@@ -140,6 +139,49 @@ namespace Data.Migrations
                     b.ToTable("Vehiculos", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Model.Viaje", b =>
+                {
+                    b.Property<int>("IdViaje")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdViaje"));
+
+                    b.Property<int>("CantLugares")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comentario")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DestinoCodPostal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Hora")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrigenCodPostal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float>("Precio")
+                        .HasColumnType("real");
+
+                    b.HasKey("IdViaje");
+
+                    b.HasIndex("DestinoCodPostal");
+
+                    b.HasIndex("OrigenCodPostal");
+
+                    b.ToTable("Viajes", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Model.Vehiculo", b =>
                 {
                     b.HasOne("Domain.Model.Usuario", "Usuario")
@@ -149,6 +191,25 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Domain.Model.Viaje", b =>
+                {
+                    b.HasOne("Domain.Model.Localidad", "Destino")
+                        .WithMany()
+                        .HasForeignKey("DestinoCodPostal")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Model.Localidad", "Origen")
+                        .WithMany()
+                        .HasForeignKey("OrigenCodPostal")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Destino");
+
+                    b.Navigation("Origen");
                 });
 
             modelBuilder.Entity("Domain.Model.Usuario", b =>

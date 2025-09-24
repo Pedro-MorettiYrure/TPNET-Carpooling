@@ -41,6 +41,8 @@ if (app.Environment.IsDevelopment())
     app.UseHttpLogging();
 }
 
+// dotnet ef migrations add NombreMigracion
+
 IServiceScope scope = app.Services.CreateScope();
 TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();
 context.Database.Migrate();
