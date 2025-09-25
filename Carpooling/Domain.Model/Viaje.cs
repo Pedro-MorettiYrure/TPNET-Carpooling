@@ -12,7 +12,7 @@ namespace Domain.Model
 
         public DateTime Fecha { get; set; }
 
-        public DateTime Hora { get; set; }
+        public DateTime Hora { get; set; } //no se usa(?
 
         public int CantLugares { get; set; }
 
@@ -20,7 +20,7 @@ namespace Domain.Model
 
         public string? Comentario { get; set; }
 
-        public float Precio { get; set; }
+        public decimal Precio { get; set; }
 
         public Localidad Origen { get; set; }
 
@@ -30,18 +30,26 @@ namespace Domain.Model
 
         public string DestinoCodPostal { get; set; }
 
+        public Usuario Conductor { get; set; }
+
+        public int IdConductor { get; set; }
+
+
         public Viaje() { }
 
-        public static Viaje Crear(DateTime fecha, DateTime hora, int cantLugares,
-                                    string? comentario, float precio, Localidad origen, Localidad destino)
+        public static Viaje Crear(DateTime fecha, int cantLugares, decimal precio,string? comentario,
+                                      string origenCodPostal, string destinoCodPostal, int idConductor)
         {
             var v = new Viaje();
             v.SetFechaHora(fecha);
-            v.SetHora(hora);
+            //v.SetHora(hora);
             v.SetCantLugares(cantLugares);
             v.SetComentario(comentario);
-            v.SetOrigen(origen);
-            v.SetDestino(destino);
+            //v.SetOrigen(origen);
+            //v.SetDestino(destino);
+            v.OrigenCodPostal = origenCodPostal;
+            v.DestinoCodPostal = destinoCodPostal;
+            v.IdConductor = idConductor;
             v.Estado = EstadoViaje.Pendiente;
             return v;
         }

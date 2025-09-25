@@ -83,6 +83,12 @@ namespace Data
                       .HasForeignKey(v => v.DestinoCodPostal)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(e => e.Conductor)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdConductor)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction)
+                      ;
 
 
             });

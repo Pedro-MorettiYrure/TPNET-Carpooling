@@ -22,22 +22,6 @@ namespace WindowsForms
             this.GetAllAndLoad();
         }
 
-        private void btnCrear_Click(object sender, EventArgs e)
-        {
-            VehiculoDetalle formCrear = new VehiculoDetalle();
-            VehiculoDTO vehiculoNuevo = new VehiculoDTO
-            {
-                IdUsuario = _usuario.IdUsuario // asignamos al usuario logueado
-            };
-
-            formCrear.Mode = FormMode.Add;
-            formCrear.Vehiculo = vehiculoNuevo;
-
-            formCrear.ShowDialog();
-
-            this.GetAllAndLoad();
-        }
-
         private void btnSalir_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -70,6 +54,22 @@ namespace WindowsForms
                 this.btnEliminar.Enabled = false;
                 this.btnEditar.Enabled = false;
             }
+        }
+
+        private void btnCrear_Click(object sender, EventArgs e)
+        {
+            VehiculoDetalle formCrear = new VehiculoDetalle();
+            VehiculoDTO vehiculoNuevo = new VehiculoDTO
+            {
+                IdUsuario = _usuario.IdUsuario // asignamos al usuario logueado
+            };
+
+            formCrear.Mode = FormMode.Add;
+            formCrear.Vehiculo = vehiculoNuevo;
+
+            formCrear.ShowDialog();
+
+            this.GetAllAndLoad();
         }
 
         private VehiculoDTO SelectedItem()

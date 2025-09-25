@@ -47,7 +47,7 @@
             // tscLocalidades.ContentPanel
             // 
             tscLocalidades.ContentPanel.Controls.Add(tlLocalidades);
-            tscLocalidades.ContentPanel.Size = new Size(800, 450);
+            tscLocalidades.ContentPanel.Size = new Size(800, 425);
             tscLocalidades.Dock = DockStyle.Fill;
             tscLocalidades.Location = new Point(0, 0);
             tscLocalidades.Name = "tscLocalidades";
@@ -68,16 +68,16 @@
             tlLocalidades.ColumnStyles.Add(new ColumnStyle());
             tlLocalidades.Controls.Add(dgvLocalidad, 0, 0);
             tlLocalidades.Controls.Add(btnSalir, 3, 1);
-            tlLocalidades.Controls.Add(btnCrear, 2, 1);
-            tlLocalidades.Controls.Add(btnEliminar, 1, 1);
-            tlLocalidades.Controls.Add(btnEditar, 0, 1);
+            tlLocalidades.Controls.Add(btnCrear, 0, 1);
+            tlLocalidades.Controls.Add(btnEditar, 1, 1);
+            tlLocalidades.Controls.Add(btnEliminar, 2, 1);
             tlLocalidades.Dock = DockStyle.Fill;
             tlLocalidades.Location = new Point(0, 0);
             tlLocalidades.Name = "tlLocalidades";
             tlLocalidades.RowCount = 2;
             tlLocalidades.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlLocalidades.RowStyles.Add(new RowStyle());
-            tlLocalidades.Size = new Size(800, 450);
+            tlLocalidades.Size = new Size(800, 425);
             tlLocalidades.TabIndex = 0;
             // 
             // dgvLocalidad
@@ -87,13 +87,13 @@
             dgvLocalidad.Dock = DockStyle.Fill;
             dgvLocalidad.Location = new Point(3, 3);
             dgvLocalidad.Name = "dgvLocalidad";
-            dgvLocalidad.Size = new Size(794, 415);
+            dgvLocalidad.Size = new Size(794, 390);
             dgvLocalidad.TabIndex = 0;
             // 
             // btnSalir
             // 
             btnSalir.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnSalir.Location = new Point(722, 424);
+            btnSalir.Location = new Point(722, 399);
             btnSalir.Name = "btnSalir";
             btnSalir.Size = new Size(75, 23);
             btnSalir.TabIndex = 2;
@@ -103,7 +103,7 @@
             // 
             // btnCrear
             // 
-            btnCrear.Location = new Point(481, 424);
+            btnCrear.Location = new Point(3, 399);
             btnCrear.Name = "btnCrear";
             btnCrear.Size = new Size(158, 23);
             btnCrear.TabIndex = 1;
@@ -113,7 +113,7 @@
             // 
             // btnEliminar
             // 
-            btnEliminar.Location = new Point(242, 424);
+            btnEliminar.Location = new Point(481, 399);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(158, 23);
             btnEliminar.TabIndex = 3;
@@ -123,7 +123,7 @@
             // 
             // btnEditar
             // 
-            btnEditar.Location = new Point(3, 424);
+            btnEditar.Location = new Point(242, 399);
             btnEditar.Name = "btnEditar";
             btnEditar.Size = new Size(158, 23);
             btnEditar.TabIndex = 4;

@@ -30,6 +30,21 @@ namespace Data
             _context.SaveChanges();
         }
 
+        public void Delete(Viaje viaje)
+        {
+            _context.Viajes.Remove(viaje);
+            _context.SaveChanges();
+        }
+
+        public Viaje Get(int id)
+        {
+            return _context.Viajes.FirstOrDefault(v => v.IdViaje == id);
+        }
+
+        public IEnumerable<Viaje> GetAllByConductor(int idUsuario)
+        {
+            return _context.Viajes.Where(v => v.IdConductor == idUsuario).ToList();
+        }
         
 
     }

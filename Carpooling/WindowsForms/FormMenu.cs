@@ -56,7 +56,8 @@ namespace WindowsForms
 
         private void btnViajeLista_Click(object sender, EventArgs e)
         {
-
+            ViajesLista appLista = new ViajesLista(_usuarioLogueado);
+            appLista.ShowDialog();
         }
     }
 }

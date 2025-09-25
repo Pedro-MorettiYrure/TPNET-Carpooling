@@ -15,14 +15,15 @@ namespace DTOs
         public EstadoViaje Estado { get; set; }
         public string? Comentario { get; set; }
         public decimal Precio { get; set; } // prefiero decimal para dinero
-        public int OrigenId { get; set; }
-        public int DestinoId { get; set; }
+        public string OrigenCodPostal { get; set; }
+        public string DestinoCodPostal { get; set; }
 
-        // Opcional: datos completos de las localidades si quieres devolverlos
+        // Opcional: datos completos de las localidades si hay q devolverlos
         public LocalidadDTO? Origen { get; set; }
         public LocalidadDTO? Destino { get; set; }
 
-        // información sobre el conductor??
+        // información sobre el conductor
+        public int IdConductor { get; set; }
         
     }
 }

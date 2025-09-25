@@ -55,9 +55,6 @@
             tscVehiculos.TabIndex = 0;
             tscVehiculos.Text = "toolStripContainer1";
             // 
-            // tscVehiculos.TopToolStripPanel
-            // 
-            // 
             // tlVehiculos
             // 
             tlVehiculos.ColumnCount = 4;
@@ -67,9 +64,9 @@
             tlVehiculos.ColumnStyles.Add(new ColumnStyle());
             tlVehiculos.Controls.Add(dgvVehiculos, 0, 0);
             tlVehiculos.Controls.Add(btnSalir, 3, 1);
-            tlVehiculos.Controls.Add(btnCrear, 2, 1);
-            tlVehiculos.Controls.Add(btnEliminar, 1, 1);
-            tlVehiculos.Controls.Add(btnEditar, 0, 1);
+            tlVehiculos.Controls.Add(btnEditar, 1, 1);
+            tlVehiculos.Controls.Add(btnEliminar, 2, 1);
+            tlVehiculos.Controls.Add(btnCrear, 0, 1);
             tlVehiculos.Dock = DockStyle.Fill;
             tlVehiculos.Location = new Point(0, 0);
             tlVehiculos.Name = "tlVehiculos";
@@ -101,7 +98,7 @@
             // 
             // btnCrear
             // 
-            btnCrear.Location = new Point(491, 399);
+            btnCrear.Location = new Point(3, 399);
             btnCrear.Name = "btnCrear";
             btnCrear.Size = new Size(120, 23);
             btnCrear.TabIndex = 1;
@@ -111,7 +108,7 @@
             // 
             // btnEliminar
             // 
-            btnEliminar.Location = new Point(247, 399);
+            btnEliminar.Location = new Point(491, 399);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(120, 23);
             btnEliminar.TabIndex = 3;
@@ -121,7 +118,7 @@
             // 
             // btnEditar
             // 
-            btnEditar.Location = new Point(3, 399);
+            btnEditar.Location = new Point(247, 399);
             btnEditar.Name = "btnEditar";
             btnEditar.Size = new Size(120, 23);
             btnEditar.TabIndex = 4;
