@@ -23,9 +23,9 @@ namespace API.Clients
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public static async Task<IEnumerable<ViajeDTO>> GetByUsuarioAsync(int idUsuario)
+        public static async Task<IEnumerable<ViajeDTO>> GetByConductorAsync(int idUsuario)
         {
-            HttpResponseMessage response = await client.GetAsync($"viajes/{idUsuario}");
+            HttpResponseMessage response = await client.GetAsync($"viajes/conductor/{idUsuario}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<IEnumerable<ViajeDTO>>();
         }

@@ -24,13 +24,15 @@ builder.Services.AddDbContext<TPIContext>(options =>
 // Inyección de repositorios
 builder.Services.AddScoped<LocalidadRepository>();
 builder.Services.AddScoped<UsuarioRepository>();
+builder.Services.AddScoped<VehiculoRepository>();
+builder.Services.AddScoped<ViajeRepository>(); 
+
 
 // Inyección de servicios
 builder.Services.AddScoped<LocalidadService>();
 builder.Services.AddScoped<UsuarioService>();
-
 builder.Services.AddScoped<VehiculoService>();
-builder.Services.AddScoped<VehiculoRepository>();
+builder.Services.AddScoped<ViajeServices>();
 
 var app = builder.Build();
 
@@ -126,6 +128,8 @@ app.MapDelete("/localidades/{codPostal}", (string codPostal, LocalidadService lo
 .Produces(StatusCodes.Status204NoContent)
 .Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
+
+
 // ==================== Usuarios ====================
 
 app.MapPost("/usuarios", (UsuarioDTO dto, UsuarioService usuarioService) =>
@@ -177,6 +181,8 @@ app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", (int idUsuario, [FromB
 .Produces(StatusCodes.Status400BadRequest)
 .WithOpenApi();
 
+
+
 // ==================== Vehiculos ====================
 
 // GET: todos los vehículos de un usuario
@@ -223,4 +229,61 @@ app.MapDelete("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [
     return Results.NoContent();
 });
 
+
+// ==================== Viajes ====================
+//GET: todos los viajes
+app.MapGet("/viajes", (ViajeServices viajeService) =>
+{
+    var dtos = viajeService.GetAll();
+    return Results.Ok(dtos);
+})
+.WithName("GetAllViajes")
+.Produces<List<ViajeDTO>>(StatusCodes.Status200OK)
+.WithOpenApi();
+
+// GET: todos los viajes de un usuario
+app.MapGet("/viajes/conductor/{idConductor}", ([FromRoute] int idConductor, [FromServices] ViajeServices viajeServices) =>
+{
+    var viajes = viajeServices.GetAllByConductor(idConductor);
+    return Results.Ok(viajes);
+});
+
+//GET: viaje por Id
+app.MapGet("/viajes/{idViaje}", (int idViaje, ViajeServices viajeService) =>
+{
+    ViajeDTO dto = viajeService.Get(idViaje);
+    return dto == null ? Results.NotFound() : Results.Ok(dto);
+})
+.WithName("GetViaje")
+.Produces<ViajeDTO>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound)
+.WithOpenApi();
+
+// POST: agregar un viaje
+app.MapPost("/viajes/", ([FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServices viajeService) =>
+{
+    //vehiculoDto.IdUsuario = idUsuario; // aseguramos que el dto tenga el idUsuario correcto
+    var created = viajeService.Add(viajeDTO);
+    return Results.Created($"/viajes/{created.IdViaje}", created);
+});
+
+// PUT: actualizar un vehículo
+app.MapPut("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServices viajeService) =>
+{
+    viajeDTO.IdViaje = idViaje;
+
+    var updated = viajeService.Update(viajeDTO);
+    if (!updated) return Results.NotFound();
+    return Results.Ok(viajeDTO);
+});
+
+// DELETE: eliminar un vehículo
+app.MapDelete("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromServices] ViajeServices viajeService) =>
+{
+    var deleted = viajeService.Delete(idViaje);
+    if (!deleted) return Results.NotFound();
+    return Results.NoContent();
+});
+
+// === Run === 
 app.Run();

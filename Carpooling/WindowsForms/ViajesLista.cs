@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DTOs;
 using API.Clients;
+using static WindowsForms.ViajeDetalle;
 
 namespace WindowsForms
 {
@@ -29,7 +30,7 @@ namespace WindowsForms
             try
             {
                 this.dgvViajesLista.DataSource = null;
-                var viajes = await ViajeApiClient.GetByUsuarioAsync(_usuario.IdUsuario);
+                var viajes = await ViajeApiClient.GetByConductorAsync(_usuario.IdUsuario);
                 this.dgvViajesLista.DataSource = viajes.ToList();
 
                 //if (dgvViajesLista.Columns["IdViaje"]) != null)
@@ -53,6 +54,10 @@ namespace WindowsForms
         private void btnCrear_Click(object sender, EventArgs e)
         {
             ViajeDetalle formCrear = new ViajeDetalle(_usuario);
+            formCrear.Mode = FormMode.Add;
+            formCrear.ShowDialog();
+
+            this.GetAllAndLoad();
             //ViajeDTO viajeNuevo = new ViajeDTO
             //{
             //    IdConductor = _usuario.IdUsuario

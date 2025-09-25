@@ -10,9 +10,9 @@ namespace Domain.Model
     {
         public int IdViaje {  get; set; }
 
-        public DateTime Fecha { get; set; }
+        public DateTime FechaHora { get; set; }
 
-        public DateTime Hora { get; set; } //no se usa(?
+        //public DateTime Hora { get; set; } //no se usa(?
 
         public int CantLugares { get; set; }
 
@@ -58,13 +58,13 @@ namespace Domain.Model
         {
             if (fecha < DateTime.Today)
                 throw new ArgumentOutOfRangeException("No se pueden seleccionar fechas anteriores a hoy");
-            Fecha = fecha;
+            FechaHora = fecha;
         }
 
-        public void SetHora(DateTime hora)
-        {
-            Hora = hora;
-        }
+        //public void SetHora(DateTime hora)
+        //{
+        //    Hora = hora;
+        //}
 
         public void SetCantLugares(int cantLugares)
         {
@@ -80,7 +80,7 @@ namespace Domain.Model
             Comentario = comentario;
         }
 
-        public void SetPrecio(float precio)
+        public void SetPrecio(decimal precio)
         {
             if (precio < 0)
                 throw new ArgumentOutOfRangeException(nameof(precio), "El precio no puede ser negativo.");

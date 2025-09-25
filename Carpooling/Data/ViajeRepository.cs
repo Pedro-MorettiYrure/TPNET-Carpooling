@@ -24,10 +24,17 @@ namespace Data
             _context.SaveChanges();
         }
 
-        public void Update(Viaje viaje)
+        public bool Update(Viaje viaje)
         {
-            _context.Viajes.Update(viaje);
-            _context.SaveChanges();
+            var viajeExistente = _context.Viajes.Find(viaje.IdViaje);
+
+            if (viajeExistente != null)
+            {
+                _context.Viajes.Update(viaje);      //usar Set() para validar?
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
         }
 
         public void Delete(Viaje viaje)
@@ -45,7 +52,12 @@ namespace Data
         {
             return _context.Viajes.Where(v => v.IdConductor == idUsuario).ToList();
         }
-        
+
+        public IEnumerable<Viaje> GetAll()
+        {
+            return _context.Viajes.OrderBy(p => p.IdViaje).ToList();
+        }
+
 
     }
 }

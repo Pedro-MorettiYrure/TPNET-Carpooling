@@ -67,8 +67,8 @@ namespace Data
             {
                 entity.ToTable("Viajes");
                 entity.HasKey(v => v.IdViaje);
-                entity.Property(v => v.Fecha).IsRequired();
-                entity.Property(v => v.Hora).IsRequired();
+                entity.Property(v => v.FechaHora).IsRequired();
+                //entity.Property(v => v.Hora).IsRequired();
                 entity.Property(v => v.CantLugares).IsRequired();
                 entity.Property(v => v.Estado).IsRequired();
                 entity.Property(v => v.Comentario);

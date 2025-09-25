@@ -9,7 +9,7 @@ using Domain.Model;
 
 namespace Application.Services
 {
-    internal class ViajeServices
+    public class ViajeServices
     {
         private readonly ViajeRepository _repo;
 
@@ -39,15 +39,74 @@ namespace Application.Services
             return dto;
         }
 
-        public bool Delete(int idViaje, int idConductor)
+        public bool Delete(int idViaje)
         {
             var viaje = _repo.Get(idViaje);
-            if (viaje != null && viaje.IdConductor == idConductor)
+            if (viaje != null)
             {
                 _repo.Delete(viaje);
                 return true;
             }
             return false;
         }
+        public ViajeDTO? Get(int idViaje)
+        {
+            var l = _repo.Get(idViaje);
+            if (l == null) return null;
+
+            return new ViajeDTO
+            {
+                IdViaje = l.IdViaje,
+                FechaHora = l.FechaHora,
+                CantLugares = l.CantLugares,
+                Precio = l.Precio,
+                Comentario = l.Comentario,
+                Estado = l.Estado,
+                OrigenCodPostal = l.OrigenCodPostal,
+                DestinoCodPostal = l.DestinoCodPostal,
+                IdConductor = l.IdConductor
+            };
+        }
+
+        public IEnumerable<ViajeDTO> GetAll()
+        {
+            return _repo.GetAll().Select(l => new ViajeDTO
+            {
+                IdViaje = l.IdViaje,
+                FechaHora = l.FechaHora,
+                CantLugares = l.CantLugares,
+                Precio = l.Precio,
+                Comentario = l.Comentario,
+                Estado = l.Estado,
+                OrigenCodPostal = l.OrigenCodPostal,
+                DestinoCodPostal = l.DestinoCodPostal,
+                IdConductor = l.IdConductor
+            }).ToList();
+        }
+
+        public IEnumerable<ViajeDTO> GetAllByConductor(int idUsuario)
+        {
+            return _repo.GetAllByConductor(idUsuario).Select(l => new ViajeDTO
+            {
+                IdViaje = l.IdViaje,
+                FechaHora = l.FechaHora,
+                CantLugares = l.CantLugares,
+                Precio = l.Precio,
+                Comentario = l.Comentario,
+                Estado = l.Estado,
+                OrigenCodPostal = l.OrigenCodPostal,
+                DestinoCodPostal = l.DestinoCodPostal,
+                IdConductor = l.IdConductor
+            }).ToList();
+        }
+
+        public bool Update(ViajeDTO dto)
+        {
+            Viaje viaje = Viaje.Crear (dto.FechaHora, dto.CantLugares, dto.Precio, dto.Comentario,
+                                        dto.OrigenCodPostal, dto.DestinoCodPostal, dto.IdConductor);
+            viaje.IdViaje = dto.IdViaje;
+            //_repo.Update (viaje);
+            return _repo.Update(viaje);
+            }
     }
 }
