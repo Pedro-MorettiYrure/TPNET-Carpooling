@@ -18,7 +18,7 @@ namespace Application.Services
         // Registrar usuario usando el método de fábrica
         public UsuarioDTO Registrar(UsuarioDTO dto, string contraseña)
         {
-            var usuario = Usuario.Crear(dto.Nombre, dto.Apellido, dto.Email, contraseña);
+            var usuario = Usuario.Crear(dto.Nombre, dto.Apellido, dto.Email, contraseña, dto.Telefono);
             _repo.Add(usuario);
 
             return new UsuarioDTO
@@ -27,6 +27,7 @@ namespace Application.Services
                 Nombre = usuario.Nombre,
                 Apellido = usuario.Apellido,
                 Email = usuario.Email,
+                Telefono= usuario.Telefono,
                 Contraseña = usuario.ContraseñaHash,
                 TipoUsuario = usuario.TipoUsuario
             };
@@ -52,7 +53,8 @@ namespace Application.Services
                 Apellido = usuario.Apellido,
                 Email = usuario.Email,
                 Contraseña = usuario.ContraseñaHash,
-                TipoUsuario = usuario.TipoUsuario
+                TipoUsuario = usuario.TipoUsuario,
+                Telefono = usuario.Telefono
             };
         }
 

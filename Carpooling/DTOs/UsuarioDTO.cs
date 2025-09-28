@@ -14,8 +14,7 @@ namespace DTOs
         public string Apellido { get; set; }
         public string Email { get; set; }
         public TipoUsuario TipoUsuario { get; set; }
-
-       // public string Telefono { get; set; }  FALTA
+        public string? Telefono { get; set; } 
 
         public string? nroLicenciaConductor { get; set; } // Solo para conductores
 

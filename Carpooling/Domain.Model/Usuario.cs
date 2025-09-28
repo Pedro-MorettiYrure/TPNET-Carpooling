@@ -29,13 +29,14 @@ namespace Domain.Model
 
         public Usuario() { }
 
-        public static Usuario Crear(string nombre, string apellido, string email, string contraseña)
+        public static Usuario Crear(string nombre, string apellido, string email, string contraseña, string? telefono)
         {
             var u = new Usuario();
             u.SetNombre(nombre);
             u.SetApellido(apellido);
             u.SetEmail(email);
             u.SetContraseña(contraseña);
+            u.SetTelefono(telefono);
             u.TipoUsuario = TipoUsuario.Pasajero; // Asignar el tipo "Pasajero" por defecto
             return u;
         }
@@ -70,6 +71,15 @@ namespace Domain.Model
             }
         }
 
+        public void SetTelefono(string? telefono)
+        {
+           
+            if (!string.IsNullOrWhiteSpace(telefono) && telefono.Length > 20)
+            {
+                throw new ArgumentException("El número de teléfono es demasiado largo.", nameof(telefono));
+            }
+            Telefono = telefono;
+        }
         public void SetContraseña(string contraseña)
         {
             if (string.IsNullOrWhiteSpace(contraseña))

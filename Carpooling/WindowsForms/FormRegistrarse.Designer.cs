@@ -40,6 +40,8 @@
             label3 = new Label();
             txtBoxNombre = new TextBox();
             txtBoxApellido = new TextBox();
+            txtBoxTele = new TextBox();
+            labelTele = new Label();
             SuspendLayout();
             // 
             // label1
@@ -143,11 +145,32 @@
             txtBoxApellido.Size = new Size(128, 23);
             txtBoxApellido.TabIndex = 11;
             // 
-            // FormRegistarse
+            // txtBoxTele
+            // 
+            txtBoxTele.Location = new Point(162, 186);
+            txtBoxTele.Name = "txtBoxTele";
+            txtBoxTele.Size = new Size(128, 23);
+            txtBoxTele.TabIndex = 12;
+            // 
+            // labelTele
+            // 
+            labelTele.AutoSize = true;
+            labelTele.Location = new Point(42, 194);
+            labelTele.Name = "labelTele";
+            labelTele.RightToLeft = RightToLeft.No;
+            labelTele.Size = new Size(109, 15);
+            labelTele.TabIndex = 13;
+            labelTele.Text = "Ingresa tu teléfono:";
+            labelTele.TextAlign = ContentAlignment.MiddleRight;
+            labelTele.Click += label4_Click;
+            // 
+            // FormRegistrarse
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(655, 318);
+            Controls.Add(labelTele);
+            Controls.Add(txtBoxTele);
             Controls.Add(txtBoxApellido);
             Controls.Add(txtBoxNombre);
             Controls.Add(label3);
@@ -160,7 +183,7 @@
             Controls.Add(labelContra);
             Controls.Add(labelEmail);
             Controls.Add(label1);
-            Name = "FormRegistarse";
+            Name = "FormRegistrarse";
             Text = "FormRegistarse";
             ResumeLayout(false);
             PerformLayout();
@@ -180,5 +203,7 @@
         private Label label3;
         private TextBox txtBoxNombre;
         private TextBox txtBoxApellido;
+        private TextBox txtBoxTele;
+        private Label labelTele;
     }
 }

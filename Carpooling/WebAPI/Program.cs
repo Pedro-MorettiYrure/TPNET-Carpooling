@@ -45,9 +45,9 @@ if (app.Environment.IsDevelopment())
 
 // dotnet ef migrations add NombreMigracion
 
-IServiceScope scope = app.Services.CreateScope();
-TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();
-context.Database.Migrate();
+//IServiceScope scope = app.Services.CreateScope();
+//TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();
+//context.Database.Migrate();
 //using (var scope = app.Services.CreateScope())
 //{
 //    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();

@@ -18,7 +18,8 @@ namespace WindowsForms
                 string.IsNullOrWhiteSpace(txtBoxApellido.Text) ||
                 string.IsNullOrWhiteSpace(txtEmail.Text) ||
                 string.IsNullOrWhiteSpace(txtBoxContra.Text) ||
-                string.IsNullOrWhiteSpace(txtBoxConfirmaCon.Text))
+                string.IsNullOrWhiteSpace(txtBoxConfirmaCon.Text) ||
+                string.IsNullOrWhiteSpace(txtBoxTele.Text))
             {
                 MessageBox.Show("Debe completar todos los campos.", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -39,7 +40,8 @@ namespace WindowsForms
                     Nombre = txtBoxNombre.Text,
                     Apellido = txtBoxApellido.Text,
                     Email = txtEmail.Text,
-                    Contraseña = txtBoxContra.Text
+                    Contraseña = txtBoxContra.Text,
+                    Telefono = txtBoxTele.Text
                 };
 
                 var usuarioGuardado = await UsuarioApiClient.RegistrarUsuarioAsync(usuarioDto);
@@ -59,6 +61,11 @@ namespace WindowsForms
                 MessageBox.Show($"Error al registrar usuario: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
 
         }
     }
