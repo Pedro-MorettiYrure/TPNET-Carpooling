@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Data;
 using DTOs;
 using Domain.Model;
@@ -11,47 +9,64 @@ namespace Application.Services
 {
     public class ViajeServices
     {
-        private readonly ViajeRepository _repo;
+        private readonly ViajeRepository _viajeRepo;
+        private readonly VehiculoRepository _vehiculoRepo;
 
-        public ViajeServices(ViajeRepository repo)
+        public ViajeServices(ViajeRepository viajeRepo, VehiculoRepository vehiculoRepo)
         {
-            _repo = repo;
+            _viajeRepo = viajeRepo;
+            _vehiculoRepo = vehiculoRepo;
         }
 
         public ViajeDTO Add(ViajeDTO dto)
         {
-            //verificar no existe un viaje en la misma fecha
-            //if (_repo.Get())
-            //    throw new ArgumentException($"Ya tienes un viaje programado para esa fecha y hora")
+            // Validar que el vehículo exista y pertenezca al conductor
+            var vehiculo = _vehiculoRepo.GetById(dto.IdVehiculo);
+            if (vehiculo == null)
+            {
+                throw new ArgumentException($"Vehículo con Id {dto.IdVehiculo} no encontrado para el conductor {dto.IdConductor}");
+            }
+
+
+            if (vehiculo == null || vehiculo.IdUsuario != dto.IdConductor)
+                throw new ArgumentException("El vehículo no pertenece al conductor.");
+
+            if (dto.CantLugares > vehiculo.CantLugares)
+                throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
 
             Viaje viaje = Viaje.Crear(
-                dto.FechaHora,
-                dto.CantLugares,
-                dto.Precio,
-                dto.Comentario,
-                dto.OrigenCodPostal,
-                dto.DestinoCodPostal,
-                dto.IdConductor
-                );
+            dto.FechaHora,
+            dto.CantLugares,
+            dto.Precio,
+            dto.Comentario,
+            dto.OrigenCodPostal,
+            dto.DestinoCodPostal,
+            dto.IdConductor,
+            vehiculo.CantLugares   
+            );
 
-            _repo.Add(viaje);
+
+            viaje.IdVehiculo = dto.IdVehiculo;
+
+            _viajeRepo.Add(viaje);
 
             return dto;
         }
 
         public bool Delete(int idViaje)
         {
-            var viaje = _repo.Get(idViaje);
+            var viaje = _viajeRepo.Get(idViaje);
             if (viaje != null)
             {
-                _repo.Delete(viaje);
+                _viajeRepo.Delete(viaje);
                 return true;
             }
             return false;
         }
+
         public ViajeDTO? Get(int idViaje)
         {
-            var l = _repo.Get(idViaje);
+            var l = _viajeRepo.Get(idViaje);
             if (l == null) return null;
 
             return new ViajeDTO
@@ -70,7 +85,7 @@ namespace Application.Services
 
         public IEnumerable<ViajeDTO> GetAll()
         {
-            return _repo.GetAll().Select(l => new ViajeDTO
+            return _viajeRepo.GetAll().Select(l => new ViajeDTO
             {
                 IdViaje = l.IdViaje,
                 FechaHora = l.FechaHora,
@@ -86,7 +101,7 @@ namespace Application.Services
 
         public IEnumerable<ViajeDTO> GetAllByConductor(int idUsuario)
         {
-            return _repo.GetAllByConductor(idUsuario).Select(l => new ViajeDTO
+            return _viajeRepo.GetAllByConductor(idUsuario).Select(l => new ViajeDTO
             {
                 IdViaje = l.IdViaje,
                 FechaHora = l.FechaHora,
@@ -102,11 +117,28 @@ namespace Application.Services
 
         public bool Update(ViajeDTO dto)
         {
-            Viaje viaje = Viaje.Crear (dto.FechaHora, dto.CantLugares, dto.Precio, dto.Comentario,
-                                        dto.OrigenCodPostal, dto.DestinoCodPostal, dto.IdConductor);
+            var vehiculo = _vehiculoRepo.GetById(dto.IdVehiculo);
+
+            if (vehiculo == null || vehiculo.IdUsuario != dto.IdConductor)
+                throw new ArgumentException("El vehículo no pertenece al conductor.");
+
+            if (dto.CantLugares > vehiculo.CantLugares)
+                throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
+
+            Viaje viaje = Viaje.Crear(
+            dto.FechaHora,
+            dto.CantLugares,
+            dto.Precio,
+            dto.Comentario,
+            dto.OrigenCodPostal,
+            dto.DestinoCodPostal,
+            dto.IdConductor,
+            vehiculo.CantLugares   // 👈 acá va la capacidad real del vehículo
+        );
+
             viaje.IdViaje = dto.IdViaje;
-            //_repo.Update (viaje);
-            return _repo.Update(viaje);
-            }
+
+            return _viajeRepo.Update(viaje);
+        }
     }
 }

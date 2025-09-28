@@ -20,19 +20,29 @@ namespace WindowsForms
 
         private void MostrarBtnsTipoUsuario()
         {
-            if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero)
+            // Ocultamos todo por defecto
+            btnConvertirAConductor.Visible = false;
+            btnVehiculoLista.Visible = false;
+            btnViajeLista.Visible = false;
+            btnLocalidadLista.Visible = false; 
+
+            switch (_usuarioLogueado.TipoUsuario)
             {
-                btnConvertirAConductor.Visible = true;
-                btnVehiculoLista.Visible = false; // El pasajero no puede ver vehículos
-                btnViajeLista.Visible = false;
-            }
-            else if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor || _usuarioLogueado.TipoUsuario == TipoUsuario.Administrador)
-            {
-                btnConvertirAConductor.Visible = false;
-                btnVehiculoLista.Visible = true; // El conductor y admin sí pueden
-                btnViajeLista.Visible=true;
+                case TipoUsuario.Administrador:
+                    btnLocalidadLista.Visible = true; 
+                    break;
+
+                case TipoUsuario.Pasajero:
+                    btnConvertirAConductor.Visible = true;
+                    break;
+
+                case TipoUsuario.PasajeroConductor:
+                    btnVehiculoLista.Visible = true;
+                    btnViajeLista.Visible = true;
+                    break;
             }
         }
+
 
         private void btnLocalidadLista_Click(object sender, EventArgs e)
         {

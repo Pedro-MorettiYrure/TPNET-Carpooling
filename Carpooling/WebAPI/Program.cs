@@ -56,6 +56,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<TPIContext>();
+
+    if (!context.Usuarios.Any(u => u.Email == "admin@gmail.com"))
+    {
+        var admin = Usuario.Crear("Admin", "Admin", "admin@gmail.com", "1234", null);
+        admin.TipoUsuario = TipoUsuario.Administrador;
+        context.Usuarios.Add(admin);
+        context.SaveChanges();
+    }
+}
 // ==================== Localidades ====================
 
 app.MapGet("/localidades/{CodPostal}", (string CodPostal, LocalidadService localidadService) =>

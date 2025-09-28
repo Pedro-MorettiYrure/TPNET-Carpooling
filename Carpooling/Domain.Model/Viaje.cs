@@ -34,25 +34,33 @@ namespace Domain.Model
 
         public int IdConductor { get; set; }
 
+        public Vehiculo Vehiculo { get; set; }
+        public int IdVehiculo { get; set; }
 
         public Viaje() { }
 
-        public static Viaje Crear(DateTime fecha, int cantLugares, decimal precio,string? comentario,
-                                      string origenCodPostal, string destinoCodPostal, int idConductor)
+        public static Viaje Crear(DateTime fecha, int cantLugares, decimal precio, string? comentario,
+                           string origenCodPostal, string destinoCodPostal,
+                           int idConductor, int capacidadVehiculo)
         {
+            // Validación de la capacidad
+            if (cantLugares > capacidadVehiculo)
+                throw new ArgumentException("La cantidad de lugares no puede superar la capacidad del vehículo.");
+
             var v = new Viaje();
             v.SetFechaHora(fecha);
-            //v.SetHora(hora);
             v.SetCantLugares(cantLugares);
+            v.SetPrecio(precio);   // faltaba setear el precio
             v.SetComentario(comentario);
-            //v.SetOrigen(origen);
-            //v.SetDestino(destino);
+
             v.OrigenCodPostal = origenCodPostal;
             v.DestinoCodPostal = destinoCodPostal;
             v.IdConductor = idConductor;
             v.Estado = EstadoViaje.Pendiente;
+
             return v;
         }
+
 
         public void SetFechaHora(DateTime fecha)
         {

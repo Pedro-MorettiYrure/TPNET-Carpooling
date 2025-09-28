@@ -43,6 +43,12 @@ namespace Data
             _context.SaveChanges();
         }
 
+        public Vehiculo? GetVehiculo(int idVehiculo)
+        {
+            return _context.Vehiculos.FirstOrDefault(v => v.IdVehiculo == idVehiculo);
+        }
+
+
         public Viaje Get(int id)
         {
             return _context.Viajes.FirstOrDefault(v => v.IdViaje == id);

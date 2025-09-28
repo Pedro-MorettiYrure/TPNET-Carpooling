@@ -11,14 +11,14 @@ namespace Data
         public DbSet<Viaje> Viajes { get; set; }
 
         // Constructor que EF y DI usarán
-        public TPIContext(DbContextOptions<TPIContext> options) : base(options) 
+        public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
-            //this.Database.EnsureCreated();
+            this.Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configuración de Usuario
+            // ---------------- Usuario ----------------
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.ToTable("Usuario");
@@ -28,12 +28,15 @@ namespace Data
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.ContraseñaHash).IsRequired();
                 entity.Property(e => e.TipoUsuario).IsRequired();
-                entity.Property(e => e.Telefono).HasMaxLength(200);     //required?
+                entity.Property(e => e.Telefono).HasMaxLength(200);
                 entity.Property(e => e.nroLicenciaConductor).HasMaxLength(50);
                 entity.Property(e => e.fechaVencimientoLicencia).HasColumnType("datetime2");
+
+               
+
             });
 
-            // Configuración de Localidad
+            // ---------------- Localidad ----------------
             modelBuilder.Entity<Localidad>(entity =>
             {
                 entity.HasKey(e => e.codPostal);
@@ -45,10 +48,11 @@ namespace Data
                 );
             });
 
+            // ---------------- Vehiculo ----------------
             modelBuilder.Entity<Vehiculo>(entity =>
             {
                 entity.ToTable("Vehiculos");
-                entity.HasKey(e => e.IdVehiculo); // PK
+                entity.HasKey(e => e.IdVehiculo);
                 entity.Property(e => e.Patente).IsRequired().HasMaxLength(10);
                 entity.Property(e => e.Modelo).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Color).IsRequired().HasMaxLength(30);
@@ -58,42 +62,62 @@ namespace Data
                 entity.HasOne(e => e.Usuario)
                       .WithMany(u => u.Vehiculos)
                       .HasForeignKey(e => e.IdUsuario)
-                      .IsRequired()
-                      //.OnDelete(DeleteBehavior.Cascade)
-                      ; 
+                      .IsRequired();
             });
 
+            // ---------------- Viaje ----------------
             modelBuilder.Entity<Viaje>(entity =>
             {
                 entity.ToTable("Viajes");
                 entity.HasKey(v => v.IdViaje);
                 entity.Property(v => v.FechaHora).IsRequired();
-                //entity.Property(v => v.Hora).IsRequired();
                 entity.Property(v => v.CantLugares).IsRequired();
                 entity.Property(v => v.Estado).IsRequired();
                 entity.Property(v => v.Comentario);
                 entity.Property(v => v.Precio);
+
                 entity.HasOne(v => v.Origen)
                       .WithMany()
                       .HasForeignKey(v => v.OrigenCodPostal)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.NoAction);
+
                 entity.HasOne(v => v.Destino)
                       .WithMany()
                       .HasForeignKey(v => v.DestinoCodPostal)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.NoAction);
+
                 entity.HasOne(e => e.Conductor)
                       .WithMany()
                       .HasForeignKey(e => e.IdConductor)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction)
-                      ;
-
-
-            });
-
-
+                      .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(v => v.Vehiculo)
+                     .WithMany()
+                     .HasForeignKey(v => v.IdVehiculo)
+                     .IsRequired()
+                     .OnDelete(DeleteBehavior.NoAction);
+                        });
         }
+
+        // ---------------- Hash para el seed ----------------
+        private static string CrearHashParaSeed(string contraseña)
+        {
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+
+            byte[] salt = new byte[16];
+            rng.GetBytes(salt);
+
+            var pbkdf2 = new System.Security.Cryptography.Rfc2898DeriveBytes(
+                contraseña, salt, 10000, System.Security.Cryptography.HashAlgorithmName.SHA256);
+            byte[] hash = pbkdf2.GetBytes(32);
+
+            return $"{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
+        }
+
+
+
     }
 }
+

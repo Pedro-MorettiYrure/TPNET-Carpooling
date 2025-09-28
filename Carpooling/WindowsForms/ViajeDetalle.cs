@@ -20,10 +20,12 @@ namespace WindowsForms
         public ViajeDetalle(UsuarioDTO usuarioLogueado)
         {
             InitializeComponent();
+            //ver lo de formmode
             _usuarioLogueado = usuarioLogueado;
-            //Mode = FormMode.Add;                //terminar de agregar modo
             LoadLocalidades();
+            LoadVehiculos();
         }
+
 
         public enum FormMode
         {
@@ -52,6 +54,24 @@ namespace WindowsForms
             }
         }
 
+        private async void LoadVehiculos()
+        {
+            try
+            {
+                var vehiculos = await VehiculoApiClient.GetByUsuarioAsync(_usuarioLogueado.IdUsuario);
+
+                cbVehiculos.DataSource = vehiculos.ToList();
+                cbVehiculos.DisplayMember = "Patente";       // lo que se va a mostrar
+                cbVehiculos.ValueMember = "IdVehiculo";      // lo que se guarda como valor
+                cbVehiculos.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar vehículos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
         private async void btnConfirmar_Click(object sender, EventArgs e)
         {
             try
@@ -63,6 +83,8 @@ namespace WindowsForms
                 var cantLugares = int.Parse(tbCantLugares.Text);
                 var precio = decimal.Parse(tbPrecio.Text);
                 var comentario = tbComentario.Text;
+                var idVehiculo = (int)cbVehiculos.SelectedValue; // el IdVehiculo del combo
+
 
                 var dto = new ViajeDTO      //validar!
                 {
@@ -73,7 +95,9 @@ namespace WindowsForms
                     Precio = precio,
                     Comentario = comentario,
                     IdConductor = _usuarioLogueado.IdUsuario,
+                    IdVehiculo = idVehiculo
                 };
+                MessageBox.Show($"IdVehiculo seleccionado: {dto.IdVehiculo}, IdConductor: {dto.IdConductor}");
 
                 if (Mode == FormMode.Update)
                 {

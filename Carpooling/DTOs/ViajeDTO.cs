@@ -18,6 +18,7 @@ namespace DTOs
         public string OrigenCodPostal { get; set; }
         public string DestinoCodPostal { get; set; }
 
+        public int IdVehiculo { get; set; }
         // Opcional: datos completos de las localidades si hay q devolverlos
         public LocalidadDTO? Origen { get; set; }
         public LocalidadDTO? Destino { get; set; }

@@ -41,6 +41,8 @@
             labelComentarios = new Label();
             tbComentario = new TextBox();
             btnConfirmar = new Button();
+            labelVehiculo = new Label();
+            cbVehiculos = new ComboBox();
             SuspendLayout();
             // 
             // dtpFechaHora
@@ -96,7 +98,7 @@
             // labelCantLugares
             // 
             labelCantLugares.AutoSize = true;
-            labelCantLugares.Location = new Point(128, 204);
+            labelCantLugares.Location = new Point(131, 279);
             labelCantLugares.Name = "labelCantLugares";
             labelCantLugares.Size = new Size(152, 15);
             labelCantLugares.TabIndex = 8;
@@ -104,7 +106,7 @@
             // 
             // tbCantLugares
             // 
-            tbCantLugares.Location = new Point(382, 204);
+            tbCantLugares.Location = new Point(385, 279);
             tbCantLugares.Name = "tbCantLugares";
             tbCantLugares.Size = new Size(80, 23);
             tbCantLugares.TabIndex = 9;
@@ -112,7 +114,7 @@
             // labelPrecio
             // 
             labelPrecio.AutoSize = true;
-            labelPrecio.Location = new Point(128, 254);
+            labelPrecio.Location = new Point(131, 329);
             labelPrecio.Name = "labelPrecio";
             labelPrecio.Size = new Size(43, 15);
             labelPrecio.TabIndex = 10;
@@ -120,7 +122,7 @@
             // 
             // tbPrecio
             // 
-            tbPrecio.Location = new Point(382, 251);
+            tbPrecio.Location = new Point(385, 326);
             tbPrecio.Name = "tbPrecio";
             tbPrecio.Size = new Size(80, 23);
             tbPrecio.TabIndex = 11;
@@ -128,7 +130,7 @@
             // labelComentarios
             // 
             labelComentarios.AutoSize = true;
-            labelComentarios.Location = new Point(128, 300);
+            labelComentarios.Location = new Point(131, 375);
             labelComentarios.Name = "labelComentarios";
             labelComentarios.Size = new Size(161, 15);
             labelComentarios.TabIndex = 12;
@@ -136,14 +138,14 @@
             // 
             // tbComentario
             // 
-            tbComentario.Location = new Point(128, 331);
+            tbComentario.Location = new Point(131, 406);
             tbComentario.Name = "tbComentario";
             tbComentario.Size = new Size(392, 23);
             tbComentario.TabIndex = 13;
             // 
             // btnConfirmar
             // 
-            btnConfirmar.Location = new Point(447, 391);
+            btnConfirmar.Location = new Point(450, 466);
             btnConfirmar.Name = "btnConfirmar";
             btnConfirmar.Size = new Size(75, 23);
             btnConfirmar.TabIndex = 14;
@@ -151,11 +153,31 @@
             btnConfirmar.UseVisualStyleBackColor = true;
             btnConfirmar.Click += btnConfirmar_Click;
             // 
+            // labelVehiculo
+            // 
+            labelVehiculo.AutoSize = true;
+            labelVehiculo.Location = new Point(128, 216);
+            labelVehiculo.Name = "labelVehiculo";
+            labelVehiculo.Size = new Size(55, 15);
+            labelVehiculo.TabIndex = 15;
+            labelVehiculo.Text = "Vehiculo:";
+            // 
+            // cbVehiculos
+            // 
+            cbVehiculos.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbVehiculos.FormattingEnabled = true;
+            cbVehiculos.Location = new Point(323, 212);
+            cbVehiculos.Name = "cbVehiculos";
+            cbVehiculos.Size = new Size(197, 23);
+            cbVehiculos.TabIndex = 16;
+            // 
             // ViajeDetalle
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(800, 504);
+            Controls.Add(cbVehiculos);
+            Controls.Add(labelVehiculo);
             Controls.Add(btnConfirmar);
             Controls.Add(tbComentario);
             Controls.Add(labelComentarios);
@@ -189,5 +211,7 @@
         private Label labelComentarios;
         private TextBox tbComentario;
         private Button btnConfirmar;
+        private Label labelVehiculo;
+        private ComboBox cbVehiculos;
     }
 }

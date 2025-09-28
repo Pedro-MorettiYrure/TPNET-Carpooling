@@ -32,6 +32,11 @@ namespace Data
             _context.SaveChanges();
         }
 
+        public Vehiculo GetById(int idVehiculo)
+        {
+            return _context.Vehiculos.FirstOrDefault(v => v.IdVehiculo == idVehiculo);
+        }
+
         public Vehiculo Get(string patente)
         {
             return _context.Vehiculos.FirstOrDefault(v => v.Patente == patente);

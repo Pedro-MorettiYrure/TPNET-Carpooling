@@ -34,7 +34,7 @@ namespace Data.Migrations
 
                     b.HasKey("codPostal");
 
-                    b.ToTable("Localidades", (string)null);
+                    b.ToTable("Localidades");
 
                     b.HasData(
                         new
