@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            dtpFechaHora = new DateTimePicker();
+            components = new System.ComponentModel.Container();
+            dtpHora = new DateTimePicker();
             labelFechaHora = new Label();
             cbOrigen = new ComboBox();
             labelOrigen = new Label();
@@ -43,28 +44,33 @@
             btnConfirmar = new Button();
             labelVehiculo = new Label();
             cbVehiculos = new ComboBox();
+            dtpFecha = new DateTimePicker();
+            errorProviderViajeDetalle = new ErrorProvider(components);
+            ((System.ComponentModel.ISupportInitialize)errorProviderViajeDetalle).BeginInit();
             SuspendLayout();
             // 
-            // dtpFechaHora
+            // dtpHora
             // 
-            dtpFechaHora.Location = new Point(320, 37);
-            dtpFechaHora.Name = "dtpFechaHora";
-            dtpFechaHora.Size = new Size(200, 23);
-            dtpFechaHora.TabIndex = 2;
+            dtpHora.CustomFormat = "HH:mm";
+            dtpHora.Format = DateTimePickerFormat.Custom;
+            dtpHora.Location = new Point(436, 75);
+            dtpHora.Name = "dtpHora";
+            dtpHora.ShowUpDown = true;
+            dtpHora.Size = new Size(84, 23);
+            dtpHora.TabIndex = 2;
             // 
             // labelFechaHora
             // 
-            labelFechaHora.AutoSize = true;
-            labelFechaHora.Location = new Point(128, 43);
+            labelFechaHora.Location = new Point(128, 37);
             labelFechaHora.Name = "labelFechaHora";
-            labelFechaHora.Size = new Size(167, 15);
+            labelFechaHora.Size = new Size(94, 35);
             labelFechaHora.TabIndex = 3;
             labelFechaHora.Text = "Elije la fecha y hora de partida:";
             // 
             // cbOrigen
             // 
             cbOrigen.FormattingEnabled = true;
-            cbOrigen.Location = new Point(320, 92);
+            cbOrigen.Location = new Point(320, 125);
             cbOrigen.Name = "cbOrigen";
             cbOrigen.Size = new Size(200, 23);
             cbOrigen.TabIndex = 4;
@@ -72,7 +78,7 @@
             // labelOrigen
             // 
             labelOrigen.AutoSize = true;
-            labelOrigen.Location = new Point(128, 95);
+            labelOrigen.Location = new Point(128, 128);
             labelOrigen.Name = "labelOrigen";
             labelOrigen.Size = new Size(46, 15);
             labelOrigen.TabIndex = 5;
@@ -81,7 +87,7 @@
             // labelDestino
             // 
             labelDestino.AutoSize = true;
-            labelDestino.Location = new Point(128, 156);
+            labelDestino.Location = new Point(128, 189);
             labelDestino.Name = "labelDestino";
             labelDestino.Size = new Size(50, 15);
             labelDestino.TabIndex = 6;
@@ -90,7 +96,7 @@
             // cbDestino
             // 
             cbDestino.FormattingEnabled = true;
-            cbDestino.Location = new Point(320, 153);
+            cbDestino.Location = new Point(320, 186);
             cbDestino.Name = "cbDestino";
             cbDestino.Size = new Size(200, 23);
             cbDestino.TabIndex = 7;
@@ -98,7 +104,7 @@
             // labelCantLugares
             // 
             labelCantLugares.AutoSize = true;
-            labelCantLugares.Location = new Point(131, 279);
+            labelCantLugares.Location = new Point(128, 302);
             labelCantLugares.Name = "labelCantLugares";
             labelCantLugares.Size = new Size(152, 15);
             labelCantLugares.TabIndex = 8;
@@ -106,7 +112,7 @@
             // 
             // tbCantLugares
             // 
-            tbCantLugares.Location = new Point(385, 279);
+            tbCantLugares.Location = new Point(323, 299);
             tbCantLugares.Name = "tbCantLugares";
             tbCantLugares.Size = new Size(80, 23);
             tbCantLugares.TabIndex = 9;
@@ -114,7 +120,7 @@
             // labelPrecio
             // 
             labelPrecio.AutoSize = true;
-            labelPrecio.Location = new Point(131, 329);
+            labelPrecio.Location = new Point(128, 344);
             labelPrecio.Name = "labelPrecio";
             labelPrecio.Size = new Size(43, 15);
             labelPrecio.TabIndex = 10;
@@ -122,7 +128,7 @@
             // 
             // tbPrecio
             // 
-            tbPrecio.Location = new Point(385, 326);
+            tbPrecio.Location = new Point(323, 341);
             tbPrecio.Name = "tbPrecio";
             tbPrecio.Size = new Size(80, 23);
             tbPrecio.TabIndex = 11;
@@ -130,7 +136,7 @@
             // labelComentarios
             // 
             labelComentarios.AutoSize = true;
-            labelComentarios.Location = new Point(131, 375);
+            labelComentarios.Location = new Point(128, 384);
             labelComentarios.Name = "labelComentarios";
             labelComentarios.Size = new Size(161, 15);
             labelComentarios.TabIndex = 12;
@@ -138,7 +144,7 @@
             // 
             // tbComentario
             // 
-            tbComentario.Location = new Point(131, 406);
+            tbComentario.Location = new Point(133, 415);
             tbComentario.Name = "tbComentario";
             tbComentario.Size = new Size(392, 23);
             tbComentario.TabIndex = 13;
@@ -156,7 +162,7 @@
             // labelVehiculo
             // 
             labelVehiculo.AutoSize = true;
-            labelVehiculo.Location = new Point(128, 216);
+            labelVehiculo.Location = new Point(128, 249);
             labelVehiculo.Name = "labelVehiculo";
             labelVehiculo.Size = new Size(55, 15);
             labelVehiculo.TabIndex = 15;
@@ -166,17 +172,29 @@
             // 
             cbVehiculos.DropDownStyle = ComboBoxStyle.DropDownList;
             cbVehiculos.FormattingEnabled = true;
-            cbVehiculos.Location = new Point(323, 212);
+            cbVehiculos.Location = new Point(323, 245);
             cbVehiculos.Name = "cbVehiculos";
             cbVehiculos.Size = new Size(197, 23);
             cbVehiculos.TabIndex = 16;
             cbVehiculos.SelectedIndexChanged += cbVehiculos_SelectedIndexChanged;
+            // 
+            // dtpFecha
+            // 
+            dtpFecha.Location = new Point(320, 37);
+            dtpFecha.Name = "dtpFecha";
+            dtpFecha.Size = new Size(200, 23);
+            dtpFecha.TabIndex = 17;
+            // 
+            // errorProviderViajeDetalle
+            // 
+            errorProviderViajeDetalle.ContainerControl = this;
             // 
             // ViajeDetalle
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 504);
+            Controls.Add(dtpFecha);
             Controls.Add(cbVehiculos);
             Controls.Add(labelVehiculo);
             Controls.Add(btnConfirmar);
@@ -191,15 +209,16 @@
             Controls.Add(labelOrigen);
             Controls.Add(cbOrigen);
             Controls.Add(labelFechaHora);
-            Controls.Add(dtpFechaHora);
+            Controls.Add(dtpHora);
             Name = "ViajeDetalle";
             Text = "ViajeDetalle";
+            ((System.ComponentModel.ISupportInitialize)errorProviderViajeDetalle).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-        private DateTimePicker dtpFechaHora;
+        private DateTimePicker dtpHora;
         private Label labelFechaHora;
         private ComboBox cbOrigen;
         private Label labelOrigen;
@@ -214,5 +233,7 @@
         private Button btnConfirmar;
         private Label labelVehiculo;
         private ComboBox cbVehiculos;
+        private DateTimePicker dtpFecha;
+        private ErrorProvider errorProviderViajeDetalle;
     }
 }
