@@ -33,8 +33,9 @@
             btnLocalidadLista = new Button();
             label1 = new Label();
             btnConvertirAConductor = new Button();
-            btnVehiculoLista = new Button();
             btnViajeLista = new Button();
+            btnVehiculoLista = new Button();
+            btnEditarUsuario = new Button();
             tlMain.SuspendLayout();
             SuspendLayout();
             // 
@@ -46,11 +47,12 @@
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlMain.Controls.Add(lbMain, 1, 0);
-            tlMain.Controls.Add(btnLocalidadLista, 1, 2);
             tlMain.Controls.Add(label1, 1, 1);
             tlMain.Controls.Add(btnConvertirAConductor, 1, 4);
             tlMain.Controls.Add(btnViajeLista, 2, 3);
             tlMain.Controls.Add(btnVehiculoLista, 1, 3);
+            tlMain.Controls.Add(btnLocalidadLista, 1, 2);
+            tlMain.Controls.Add(btnEditarUsuario, 2, 2);
             tlMain.Dock = DockStyle.Fill;
             tlMain.Location = new Point(0, 0);
             tlMain.Name = "tlMain";
@@ -82,8 +84,7 @@
             // btnLocalidadLista
             // 
             btnLocalidadLista.Anchor = AnchorStyles.Top;
-            tlMain.SetColumnSpan(btnLocalidadLista, 2);
-            btnLocalidadLista.Location = new Point(317, 151);
+            btnLocalidadLista.Location = new Point(217, 151);
             btnLocalidadLista.Name = "btnLocalidadLista";
             btnLocalidadLista.Size = new Size(131, 47);
             btnLocalidadLista.TabIndex = 0;
@@ -111,13 +112,24 @@
             // 
             btnConvertirAConductor.Anchor = AnchorStyles.Top;
             tlMain.SetColumnSpan(btnConvertirAConductor, 2);
-            btnConvertirAConductor.Location = new Point(317, 299);
+            btnConvertirAConductor.Location = new Point(313, 299);
             btnConvertirAConductor.Name = "btnConvertirAConductor";
-            btnConvertirAConductor.Size = new Size(131, 26);
+            btnConvertirAConductor.Size = new Size(139, 44);
             btnConvertirAConductor.TabIndex = 1;
             btnConvertirAConductor.Text = "Quiero ser conductor";
             btnConvertirAConductor.UseVisualStyleBackColor = true;
             btnConvertirAConductor.Click += btnConvertirAConductor_Click;
+            // 
+            // btnViajeLista
+            // 
+            btnViajeLista.Anchor = AnchorStyles.Top;
+            btnViajeLista.Location = new Point(417, 225);
+            btnViajeLista.Name = "btnViajeLista";
+            btnViajeLista.Size = new Size(131, 47);
+            btnViajeLista.TabIndex = 4;
+            btnViajeLista.Text = "Mis Viajes";
+            btnViajeLista.UseVisualStyleBackColor = true;
+            btnViajeLista.Click += btnViajeLista_Click;
             // 
             // btnVehiculoLista
             // 
@@ -131,16 +143,16 @@
             btnVehiculoLista.UseVisualStyleBackColor = true;
             btnVehiculoLista.Click += btnVehiculoLista_Click;
             // 
-            // btnViajeLista
+            // btnEditarUsuario
             // 
-            btnViajeLista.Anchor = AnchorStyles.Top;
-            btnViajeLista.Location = new Point(417, 225);
-            btnViajeLista.Name = "btnViajeLista";
-            btnViajeLista.Size = new Size(131, 47);
-            btnViajeLista.TabIndex = 4;
-            btnViajeLista.Text = "Mis Viajes";
-            btnViajeLista.UseVisualStyleBackColor = true;
-            btnViajeLista.Click += btnViajeLista_Click;
+            btnEditarUsuario.Anchor = AnchorStyles.Top;
+            btnEditarUsuario.Location = new Point(419, 151);
+            btnEditarUsuario.Name = "btnEditarUsuario";
+            btnEditarUsuario.Size = new Size(127, 47);
+            btnEditarUsuario.TabIndex = 5;
+            btnEditarUsuario.Text = "Editar Mis Datos";
+            btnEditarUsuario.UseVisualStyleBackColor = true;
+            btnEditarUsuario.Click += btnEditarUsuario_Click;
             // 
             // FormMenu
             // 
@@ -165,5 +177,6 @@
         private Label label1;
         private Button btnConvertirAConductor;
         private Button btnViajeLista;
+        private Button btnEditarUsuario;
     }
 }

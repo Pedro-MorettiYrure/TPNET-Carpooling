@@ -101,20 +101,7 @@ namespace Data
                         });
         }
 
-        // ---------------- Hash para el seed ----------------
-        private static string CrearHashParaSeed(string contraseña)
-        {
-            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-
-            byte[] salt = new byte[16];
-            rng.GetBytes(salt);
-
-            var pbkdf2 = new System.Security.Cryptography.Rfc2898DeriveBytes(
-                contraseña, salt, 10000, System.Security.Cryptography.HashAlgorithmName.SHA256);
-            byte[] hash = pbkdf2.GetBytes(32);
-
-            return $"{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
-        }
+        
 
 
 

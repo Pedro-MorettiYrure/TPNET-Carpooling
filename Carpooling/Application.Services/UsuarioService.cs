@@ -54,9 +54,39 @@ namespace Application.Services
                 Email = usuario.Email,
                 Contraseña = usuario.ContraseñaHash,
                 TipoUsuario = usuario.TipoUsuario,
-                Telefono = usuario.Telefono
+                Telefono = usuario.Telefono,
+                nroLicenciaConductor = usuario.nroLicenciaConductor,
+                fechaVencimientoLicencia = usuario.fechaVencimientoLicencia
             };
         }
+
+        public bool Actualizar(int id, UsuarioDTO dto)
+        {
+            var usuario = _repo.GetById(id);
+            if (usuario == null) return false;
+
+            try
+            {
+                usuario.SetNombre(dto.Nombre);
+                usuario.SetApellido(dto.Apellido);
+                usuario.SetTelefono(dto.Telefono);
+
+                if (usuario.TipoUsuario == TipoUsuario.PasajeroConductor)
+                {
+                    usuario.nroLicenciaConductor = dto.nroLicenciaConductor;
+                    usuario.fechaVencimientoLicencia = dto.fechaVencimientoLicencia;
+                }
+
+                _repo.Update(usuario);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
+
+
 
         // Método para convertir al usuario a conductor
         public bool ConvertirAConductor(int idUsuario, ConductorUpgradeDTO dto)

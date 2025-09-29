@@ -12,8 +12,6 @@ namespace Domain.Model
 
         public DateTime FechaHora { get; set; }
 
-        //public DateTime Hora { get; set; } //no se usa(?
-
         public int CantLugares { get; set; }
 
         public EstadoViaje Estado { get; set; }
@@ -69,11 +67,6 @@ namespace Domain.Model
                 throw new ArgumentOutOfRangeException("No se pueden seleccionar fechas anteriores a hoy");
             FechaHora = fecha;
         }
-
-        //public void SetHora(DateTime hora)
-        //{
-        //    Hora = hora;
-        //}
 
         public void SetCantLugares(int cantLugares)
         {

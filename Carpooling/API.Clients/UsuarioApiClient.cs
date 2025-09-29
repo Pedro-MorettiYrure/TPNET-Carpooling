@@ -101,6 +101,30 @@ namespace API.Clients
                 throw new Exception($"Timeout al obtener usuario {email}: {ex.Message}", ex);
             }
         }
+        public static async Task<bool> ActualizarUsuarioAsync(UsuarioDTO usuario)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync($"usuarios/{usuario.IdUsuario}", usuario);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Error al actualizar usuario. Status: {response.StatusCode}, Detalle: {errorContent}");
+                }
+
+                return true;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"Error de conexión al actualizar usuario: {ex.Message}", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new Exception($"Timeout al actualizar usuario: {ex.Message}", ex);
+            }
+        }
+
 
         public static async Task<bool> ConvertirAConductorAsync(int idUsuario, ConductorUpgradeDTO dto)
         {

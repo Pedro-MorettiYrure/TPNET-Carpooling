@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TPIContext))]
-    [Migration("20250925012238_ConductorFK")]
-    partial class ConductorFK
+    [Migration("20250929163857_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -160,27 +160,29 @@ namespace Data.Migrations
                     b.Property<int>("Estado")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Hora")
+                    b.Property<DateTime>("FechaHora")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("IdConductor")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdVehiculo")
                         .HasColumnType("int");
 
                     b.Property<string>("OrigenCodPostal")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<float>("Precio")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Precio")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("IdViaje");
 
                     b.HasIndex("DestinoCodPostal");
 
                     b.HasIndex("IdConductor");
+
+                    b.HasIndex("IdVehiculo");
 
                     b.HasIndex("OrigenCodPostal");
 
@@ -212,6 +214,12 @@ namespace Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("Domain.Model.Vehiculo", "Vehiculo")
+                        .WithMany()
+                        .HasForeignKey("IdVehiculo")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Domain.Model.Localidad", "Origen")
                         .WithMany()
                         .HasForeignKey("OrigenCodPostal")
@@ -223,6 +231,8 @@ namespace Data.Migrations
                     b.Navigation("Destino");
 
                     b.Navigation("Origen");
+
+                    b.Navigation("Vehiculo");
                 });
 
             modelBuilder.Entity("Domain.Model.Usuario", b =>
