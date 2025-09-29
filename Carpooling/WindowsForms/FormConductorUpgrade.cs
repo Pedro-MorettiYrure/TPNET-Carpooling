@@ -54,7 +54,7 @@ namespace WindowsForms
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo convertir a conductor. Revisa los datos e intenta de nuevo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("No se pudo completar el registro como conductor. Revise si la licencia está vencida o si faltan datos obligatorios.", "Error de Validación",MessageBoxButtons.OK,MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)

@@ -11,15 +11,32 @@ namespace Application.Services
     {
         private readonly ViajeRepository _viajeRepo;
         private readonly VehiculoRepository _vehiculoRepo;
+        private readonly UsuarioRepository _usuarioRepo;
 
-        public ViajeServices(ViajeRepository viajeRepo, VehiculoRepository vehiculoRepo)
+        public ViajeServices(ViajeRepository viajeRepo, VehiculoRepository vehiculoRepo, UsuarioRepository usuarioRepo)
         {
             _viajeRepo = viajeRepo;
             _vehiculoRepo = vehiculoRepo;
+            _usuarioRepo = usuarioRepo;
         }
 
         public ViajeDTO Add(ViajeDTO dto)
         {
+            // validacion de licencia del conductor
+            var conductor = _usuarioRepo.GetById(dto.IdConductor);
+
+            // validamos que el conductor exista por seguridad 
+            if (conductor == null || conductor.TipoUsuario != TipoUsuario.PasajeroConductor)
+            {
+                throw new ArgumentException("El ID de usuario proporcionado no corresponde a un conductor válido.");
+            }
+
+            // validamos la fecha de vencimiento de la licencia
+            if (conductor.fechaVencimientoLicencia == null || conductor.fechaVencimientoLicencia.Value.Date < dto.FechaHora.Date)
+            {
+                throw new ArgumentException("La licencia del conductor está vencida. No se puede publicar el viaje.");
+            }
+
             // Validar que el vehículo exista y pertenezca al conductor
             var vehiculo = _vehiculoRepo.GetById(dto.IdVehiculo);
             if (vehiculo == null)

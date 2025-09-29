@@ -128,6 +128,12 @@ namespace Domain.Model
                 throw new ArgumentException("El número de licencia no puede ser nulo o vacío.", nameof(nroLicencia));
             }
 
+            // validacion de fecha vencimiento de licencia
+            if (fechaVencimiento <= DateTime.Now)
+            {
+                throw new ArgumentException("La fecha de vencimiento de la licencia no puede estar vencida o ser hoy.", nameof(fechaVencimiento));
+            }
+
             this.TipoUsuario = TipoUsuario.PasajeroConductor;
             this.nroLicenciaConductor = nroLicencia;
             this.fechaVencimientoLicencia = fechaVencimiento;

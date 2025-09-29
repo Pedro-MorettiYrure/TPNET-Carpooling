@@ -57,6 +57,7 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 
 
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TPIContext>();
@@ -276,10 +277,29 @@ app.MapGet("/viajes/{idViaje}", (int idViaje, ViajeServices viajeService) =>
 // POST: agregar un viaje
 app.MapPost("/viajes/", ([FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServices viajeService) =>
 {
-    //vehiculoDto.IdUsuario = idUsuario; // aseguramos que el dto tenga el idUsuario correcto
-    var created = viajeService.Add(viajeDTO);
-    return Results.Created($"/viajes/{created.IdViaje}", created);
-});
+    try
+    {
+        var created = viajeService.Add(viajeDTO);
+        // Devuelve 201 Created si el servicio fue exitoso
+        return Results.Created($"/viajes/{created.IdViaje}", created);
+    }
+    catch (ArgumentException ex)
+    {
+         
+        // Capturamos la excepción de validación y devolvemos 400 Bad Request
+        // El mensaje de 'ex.Message' es el que dice "La licencia del conductor esta vencida..."
+        return Results.BadRequest(new { error = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        // Manejo de errores inesperados (p.ej., problemas de la base de datos)
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }
+})
+.WithName("AddViaje") // Opcional, pero bueno para Swagger
+.Produces<ViajeDTO>(StatusCodes.Status201Created)
+.Produces(StatusCodes.Status400BadRequest)
+.WithOpenApi(); // Opcional
 
 // PUT: actualizar un vehículo
 app.MapPut("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServices viajeService) =>
