@@ -43,7 +43,10 @@ if (app.Environment.IsDevelopment())
     app.UseHttpLogging();
 }
 
-// dotnet ef migrations add NombreMigracion
+//COMANDO PARA MIGRAR LA BDD
+// dotnet ef migrations add NombreMigracion 
+
+//dotnet ef database update
 
 //IServiceScope scope = app.Services.CreateScope();
 //TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();

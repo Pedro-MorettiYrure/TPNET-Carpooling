@@ -132,6 +132,7 @@
             Controls.Add(tsViajesLista);
             Name = "ViajesLista";
             Text = "Form1";
+            Load += ViajesLista_Load;
             tsViajesLista.ContentPanel.ResumeLayout(false);
             tsViajesLista.ResumeLayout(false);
             tsViajesLista.PerformLayout();
