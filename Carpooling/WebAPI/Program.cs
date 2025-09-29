@@ -48,11 +48,11 @@ if (app.Environment.IsDevelopment())
 //IServiceScope scope = app.Services.CreateScope();
 //TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();
 //context.Database.Migrate();
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
-//    db.Database.Migrate();
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
+    db.Database.Migrate();
+}
 
 app.UseHttpsRedirection();
 
@@ -257,6 +257,7 @@ app.MapGet("/viajes", (ViajeServices viajeService) =>
 // GET: todos los viajes de un usuario
 app.MapGet("/viajes/conductor/{idConductor}", ([FromRoute] int idConductor, [FromServices] ViajeServices viajeServices) =>
 {
+    
     var viajes = viajeServices.GetAllByConductor(idConductor);
     return Results.Ok(viajes);
 });

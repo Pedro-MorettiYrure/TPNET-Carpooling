@@ -66,6 +66,7 @@ namespace Application.Services
         {
             return _repo.GetAllByUsuario(idUsuario).Select(v => new VehiculoDTO
             {
+                IdVehiculo = v.IdVehiculo,
                 Patente = v.Patente,
                 Modelo = v.Modelo,
                 CantLugares = v.CantLugares,

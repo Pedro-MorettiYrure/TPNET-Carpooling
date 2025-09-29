@@ -41,7 +41,7 @@ namespace Domain.Model
 
         public static Viaje Crear(DateTime fecha, int cantLugares, decimal precio, string? comentario,
                            string origenCodPostal, string destinoCodPostal,
-                           int idConductor, int capacidadVehiculo)
+                           int idConductor, int capacidadVehiculo, int idVehiculo)
         {
             // Validación de la capacidad
             if (cantLugares > capacidadVehiculo)
@@ -56,6 +56,7 @@ namespace Domain.Model
             v.OrigenCodPostal = origenCodPostal;
             v.DestinoCodPostal = destinoCodPostal;
             v.IdConductor = idConductor;
+            v.IdVehiculo = idVehiculo;
             v.Estado = EstadoViaje.Pendiente;
 
             return v;

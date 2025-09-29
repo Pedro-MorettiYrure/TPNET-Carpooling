@@ -93,10 +93,10 @@ namespace Data
                       .HasForeignKey(e => e.IdConductor)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.NoAction);
+
                 entity.HasOne(v => v.Vehiculo)
                      .WithMany()
                      .HasForeignKey(v => v.IdVehiculo)
-                     .IsRequired()
                      .OnDelete(DeleteBehavior.NoAction);
                         });
         }

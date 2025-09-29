@@ -117,5 +117,10 @@ namespace WindowsForms
 
 
         }
+
+        private void cbVehiculos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

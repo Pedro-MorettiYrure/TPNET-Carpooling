@@ -170,6 +170,7 @@
             cbVehiculos.Name = "cbVehiculos";
             cbVehiculos.Size = new Size(197, 23);
             cbVehiculos.TabIndex = 16;
+            cbVehiculos.SelectedIndexChanged += cbVehiculos_SelectedIndexChanged;
             // 
             // ViajeDetalle
             // 

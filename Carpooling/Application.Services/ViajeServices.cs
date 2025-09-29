@@ -42,11 +42,12 @@ namespace Application.Services
             dto.OrigenCodPostal,
             dto.DestinoCodPostal,
             dto.IdConductor,
-            vehiculo.CantLugares   
+            vehiculo.CantLugares, 
+            vehiculo.IdVehiculo
             );
 
 
-            viaje.IdVehiculo = dto.IdVehiculo;
+            //viaje.IdVehiculo = dto.IdVehiculo;
 
             _viajeRepo.Add(viaje);
 
@@ -111,7 +112,8 @@ namespace Application.Services
                 Estado = l.Estado,
                 OrigenCodPostal = l.OrigenCodPostal,
                 DestinoCodPostal = l.DestinoCodPostal,
-                IdConductor = l.IdConductor
+                IdConductor = l.IdConductor,
+                IdVehiculo = l.IdVehiculo
             }).ToList();
         }
 
@@ -133,10 +135,11 @@ namespace Application.Services
             dto.OrigenCodPostal,
             dto.DestinoCodPostal,
             dto.IdConductor,
-            vehiculo.CantLugares   // 👈 acá va la capacidad real del vehículo
+            vehiculo.CantLugares, 
+            vehiculo.IdVehiculo
         );
 
-            viaje.IdViaje = dto.IdViaje;
+            viaje.IdViaje = dto.IdViaje;    //por que esto?
 
             return _viajeRepo.Update(viaje);
         }
