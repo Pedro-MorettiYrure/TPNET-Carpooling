@@ -24,12 +24,12 @@ namespace WindowsForms
             btnConvertirAConductor.Visible = false;
             btnVehiculoLista.Visible = false;
             btnViajeLista.Visible = false;
-            btnLocalidadLista.Visible = false; 
+            btnLocalidadLista.Visible = false;
 
             switch (_usuarioLogueado.TipoUsuario)
             {
                 case TipoUsuario.Administrador:
-                    btnLocalidadLista.Visible = true; 
+                    btnLocalidadLista.Visible = true;
                     break;
 
                 case TipoUsuario.Pasajero:
@@ -68,6 +68,15 @@ namespace WindowsForms
         {
             ViajesLista appLista = new ViajesLista(_usuarioLogueado);
             appLista.ShowDialog();
+        }
+
+        private void btnEditarUsuario_Click(object sender, EventArgs e)
+        {
+            FormRegistrarse formEditar = new FormRegistrarse(_usuarioLogueado, true);
+            if (formEditar.ShowDialog() == DialogResult.OK)
+            {
+
+            }
         }
     }
 }

@@ -51,7 +51,7 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
-    db.Database.Migrate();
+    //db.Database.Migrate();
 }
 
 app.UseHttpsRedirection();
@@ -195,6 +195,16 @@ app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", (int idUsuario, [FromB
 .Produces(StatusCodes.Status400BadRequest)
 .WithOpenApi();
 
+app.MapPut("/usuarios/{idUsuario}", (int idUsuario, UsuarioDTO dto, UsuarioService usuarioService) =>
+{
+    bool ok = usuarioService.Actualizar(idUsuario, dto);
+
+    return ok ? Results.Ok() : Results.BadRequest();
+})
+.WithName("ActualizarUsuario")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest)
+.WithOpenApi();
 
 
 // ==================== Vehiculos ====================

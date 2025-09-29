@@ -46,38 +46,6 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Viajes",
-                columns: table => new
-                {
-                    IdViaje = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Hora = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CantLugares = table.Column<int>(type: "int", nullable: false),
-                    Estado = table.Column<int>(type: "int", nullable: false),
-                    Comentario = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Precio = table.Column<float>(type: "real", nullable: false),
-                    OrigenCodPostal = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    DestinoCodPostal = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Viajes", x => x.IdViaje);
-                    table.ForeignKey(
-                        name: "FK_Viajes_Localidades_DestinoCodPostal",
-                        column: x => x.DestinoCodPostal,
-                        principalTable: "Localidades",
-                        principalColumn: "codPostal",
-                        onDelete: ReferentialAction.NoAction);
-                    table.ForeignKey(
-                        name: "FK_Viajes_Localidades_OrigenCodPostal",
-                        column: x => x.OrigenCodPostal,
-                        principalTable: "Localidades",
-                        principalColumn: "codPostal",
-                        onDelete: ReferentialAction.NoAction);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Vehiculos",
                 columns: table => new
                 {
@@ -101,6 +69,47 @@ namespace Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Viajes",
+                columns: table => new
+                {
+                    IdViaje = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FechaHora = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CantLugares = table.Column<int>(type: "int", nullable: false),
+                    Estado = table.Column<int>(type: "int", nullable: false),
+                    Comentario = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Precio = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    OrigenCodPostal = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DestinoCodPostal = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IdConductor = table.Column<int>(type: "int", nullable: false),
+                    IdVehiculo = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Viajes", x => x.IdViaje);
+                    table.ForeignKey(
+                        name: "FK_Viajes_Localidades_DestinoCodPostal",
+                        column: x => x.DestinoCodPostal,
+                        principalTable: "Localidades",
+                        principalColumn: "codPostal");
+                    table.ForeignKey(
+                        name: "FK_Viajes_Localidades_OrigenCodPostal",
+                        column: x => x.OrigenCodPostal,
+                        principalTable: "Localidades",
+                        principalColumn: "codPostal");
+                    table.ForeignKey(
+                        name: "FK_Viajes_Usuario_IdConductor",
+                        column: x => x.IdConductor,
+                        principalTable: "Usuario",
+                        principalColumn: "IdUsuario");
+                    table.ForeignKey(
+                        name: "FK_Viajes_Vehiculos_IdVehiculo",
+                        column: x => x.IdVehiculo,
+                        principalTable: "Vehiculos",
+                        principalColumn: "IdVehiculo");
+                });
+
             migrationBuilder.InsertData(
                 table: "Localidades",
                 columns: new[] { "codPostal", "nombreLoc" },
@@ -121,6 +130,16 @@ namespace Data.Migrations
                 column: "DestinoCodPostal");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Viajes_IdConductor",
+                table: "Viajes",
+                column: "IdConductor");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Viajes_IdVehiculo",
+                table: "Viajes",
+                column: "IdVehiculo");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Viajes_OrigenCodPostal",
                 table: "Viajes",
                 column: "OrigenCodPostal");
@@ -130,16 +149,16 @@ namespace Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Vehiculos");
-
-            migrationBuilder.DropTable(
                 name: "Viajes");
 
             migrationBuilder.DropTable(
-                name: "Usuario");
+                name: "Localidades");
 
             migrationBuilder.DropTable(
-                name: "Localidades");
+                name: "Vehiculos");
+
+            migrationBuilder.DropTable(
+                name: "Usuario");
         }
     }
 }

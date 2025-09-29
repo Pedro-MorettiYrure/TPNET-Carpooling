@@ -42,6 +42,11 @@
             txtBoxApellido = new TextBox();
             txtBoxTele = new TextBox();
             labelTele = new Label();
+            labelConductor = new Label();
+            labelLicencia = new Label();
+            labelVencimiento = new Label();
+            textBoxLicencia = new TextBox();
+            dateTimePickerVencimiento = new DateTimePicker();
             SuspendLayout();
             // 
             // label1
@@ -75,11 +80,11 @@
             // 
             // btnCrearUsuario
             // 
-            btnCrearUsuario.Location = new Point(508, 254);
+            btnCrearUsuario.Location = new Point(519, 307);
             btnCrearUsuario.Name = "btnCrearUsuario";
             btnCrearUsuario.Size = new Size(99, 32);
             btnCrearUsuario.TabIndex = 3;
-            btnCrearUsuario.Text = "Crear Usuario";
+            btnCrearUsuario.Text = "Confirmar";
             btnCrearUsuario.UseVisualStyleBackColor = true;
             btnCrearUsuario.Click += btnCrearUsuario_Click;
             // 
@@ -164,11 +169,58 @@
             labelTele.TextAlign = ContentAlignment.MiddleRight;
             labelTele.Click += label4_Click;
             // 
+            // labelConductor
+            // 
+            labelConductor.AutoSize = true;
+            labelConductor.Location = new Point(89, 243);
+            labelConductor.Name = "labelConductor";
+            labelConductor.Size = new Size(67, 15);
+            labelConductor.TabIndex = 14;
+            labelConductor.Text = "Conductor:";
+            // 
+            // labelLicencia
+            // 
+            labelLicencia.AutoSize = true;
+            labelLicencia.Location = new Point(134, 271);
+            labelLicencia.Name = "labelLicencia";
+            labelLicencia.Size = new Size(76, 15);
+            labelLicencia.TabIndex = 15;
+            labelLicencia.Text = "Nro Licencia:";
+            // 
+            // labelVencimiento
+            // 
+            labelVencimiento.AutoSize = true;
+            labelVencimiento.Location = new Point(100, 296);
+            labelVencimiento.Name = "labelVencimiento";
+            labelVencimiento.Size = new Size(110, 15);
+            labelVencimiento.TabIndex = 16;
+            labelVencimiento.Text = "Fecha Vencimiento:";
+            // 
+            // textBoxLicencia
+            // 
+            textBoxLicencia.Location = new Point(216, 263);
+            textBoxLicencia.Name = "textBoxLicencia";
+            textBoxLicencia.Size = new Size(100, 23);
+            textBoxLicencia.TabIndex = 17;
+            // 
+            // dateTimePickerVencimiento
+            // 
+            dateTimePickerVencimiento.Format = DateTimePickerFormat.Short;
+            dateTimePickerVencimiento.Location = new Point(216, 296);
+            dateTimePickerVencimiento.Name = "dateTimePickerVencimiento";
+            dateTimePickerVencimiento.Size = new Size(200, 23);
+            dateTimePickerVencimiento.TabIndex = 18;
+            // 
             // FormRegistrarse
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(655, 318);
+            ClientSize = new Size(650, 372);
+            Controls.Add(dateTimePickerVencimiento);
+            Controls.Add(textBoxLicencia);
+            Controls.Add(labelVencimiento);
+            Controls.Add(labelLicencia);
+            Controls.Add(labelConductor);
             Controls.Add(labelTele);
             Controls.Add(txtBoxTele);
             Controls.Add(txtBoxApellido);
@@ -205,5 +257,10 @@
         private TextBox txtBoxApellido;
         private TextBox txtBoxTele;
         private Label labelTele;
+        private Label labelConductor;
+        private Label labelLicencia;
+        private Label labelVencimiento;
+        private TextBox textBoxLicencia;
+        private DateTimePicker dateTimePickerVencimiento;
     }
 }

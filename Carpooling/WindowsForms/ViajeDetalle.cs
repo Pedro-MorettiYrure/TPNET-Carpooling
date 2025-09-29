@@ -97,7 +97,6 @@ namespace WindowsForms
                     IdConductor = _usuarioLogueado.IdUsuario,
                     IdVehiculo = idVehiculo
                 };
-                MessageBox.Show($"IdVehiculo seleccionado: {dto.IdVehiculo}, IdConductor: {dto.IdConductor}");
 
                 if (Mode == FormMode.Update)
                 {
