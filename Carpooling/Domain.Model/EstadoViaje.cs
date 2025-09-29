@@ -11,6 +11,6 @@ namespace Domain.Model
         Pendiente = 0,
         EnCurso = 1,
         Realizado = 2,
-        Cancelado
+        Cancelado = 3
     }
 }
