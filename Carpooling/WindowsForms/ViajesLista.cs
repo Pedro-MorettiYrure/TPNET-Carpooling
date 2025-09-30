@@ -25,7 +25,7 @@ namespace WindowsForms
         {
             this.GetAllAndLoad();
         }
-        private async void GetAllAndLoad()
+        private async Task GetAllAndLoad()
         {
             try
             {
@@ -62,6 +62,75 @@ namespace WindowsForms
             //{
             //    IdConductor = _usuario.IdUsuario
             //}
+        }
+
+        private async void btnEliminar_Click(object sender, EventArgs e)
+        {
+           
+            if (dgvViajesLista.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Debe seleccionar un viaje para cancelar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selectedRow = dgvViajesLista.SelectedRows[0];
+            var viajeDTO = selectedRow.DataBoundItem as ViajeDTO;
+
+            if (viajeDTO == null) return;
+
+            DialogResult result = MessageBox.Show(
+                $"¿Está seguro de que desea cancelar el viaje con ID: {viajeDTO.IdViaje}?",
+                "Confirmar Cancelación",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    // en el API, esta llamada DELETE realiza la baja lógica cambiando el estado.
+                    await ViajeApiClient.DeleteAsync(viajeDTO.IdViaje);
+
+                    MessageBox.Show("Viaje cancelado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    await GetAllAndLoad();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Error al cancelar el viaje.\nDetalle: {ex.Message}",
+                        "Error de Cancelación",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+        }
+
+        private async void btnEditar_Click(object sender, EventArgs e)
+        {
+          
+            if (dgvViajesLista.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Debe seleccionar un viaje para editar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selectedRow = dgvViajesLista.SelectedRows[0];
+            var viajeDTO = selectedRow.DataBoundItem as ViajeDTO;
+
+            if (viajeDTO == null) return;
+
+            // abrimos el formulario de detalle en modo EDICIÓN
+            // Usamos el constructor que creamos en ViajeDetalle.cs
+            using (var formDetalle = new ViajeDetalle(_usuario, viajeDTO)) // 
+            {
+                if (formDetalle.ShowDialog() == DialogResult.OK)
+                {
+                    await GetAllAndLoad();
+                }
+            }
         }
     }
 }

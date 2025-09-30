@@ -73,7 +73,7 @@
             lnkOlvidaPass.Location = new Point(84, 223);
             lnkOlvidaPass.Name = "lnkOlvidaPass";
             lnkOlvidaPass.Size = new Size(119, 15);
-            lnkOlvidaPass.TabIndex = 3;
+            lnkOlvidaPass.TabIndex = 4;
             lnkOlvidaPass.TabStop = true;
             lnkOlvidaPass.Text = "Olvidé mi contraseña";
             lnkOlvidaPass.Click += lnkOlvidaPass_Click;
@@ -83,7 +83,7 @@
             btnIngresar.Location = new Point(370, 219);
             btnIngresar.Name = "btnIngresar";
             btnIngresar.Size = new Size(75, 23);
-            btnIngresar.TabIndex = 4;
+            btnIngresar.TabIndex = 3;
             btnIngresar.Text = "Ingresar";
             btnIngresar.UseVisualStyleBackColor = true;
             btnIngresar.Click += btnIngresar_Click;
@@ -93,7 +93,7 @@
             txtEmail.Location = new Point(177, 130);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(268, 23);
-            txtEmail.TabIndex = 5;
+            txtEmail.TabIndex = 1;
             // 
             // txtPass
             // 
@@ -101,7 +101,7 @@
             txtPass.Name = "txtPass";
             txtPass.PasswordChar = '*';
             txtPass.Size = new Size(268, 23);
-            txtPass.TabIndex = 6;
+            txtPass.TabIndex = 2;
             // 
             // label4
             // 

@@ -76,8 +76,18 @@ namespace Application.Services
             var viaje = _viajeRepo.Get(idViaje);
             if (viaje != null)
             {
-                _viajeRepo.Delete(viaje);
-                return true;
+                //  BAJA LÓGICA (SOFT DELETE)
+                // validar si ya está realizado
+                if (viaje.Estado == EstadoViaje.Realizado)
+                {
+                    throw new InvalidOperationException("No se puede cancelar un viaje que ya fue realizado.");
+                }
+
+                // cambiamos el estado a Cancelado (Baja Lógica)
+                viaje.Estado = EstadoViaje.Cancelado;
+
+                return _viajeRepo.Update(viaje);
+
             }
             return false;
         }
@@ -134,31 +144,60 @@ namespace Application.Services
             }).ToList();
         }
 
+        // ARCHIVO: Application.Services/ViajeServices.cs (Método Update)
+
         public bool Update(ViajeDTO dto)
         {
+            var viajeExistente = _viajeRepo.Get(dto.IdViaje);
+            if (viajeExistente == null)
+            {
+                return false;
+            }
+
+            if (viajeExistente.Estado != EstadoViaje.Pendiente)
+            {
+                throw new InvalidOperationException("Solo se pueden editar viajes en estado Pendiente.");
+            }
+
+            var conductor = _usuarioRepo.GetById(dto.IdConductor);
             var vehiculo = _vehiculoRepo.GetById(dto.IdVehiculo);
 
+            if (conductor == null || conductor.TipoUsuario != TipoUsuario.PasajeroConductor)
+            {
+                throw new ArgumentException("El ID de usuario proporcionado no corresponde a un conductor válido.");
+            }
+            if (conductor.fechaVencimientoLicencia == null || conductor.fechaVencimientoLicencia.Value.Date < dto.FechaHora.Date)
+            {
+                throw new ArgumentException("La licencia del conductor está vencida en la fecha del viaje.");
+            }
             if (vehiculo == null || vehiculo.IdUsuario != dto.IdConductor)
+            {
                 throw new ArgumentException("El vehículo no pertenece al conductor.");
-
+            }
             if (dto.CantLugares > vehiculo.CantLugares)
+            {
                 throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
+            }
 
-            Viaje viaje = Viaje.Crear(
-            dto.FechaHora,
-            dto.CantLugares,
-            dto.Precio,
-            dto.Comentario,
-            dto.OrigenCodPostal,
-            dto.DestinoCodPostal,
-            dto.IdConductor,
-            vehiculo.CantLugares, 
-            vehiculo.IdVehiculo
-        );
+            // actualizamos campos del viaje existente con los datos del DTO
+            try
+            {
+                viajeExistente.SetFechaHora(dto.FechaHora);
+                viajeExistente.SetCantLugares(dto.CantLugares);
+                viajeExistente.SetPrecio(dto.Precio);
+                viajeExistente.SetComentario(dto.Comentario);
+                viajeExistente.OrigenCodPostal = dto.OrigenCodPostal;
+                viajeExistente.DestinoCodPostal = dto.DestinoCodPostal;
+                viajeExistente.IdVehiculo = dto.IdVehiculo;
 
-            viaje.IdViaje = dto.IdViaje;    //por que esto?
-
-            return _viajeRepo.Update(viaje);
+                // guardamos los cambios
+                return _viajeRepo.Update(viajeExistente);
+            }
+            catch (ArgumentException)
+            {
+                // hacemos q el controlador maneje el error
+                throw;
+            }
         }
     }
 }

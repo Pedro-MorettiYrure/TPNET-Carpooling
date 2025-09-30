@@ -104,6 +104,7 @@
             btnEditar.TabIndex = 3;
             btnEditar.Text = "Editar Viaje";
             btnEditar.UseVisualStyleBackColor = true;
+            btnEditar.Click += btnEditar_Click;
             // 
             // btnEliminar
             // 
@@ -113,6 +114,7 @@
             btnEliminar.TabIndex = 4;
             btnEliminar.Text = "Eliminar Viaje";
             btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += btnEliminar_Click;
             // 
             // btnCrear
             // 

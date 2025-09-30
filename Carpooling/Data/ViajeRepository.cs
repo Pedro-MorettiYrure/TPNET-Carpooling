@@ -37,11 +37,14 @@ namespace Data
             return false;
         }
 
-        public void Delete(Viaje viaje)
+
+        //ya no usamos este metodo, hacemos baja logica en el servicio
+
+        /*public void Delete(Viaje viaje)
         {
             _context.Viajes.Remove(viaje);
             _context.SaveChanges();
-        }
+        }*/
 
         public Vehiculo? GetVehiculo(int idVehiculo)
         {

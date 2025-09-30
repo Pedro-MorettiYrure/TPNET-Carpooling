@@ -16,17 +16,40 @@ namespace WindowsForms
     {
         private readonly UsuarioDTO _usuarioLogueado;
         public FormMode Mode;
+        private ViajeDTO _viajeAEditar;
 
         public ViajeDetalle(UsuarioDTO usuarioLogueado)
         {
             InitializeComponent();
-            //ver lo de formmode
             _usuarioLogueado = usuarioLogueado;
+            this.Mode = FormMode.Add;
             LoadLocalidades();
             LoadVehiculos();
         }
+        public ViajeDetalle(UsuarioDTO usuarioLogueado, ViajeDTO viajeAEditar)
+        {
+            InitializeComponent();
+            _usuarioLogueado = usuarioLogueado;
+            this.Mode = FormMode.Update; 
+            _viajeAEditar = viajeAEditar;  
 
+            CargarDatosSimplesAEditar();
 
+            LoadLocalidades();
+            LoadVehiculos(); 
+
+        }
+        private void CargarDatosSimplesAEditar()
+        {
+            if (_viajeAEditar != null)
+            {
+                // Solo cargamos campos que no dependen de los ComboBox
+                dtpFechaHora.Value = _viajeAEditar.FechaHora;
+                tbCantLugares.Text = _viajeAEditar.CantLugares.ToString();
+                tbPrecio.Text = _viajeAEditar.Precio.ToString();
+                tbComentario.Text = _viajeAEditar.Comentario;
+            }
+        }
         public enum FormMode
         {
             Add,
@@ -47,6 +70,13 @@ namespace WindowsForms
                 cbDestino.DisplayMember = "Nombre";
                 cbDestino.SelectedIndex = -1;
                 cbDestino.ValueMember = "CodPostal";
+
+                // seleccionar el valor si estamos editando
+                if (Mode == FormMode.Update && _viajeAEditar != null)
+                {
+                    cbOrigen.SelectedValue = _viajeAEditar.OrigenCodPostal;
+                    cbDestino.SelectedValue = _viajeAEditar.DestinoCodPostal;
+                }
             }
             catch (Exception ex)
             {
@@ -64,6 +94,13 @@ namespace WindowsForms
                 cbVehiculos.DisplayMember = "Patente";       // lo que se va a mostrar
                 cbVehiculos.ValueMember = "IdVehiculo";      // lo que se guarda como valor
                 cbVehiculos.SelectedIndex = -1;
+
+                //Seleccionar el valor si estamos editando
+                if (Mode == FormMode.Update && _viajeAEditar != null)
+                {
+                    cbVehiculos.SelectedValue = _viajeAEditar.IdVehiculo;
+                }
+
             }
             catch (Exception ex)
             {
@@ -104,17 +141,25 @@ namespace WindowsForms
                     };
                     //MessageBox.Show($"IdVehiculo seleccionado: {dto.IdVehiculo}, IdConductor: {dto.IdConductor}");
 
-                    if (Mode == FormMode.Update)
-                    {
-                        await ViajeApiClient.UpdateAsync(dto);
-                        MessageBox.Show("Viaje actualizado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        await ViajeApiClient.AddAsync(dto);
-                        MessageBox.Show("Viaje publicado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
+                if (Mode == FormMode.Update)
+                {
+                    dto.IdViaje = _viajeAEditar.IdViaje;
+                    await ViajeApiClient.UpdateAsync(dto);
+                    MessageBox.Show("Viaje actualizado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    await ViajeApiClient.AddAsync(dto);
+                    MessageBox.Show("Viaje publicado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
 
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudo confirmar el viaje.\nDetalle: {ex.Message}", "Error de Publicación", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
                     this.Dispose();
                 }
                 catch (Exception ex)

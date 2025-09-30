@@ -30,11 +30,11 @@
         {
             tlMain = new TableLayoutPanel();
             lbMain = new Label();
-            btnLocalidadLista = new Button();
             label1 = new Label();
             btnConvertirAConductor = new Button();
             btnViajeLista = new Button();
             btnVehiculoLista = new Button();
+            btnLocalidadLista = new Button();
             btnEditarUsuario = new Button();
             tlMain.SuspendLayout();
             SuspendLayout();
@@ -48,20 +48,21 @@
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlMain.Controls.Add(lbMain, 1, 0);
             tlMain.Controls.Add(label1, 1, 1);
-            tlMain.Controls.Add(btnConvertirAConductor, 1, 4);
             tlMain.Controls.Add(btnViajeLista, 2, 3);
             tlMain.Controls.Add(btnVehiculoLista, 1, 3);
             tlMain.Controls.Add(btnLocalidadLista, 1, 2);
-            tlMain.Controls.Add(btnEditarUsuario, 2, 2);
+            tlMain.Controls.Add(btnEditarUsuario, 1, 5);
+            tlMain.Controls.Add(btnConvertirAConductor, 1, 4);
             tlMain.Dock = DockStyle.Fill;
             tlMain.Location = new Point(0, 0);
             tlMain.Name = "tlMain";
-            tlMain.RowCount = 5;
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
-            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
+            tlMain.RowCount = 6;
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+            tlMain.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
             tlMain.Size = new Size(766, 374);
             tlMain.TabIndex = 4;
             // 
@@ -77,20 +78,9 @@
             lbMain.Location = new Point(206, 0);
             lbMain.Name = "lbMain";
             lbMain.RightToLeft = RightToLeft.No;
-            lbMain.Size = new Size(353, 74);
+            lbMain.Size = new Size(353, 62);
             lbMain.TabIndex = 2;
             lbMain.Text = "Menu principal";
-            // 
-            // btnLocalidadLista
-            // 
-            btnLocalidadLista.Anchor = AnchorStyles.Top;
-            btnLocalidadLista.Location = new Point(217, 151);
-            btnLocalidadLista.Name = "btnLocalidadLista";
-            btnLocalidadLista.Size = new Size(131, 47);
-            btnLocalidadLista.TabIndex = 0;
-            btnLocalidadLista.Text = "Localidades";
-            btnLocalidadLista.UseVisualStyleBackColor = true;
-            btnLocalidadLista.Click += btnLocalidadLista_Click;
             // 
             // label1
             // 
@@ -100,7 +90,7 @@
             label1.FlatStyle = FlatStyle.Popup;
             label1.Font = new Font("Calibri", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = SystemColors.ControlText;
-            label1.Location = new Point(186, 74);
+            label1.Location = new Point(186, 62);
             label1.Name = "label1";
             label1.RightToLeft = RightToLeft.No;
             label1.Size = new Size(394, 23);
@@ -112,7 +102,7 @@
             // 
             btnConvertirAConductor.Anchor = AnchorStyles.Top;
             tlMain.SetColumnSpan(btnConvertirAConductor, 2);
-            btnConvertirAConductor.Location = new Point(313, 299);
+            btnConvertirAConductor.Location = new Point(313, 251);
             btnConvertirAConductor.Name = "btnConvertirAConductor";
             btnConvertirAConductor.Size = new Size(139, 44);
             btnConvertirAConductor.TabIndex = 1;
@@ -123,7 +113,7 @@
             // btnViajeLista
             // 
             btnViajeLista.Anchor = AnchorStyles.Top;
-            btnViajeLista.Location = new Point(417, 225);
+            btnViajeLista.Location = new Point(417, 189);
             btnViajeLista.Name = "btnViajeLista";
             btnViajeLista.Size = new Size(131, 47);
             btnViajeLista.TabIndex = 4;
@@ -135,7 +125,7 @@
             // 
             btnVehiculoLista.Anchor = AnchorStyles.Top;
             btnVehiculoLista.ForeColor = SystemColors.ControlText;
-            btnVehiculoLista.Location = new Point(217, 225);
+            btnVehiculoLista.Location = new Point(217, 189);
             btnVehiculoLista.Name = "btnVehiculoLista";
             btnVehiculoLista.Size = new Size(131, 47);
             btnVehiculoLista.TabIndex = 1;
@@ -143,10 +133,23 @@
             btnVehiculoLista.UseVisualStyleBackColor = true;
             btnVehiculoLista.Click += btnVehiculoLista_Click;
             // 
+            // btnLocalidadLista
+            // 
+            btnLocalidadLista.Anchor = AnchorStyles.Top;
+            tlMain.SetColumnSpan(btnLocalidadLista, 2);
+            btnLocalidadLista.Location = new Point(317, 127);
+            btnLocalidadLista.Name = "btnLocalidadLista";
+            btnLocalidadLista.Size = new Size(131, 47);
+            btnLocalidadLista.TabIndex = 0;
+            btnLocalidadLista.Text = "Localidades";
+            btnLocalidadLista.UseVisualStyleBackColor = true;
+            btnLocalidadLista.Click += btnLocalidadLista_Click;
+            // 
             // btnEditarUsuario
             // 
             btnEditarUsuario.Anchor = AnchorStyles.Top;
-            btnEditarUsuario.Location = new Point(419, 151);
+            tlMain.SetColumnSpan(btnEditarUsuario, 2);
+            btnEditarUsuario.Location = new Point(319, 313);
             btnEditarUsuario.Name = "btnEditarUsuario";
             btnEditarUsuario.Size = new Size(127, 47);
             btnEditarUsuario.TabIndex = 5;

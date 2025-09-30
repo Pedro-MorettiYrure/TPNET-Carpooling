@@ -83,7 +83,7 @@
             btnCrearUsuario.Location = new Point(519, 307);
             btnCrearUsuario.Name = "btnCrearUsuario";
             btnCrearUsuario.Size = new Size(99, 32);
-            btnCrearUsuario.TabIndex = 3;
+            btnCrearUsuario.TabIndex = 12;
             btnCrearUsuario.Text = "Confirmar";
             btnCrearUsuario.UseVisualStyleBackColor = true;
             btnCrearUsuario.Click += btnCrearUsuario_Click;
@@ -99,6 +99,7 @@
             // 
             txtBoxContra.Location = new Point(443, 144);
             txtBoxContra.Name = "txtBoxContra";
+            txtBoxContra.PasswordChar = '*';
             txtBoxContra.Size = new Size(128, 23);
             txtBoxContra.TabIndex = 5;
             // 
@@ -115,6 +116,7 @@
             // 
             txtBoxConfirmaCon.Location = new Point(443, 186);
             txtBoxConfirmaCon.Name = "txtBoxConfirmaCon";
+            txtBoxConfirmaCon.PasswordChar = '*';
             txtBoxConfirmaCon.Size = new Size(128, 23);
             txtBoxConfirmaCon.TabIndex = 7;
             // 
@@ -141,21 +143,21 @@
             txtBoxNombre.Location = new Point(162, 106);
             txtBoxNombre.Name = "txtBoxNombre";
             txtBoxNombre.Size = new Size(128, 23);
-            txtBoxNombre.TabIndex = 10;
+            txtBoxNombre.TabIndex = 1;
             // 
             // txtBoxApellido
             // 
             txtBoxApellido.Location = new Point(162, 141);
             txtBoxApellido.Name = "txtBoxApellido";
             txtBoxApellido.Size = new Size(128, 23);
-            txtBoxApellido.TabIndex = 11;
+            txtBoxApellido.TabIndex = 2;
             // 
             // txtBoxTele
             // 
             txtBoxTele.Location = new Point(162, 186);
             txtBoxTele.Name = "txtBoxTele";
             txtBoxTele.Size = new Size(128, 23);
-            txtBoxTele.TabIndex = 12;
+            txtBoxTele.TabIndex = 3;
             // 
             // labelTele
             // 
@@ -201,7 +203,7 @@
             textBoxLicencia.Location = new Point(216, 263);
             textBoxLicencia.Name = "textBoxLicencia";
             textBoxLicencia.Size = new Size(100, 23);
-            textBoxLicencia.TabIndex = 17;
+            textBoxLicencia.TabIndex = 10;
             // 
             // dateTimePickerVencimiento
             // 
@@ -209,7 +211,7 @@
             dateTimePickerVencimiento.Location = new Point(216, 296);
             dateTimePickerVencimiento.Name = "dateTimePickerVencimiento";
             dateTimePickerVencimiento.Size = new Size(200, 23);
-            dateTimePickerVencimiento.TabIndex = 18;
+            dateTimePickerVencimiento.TabIndex = 11;
             // 
             // FormRegistrarse
             // 

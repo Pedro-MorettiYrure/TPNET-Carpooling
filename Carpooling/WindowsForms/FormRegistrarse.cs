@@ -43,6 +43,14 @@ namespace WindowsForms
         {
             if (_esEdicion && _usuarioEditar != null)
             {
+                //Si está vacío dejamos el anterior
+                if (txtBoxNombre.Text == "")
+                    txtBoxNombre.Text = _usuarioEditar.Nombre;
+                if (txtBoxApellido.Text == "")
+                    txtBoxApellido.Text = _usuarioEditar.Apellido;
+                if (txtBoxTele.Text == "")
+                    txtBoxTele.Text = (_usuarioEditar.Telefono ?? "");
+
                 // Revisamos si hubo cambios
                 bool huboCambios =
                     txtBoxNombre.Text != _usuarioEditar.Nombre ||
@@ -51,6 +59,9 @@ namespace WindowsForms
 
                 if (_usuarioEditar.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
                 {
+                    if (textBoxLicencia.Text == "")
+                        textBoxLicencia.Text = _usuarioEditar.nroLicenciaConductor;
+                   
                     huboCambios |= textBoxLicencia.Text != (_usuarioEditar.nroLicenciaConductor ?? "");
                     huboCambios |= dateTimePickerVencimiento.Value != _usuarioEditar.fechaVencimientoLicencia;
                 }
