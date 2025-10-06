@@ -30,13 +30,13 @@ namespace WindowsForms
         {
             InitializeComponent();
             _usuarioLogueado = usuarioLogueado;
-            this.Mode = FormMode.Update; 
-            _viajeAEditar = viajeAEditar;  
+            this.Mode = FormMode.Update;
+            _viajeAEditar = viajeAEditar;
 
             CargarDatosSimplesAEditar();
 
             LoadLocalidades();
-            LoadVehiculos(); 
+            LoadVehiculos();
 
         }
         private void CargarDatosSimplesAEditar()
@@ -44,7 +44,8 @@ namespace WindowsForms
             if (_viajeAEditar != null)
             {
                 // Solo cargamos campos que no dependen de los ComboBox
-                dtpFechaHora.Value = _viajeAEditar.FechaHora;
+                dtpFecha.Value = _viajeAEditar.FechaHora;
+                dtpHora.Value = _viajeAEditar.FechaHora;
                 tbCantLugares.Text = _viajeAEditar.CantLugares.ToString();
                 tbPrecio.Text = _viajeAEditar.Precio.ToString();
                 tbComentario.Text = _viajeAEditar.Comentario;
@@ -141,35 +142,32 @@ namespace WindowsForms
                     };
                     //MessageBox.Show($"IdVehiculo seleccionado: {dto.IdVehiculo}, IdConductor: {dto.IdConductor}");
 
-                if (Mode == FormMode.Update)
-                {
-                    dto.IdViaje = _viajeAEditar.IdViaje;
-                    await ViajeApiClient.UpdateAsync(dto);
-                    MessageBox.Show("Viaje actualizado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    await ViajeApiClient.AddAsync(dto);
-                    MessageBox.Show("Viaje publicado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                    if (Mode == FormMode.Update)
+                    {
+                        dto.IdViaje = _viajeAEditar.IdViaje;
+                        await ViajeApiClient.UpdateAsync(dto);
+                        MessageBox.Show("Viaje actualizado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        await ViajeApiClient.AddAsync(dto);
+                        MessageBox.Show("Viaje publicado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
 
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"No se pudo confirmar el viaje.\nDetalle: {ex.Message}", "Error de Publicación", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-                    this.Dispose();
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"No se pudo confirmar el viaje.\nDetalle: {ex.Message}", "Error de Publicación", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                this.Dispose();
             }
-
-
+                
         }
+
+    
+        
 
         private bool ValidateViaje()
         {
