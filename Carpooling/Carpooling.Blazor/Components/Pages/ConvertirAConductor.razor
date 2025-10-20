@@ -1,0 +1,87 @@
+﻿@page "/convertir-a-conductor"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@using System.ComponentModel.DataAnnotations
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+
+<h3>Quiero ser Conductor</h3>
+
+@if (SesionUsuario.EstaLogueado)
+{
+    <div class="card">
+        <div class="card-body">
+            <p>Para poder publicar viajes, necesitamos que completes los datos de tu licencia de conducir.</p>
+            <EditForm Model="@conductorModel" OnValidSubmit="ManejarSolicitud" FormName="ConductorUpgradeForm">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Número de Licencia:</label>
+                    <InputText class="form-control" @bind-Value="conductorModel.nroLicenciaConductor" />
+                    <ValidationMessage For="@(() => conductorModel.nroLicenciaConductor)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha de Vencimiento:</label>
+                    <InputDate class="form-control" @bind-Value="conductorModel.fechaVencimientoLicencia" />
+                    <ValidationMessage For="@(() => conductorModel.fechaVencimientoLicencia)" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensaje))
+                {
+                    <div class="alert @(exito ? "alert-success" : "alert-danger")">@mensaje</div>
+                }
+
+                <button type="submit" class="btn btn-primary">Confirmar y ser Conductor</button>
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <p>Debes iniciar sesión para poder solicitar ser conductor.</p>
+}
+
+
+@code {
+    private UsuarioDTO.ConductorUpgradeDTO conductorModel = new() { fechaVencimientoLicencia = DateTime.Now.AddYears(1) };
+
+    private string mensaje;
+    private bool exito;
+
+    private async Task ManejarSolicitud()
+    {
+        mensaje = string.Empty;
+        exito = false;
+
+        try
+        {
+            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
+            bool resultado = await UsuarioApiClient.ConvertirAConductorAsync(idUsuario, conductorModel);
+
+            if (resultado)
+            {
+                exito = true;
+                mensaje = "¡Felicidades! Tus datos se guardaron correctamente. Ahora sos conductor.";
+
+                // Actualizamos el usuario en la sesión para que el menú cambie inmediatamente
+                var usuarioActualizado = await UsuarioApiClient.GetByEmailAsync(SesionUsuario.UsuarioActual.Email);
+                SesionUsuario.IniciarSesion(usuarioActualizado);
+
+                // Esperamos 2 segundos para que el usuario lea el mensaje y luego lo redirigimos
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                mensaje = "No se pudo completar el registro. Revisá que la licencia no esté vencida.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Ocurrió un error inesperado: {ex.Message}";
+        }
+    }
+}

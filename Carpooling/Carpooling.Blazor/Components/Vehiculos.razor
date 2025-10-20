@@ -1,0 +1,124 @@
+﻿@page "/vehiculos"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+
+<h3>Mis Vehículos</h3>
+
+@if (puedeAcceder)
+{
+    <div class="mb-3">
+        <button class="btn btn-success" @onclick="AgregarVehiculo">
+            <span class="bi bi-plus-circle-fill"></span> Agregar Nuevo Vehículo
+        </button>
+    </div>
+
+    @if (vehiculos == null)
+    {
+        <p><em>Cargando vehículos...</em></p>
+    }
+    else if (vehiculos.Count == 0)
+    {
+        <p>Aún no has agregado ningún vehículo.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Patente</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Color</th>
+                    <th>Lugares</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var vehiculo in vehiculos)
+                {
+                    <tr>
+                        <td>@vehiculo.Patente</td>
+                        <td>@vehiculo.Marca</td>
+                        <td>@vehiculo.Modelo</td>
+                        <td>@vehiculo.Color</td>
+                        <td>@vehiculo.CantLugares</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" @onclick="() => EditarVehiculo(vehiculo.Patente)">Editar</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarVehiculo(vehiculo.Patente)">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <div class="alert alert-warning">No tienes permiso para acceder a esta sección. Debes ser conductor.</div>
+}
+
+
+@code {
+    private List<VehiculoDTO> vehiculos;
+    private bool puedeAcceder = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Primero, verificamos si el usuario puede estar aquí
+        if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
+        {
+            puedeAcceder = true;
+            await CargarVehiculos();
+        }
+        else
+        {
+            // Opcional: Redirigir si no tiene permiso
+            // Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task CargarVehiculos()
+    {
+        try
+        {
+            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
+            var vehiculosList = await VehiculoApiClient.GetByUsuarioAsync(idUsuario);
+            vehiculos = vehiculosList.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar vehículos: {ex.Message}");
+            // Aquí podrías mostrar un mensaje de error en la UI
+        }
+    }
+
+    private void AgregarVehiculo()
+    {
+        Navigation.NavigateTo("/vehiculo/nuevo");
+    }
+
+    private void EditarVehiculo(string patente)
+    {
+        Navigation.NavigateTo($"/vehiculo/editar/{patente}");
+    }
+
+    private async Task EliminarVehiculo(string patente)
+    {
+        // Aquí podrías agregar una confirmación (ej. un pop-up)
+        try
+        {
+            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
+            await VehiculoApiClient.DeleteAsync(patente, idUsuario);
+            // Recargamos la lista para que el vehículo eliminado desaparezca
+            await CargarVehiculos();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al eliminar vehículo: {ex.Message}");
+        }
+    }
+}

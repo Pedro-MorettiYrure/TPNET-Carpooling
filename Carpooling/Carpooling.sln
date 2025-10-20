@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Clients", "API.Clients\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{6DA151B6-65C3-4AA4-BA52-D03F96262622}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carpooling.Blazor", "Carpooling.Blazor\Carpooling.Blazor.csproj", "{B8E9744C-4B51-4D7A-BF01-4D72E62CA346}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{6DA151B6-65C3-4AA4-BA52-D03F96262622}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DA151B6-65C3-4AA4-BA52-D03F96262622}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DA151B6-65C3-4AA4-BA52-D03F96262622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8E9744C-4B51-4D7A-BF01-4D72E62CA346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8E9744C-4B51-4D7A-BF01-4D72E62CA346}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8E9744C-4B51-4D7A-BF01-4D72E62CA346}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8E9744C-4B51-4D7A-BF01-4D72E62CA346}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,116 @@
+﻿@page "/editar-perfil"
+
+@using DTOs
+@using API.Clients
+@using System.ComponentModel.DataAnnotations
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+
+<h3>Editar Mis Datos</h3>
+
+@if (usuarioModel is not null)
+{
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="@usuarioModel" OnValidSubmit="ActualizarDatos" FormName="ProfileEditForm">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Email:</label>
+                    <InputText class="form-control" @bind-Value="usuarioModel.Email" disabled="true" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre:</label>
+                    <InputText class="form-control" @bind-Value="usuarioModel.Nombre" />
+                    <ValidationMessage For="@(() => usuarioModel.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Apellido:</label>
+                    <InputText class="form-control" @bind-Value="usuarioModel.Apellido" />
+                    <ValidationMessage For="@(() => usuarioModel.Apellido)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono:</label>
+                    <InputText class="form-control" @bind-Value="usuarioModel.Telefono" />
+                    <ValidationMessage For="@(() => usuarioModel.Telefono)" />
+                </div>
+
+                @if (usuarioModel.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
+                {
+                    <hr />
+                    <h5>Datos de Conductor</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Número de Licencia:</label>
+                        <InputText class="form-control" @bind-Value="usuarioModel.nroLicenciaConductor" />
+                        <ValidationMessage For="@(() => usuarioModel.nroLicenciaConductor)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Vencimiento de Licencia:</label>
+                        <InputDate class="form-control" @bind-Value="usuarioModel.fechaVencimientoLicencia" />
+                        <ValidationMessage For="@(() => usuarioModel.fechaVencimientoLicencia)" />
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(mensaje))
+                {
+                    <div class="alert @(exito ? "alert-success" : "alert-danger")">@mensaje</div>
+                }
+
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <p>Cargando datos del usuario...</p>
+}
+
+@code {
+    private UsuarioDTO usuarioModel;
+    private string mensaje;
+    private bool exito;
+
+    protected override void OnInitialized()
+    {
+        // Cargamos los datos del usuario logueado en el modelo del formulario
+        if (SesionUsuario.EstaLogueado)
+        {
+            usuarioModel = SesionUsuario.UsuarioActual;
+        }
+        else
+        {
+            Navigation.NavigateTo("/login"); // Si no está logueado, lo mandamos al login
+        }
+    }
+
+    private async Task ActualizarDatos()
+    {
+        mensaje = string.Empty;
+        exito = false;
+
+        try
+        {
+            bool resultado = await UsuarioApiClient.ActualizarUsuarioAsync(usuarioModel);
+            if (resultado)
+            {
+                exito = true;
+                mensaje = "¡Tus datos se actualizaron correctamente!";
+
+                // Actualizamos la sesión con los nuevos datos
+                SesionUsuario.IniciarSesion(usuarioModel);
+            }
+            else
+            {
+                mensaje = "No se pudieron actualizar los datos.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error al actualizar: {ex.Message}";
+        }
+    }
+}

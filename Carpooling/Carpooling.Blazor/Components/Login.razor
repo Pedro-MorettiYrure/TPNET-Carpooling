@@ -1,0 +1,62 @@
+﻿@page "/login"
+@using DTOs
+@using API.Clients
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+
+<h3>Iniciar Sesión</h3>
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="@loginModel" OnValidSubmit="ManejarLogin">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Contraseña" />
+            </div>
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+            <button type="submit" class="btn btn-primary">Ingresar</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string error;
+
+    private async Task ManejarLogin()
+    {
+        try
+        {
+            bool loginExitoso = await UsuarioApiClient.LoginAsync(loginModel.Email, loginModel.Contraseña);
+
+            if (loginExitoso)
+            {
+                UsuarioDTO usuario = await UsuarioApiClient.GetByEmailAsync(loginModel.Email);
+                SesionUsuario.IniciarSesion(usuario);
+                Navigation.NavigateTo("/"); // Redirige al inicio
+            }
+            else
+            {
+                error = "Email o contraseña incorrectos.";
+            }
+        }
+        catch (Exception)
+        {
+            error = "Ocurrió un error al intentar iniciar sesión.";
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; }
+        public string Contraseña { get; set; }
+    }
+}

@@ -1,0 +1,96 @@
+﻿@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Carpooling.Blazor</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable">
+    <nav class="flex-column">
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        @if (SesionUsuario.EstaLogueado)
+        {
+            @switch (SesionUsuario.UsuarioActual.TipoUsuario)
+            {
+                case Domain.Model.TipoUsuario.Administrador:
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="localidades">
+                            <span class="bi bi-pin-map-fill" aria-hidden="true"></span> Localidades
+                        </NavLink>
+                    </div>
+                    break;
+                case Domain.Model.TipoUsuario.Pasajero:
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="convertir-a-conductor">
+                            <span class="bi bi-person-check-fill" aria-hidden="true"></span> Ser Conductor
+                        </NavLink>
+                    </div>
+                    break;
+                case Domain.Model.TipoUsuario.PasajeroConductor:
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="vehiculos">
+                            <span class="bi bi-car-front-fill" aria-hidden="true"></span> Mis Vehículos
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="viajes">
+                            <span class="bi bi-signpost-split-fill" aria-hidden="true"></span> Mis Viajes
+                        </NavLink>
+                    </div>
+                    break;
+            }
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="editar-perfil">
+                    <span class="bi bi-person-fill-gear" aria-hidden="true"></span> Editar Mis Datos
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="CerrarSesion" style="cursor: pointer;">
+                    <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Cerrar Sesión
+                </NavLink>
+            </div>
+        }
+        else
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="login">
+                    <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Iniciar Sesión
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="registro">
+                    <span class="bi bi-person-plus-fill" aria-hidden="true"></span> Registrarse
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SesionUsuario.OnChange += StateHasChanged;
+    }
+
+    private void CerrarSesion()
+    {
+        SesionUsuario.CerrarSesion();
+        Navigation.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        SesionUsuario.OnChange -= StateHasChanged;
+    }
+}

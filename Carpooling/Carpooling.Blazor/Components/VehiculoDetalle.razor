@@ -1,0 +1,120 @@
+﻿@page "/vehiculo/nuevo"
+@page "/vehiculo/editar/{Patente}"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@inject NavigationManager Navigation
+@inject ServicioSesionUsuario SesionUsuario
+
+@if (puedeAcceder)
+{
+    <h3>@Titulo</h3>
+
+    <EditForm Model="@Vehiculo" OnValidSubmit="Guardar" FormName="VehiculoForm">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label for="patente" class="form-label">Patente</label>
+            <InputText id="patente" class="form-control" @bind-Value="Vehiculo.Patente" disabled="@modoEdicion" />
+            <ValidationMessage For="@(() => Vehiculo.Patente)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="marca" class="form-label">Marca</label>
+            <InputText id="marca" class="form-control" @bind-Value="Vehiculo.Marca" />
+            <ValidationMessage For="@(() => Vehiculo.Marca)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="modelo" class="form-label">Modelo</label>
+            <InputText id="modelo" class="form-control" @bind-Value="Vehiculo.Modelo" />
+            <ValidationMessage For="@(() => Vehiculo.Modelo)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="color" class="form-label">Color</label>
+            <InputText id="color" class="form-control" @bind-Value="Vehiculo.Color" />
+            <ValidationMessage For="@(() => Vehiculo.Color)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="cantLugares" class="form-label">Cantidad de Lugares</label>
+            <InputNumber id="cantLugares" class="form-control" @bind-Value="Vehiculo.CantLugares" />
+            <ValidationMessage For="@(() => Vehiculo.CantLugares)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </EditForm>
+}
+else
+{
+    <p>Cargando o no tienes permiso para estar aquí...</p>
+}
+
+
+@code {
+    [Parameter]
+    public string Patente { get; set; }
+
+    private VehiculoDTO Vehiculo { get; set; }
+    private string Titulo = "";
+    private bool modoEdicion = false;
+    private bool puedeAcceder = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verificamos que el usuario esté logueado y sea conductor
+        if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
+        {
+            puedeAcceder = true;
+            var idUsuarioLogueado = SesionUsuario.UsuarioActual.IdUsuario;
+
+            if (!string.IsNullOrEmpty(Patente))
+            {
+                // --- Modo Edición ---
+                Titulo = "Editar Vehículo";
+                modoEdicion = true;
+                Vehiculo = await VehiculoApiClient.GetAsync(Patente, idUsuarioLogueado);
+            }
+            else
+            {
+                // --- Modo Creación ---
+                Titulo = "Nuevo Vehículo";
+                // Creamos un vehículo nuevo ASIGNÁNDOLE EL ID CORRECTO
+                Vehiculo = new VehiculoDTO { IdUsuario = idUsuarioLogueado };
+            }
+        }
+        else
+        {
+            // Si no tiene permiso, lo sacamos de aquí
+            Navigation.NavigateTo("/vehiculos");
+        }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            if (modoEdicion)
+            {
+                await VehiculoApiClient.UpdateAsync(Vehiculo);
+            }
+            else
+            {
+                await VehiculoApiClient.AddAsync(Vehiculo);
+            }
+            Navigation.NavigateTo("/vehiculos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al guardar: {ex.Message}");
+        }
+    }
+
+    private void Cancelar()
+    {
+        Navigation.NavigateTo("/vehiculos");
+    }
+}
