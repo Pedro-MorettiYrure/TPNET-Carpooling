@@ -10,11 +10,12 @@ namespace Application.Services
     public class LocalidadService
     {
         private readonly LocalidadRepository _repo;
-
+        private readonly TPIContext _context;
         // Recibe el repositorio por constructor
-        public LocalidadService(LocalidadRepository repo)
+        public LocalidadService(LocalidadRepository repo, TPIContext context)
         {
             _repo = repo;
+            _context = context;
         }
 
         public LocalidadDTO Add(LocalidadDTO dto)
@@ -31,6 +32,12 @@ namespace Application.Services
 
         public bool Delete(string cod)
         {
+            bool estaEnUso = _context.Viajes
+                                .Any(v => v.OrigenCodPostal == cod || v.DestinoCodPostal == cod); ;
+            if (estaEnUso)
+                {
+                    throw new InvalidOperationException($"No se puede eliminar la localidad con Código Postal '{cod}' porque está en uso en viajes.");
+            }
             return _repo.Delete(cod);
         }
 

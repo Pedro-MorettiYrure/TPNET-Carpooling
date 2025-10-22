@@ -106,7 +106,30 @@ namespace API.Clients
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al eliminar localidad con codigo postal {codPostal}. Status: {response.StatusCode}, Detalle: {errorContent}");
+                    if (!string.IsNullOrWhiteSpace(errorContent)) {
+                        try
+                        {
+                            var errorDetails = System.Text.Json.JsonDocument.Parse(errorContent);
+                            if (errorDetails.RootElement.TryGetProperty("detail", out var detail))
+                            {
+                                errorContent = detail.GetString();
+                            }
+                            else if (errorDetails.RootElement.TryGetProperty("title", out var title))
+                            {
+                                errorContent = title.GetString();
+                            }
+                        }
+
+                        catch (System.Text.Json.JsonException)
+                        {
+                            // No es un JSON válido, se deja el contenido original
+                        }
+                    }
+                    else
+                    {
+                        response.EnsureSuccessStatusCode();
+                    }
+                        throw new Exception($"Error al eliminar localidad con codigo postal {codPostal}. Status: {response.StatusCode}, Detalle: {errorContent}");
                 }
             }
             catch (HttpRequestException ex)

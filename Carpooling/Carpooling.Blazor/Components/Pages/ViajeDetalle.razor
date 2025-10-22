@@ -1,0 +1,271 @@
+﻿@page "/viaje/nuevo"
+@page "/viaje/editar/{IdViaje:int}"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Navigation
+@inject ServicioSesionUsuario SesionUsuario
+
+<h3>@Titulo</h3>
+
+@if (puedeAcceder && viajeModel != null)
+{
+    <EditForm Model="@viajeModel" OnValidSubmit="GuardarViaje" FormName="ViajeForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary /> @* Muestra un resumen de todos los errores *@
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Fecha:</label>
+                    <InputDate class="form-control" @bind-Value="viajeModel.FechaHora" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Hora (HH:mm):</label>
+                    @* InputTime no existe por defecto, usamos InputText con formato *@
+                    <InputText type="time" class="form-control" @bind-Value="horaSalidaString" />
+                </div>
+            </div>
+        </div>
+
+
+        <div class="mb-3">
+            <label class="form-label">Origen:</label>
+            <InputSelect class="form-select" @bind-Value="viajeModel.OrigenCodPostal">
+                <option value="">Seleccione una localidad...</option>
+                @if (localidades != null)
+                {
+                    @foreach (var loc in localidades)
+                    {
+                        <option value="@loc.CodPostal">@loc.Nombre (@loc.CodPostal)</option>
+                    }
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Destino:</label>
+            <InputSelect class="form-select" @bind-Value="viajeModel.DestinoCodPostal">
+                <option value="">Seleccione una localidad...</option>
+                @if (localidades != null)
+                {
+                    @foreach (var loc in localidades)
+                    {
+                        <option value="@loc.CodPostal">@loc.Nombre (@loc.CodPostal)</option>
+                    }
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Vehículo:</label>
+            <InputSelect class="form-select" @bind-Value="viajeModel.IdVehiculo">
+                <option value="0">Seleccione un vehículo...</option>
+                @if (vehiculos != null)
+                {
+                    @foreach (var veh in vehiculos)
+                    {
+                        @* Guardamos el IdVehiculo, pero mostramos patente y modelo *@
+                        <option value="@veh.IdVehiculo">@veh.Patente - @veh.Marca @veh.Modelo</option>
+                    }
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cantidad de Lugares Libres:</label>
+            <InputNumber class="form-control" @bind-Value="viajeModel.CantLugares" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Precio por Pasajero:</label>
+            <InputNumber class="form-control" @bind-Value="viajeModel.Precio" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Comentario (opcional):</label>
+            <InputTextArea class="form-control" @bind-Value="viajeModel.Comentario" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+
+        <button type="submit" class="btn btn-primary">@(modoEdicion ? "Actualizar Viaje" : "Publicar Viaje")</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+    </EditForm>
+}
+else if (!puedeAcceder)
+{
+    <div class="alert alert-warning">No tienes permiso para acceder a esta sección. Debes ser conductor.</div>
+}
+else
+{
+    <p>Cargando datos del viaje...</p>
+}
+
+@code {
+    [Parameter]
+    public int IdViaje { get; set; } // Recibe el ID del viaje desde la URL si estamos editando
+
+    private ViajeDTO viajeModel;
+    private List<LocalidadDTO> localidades;
+    private List<VehiculoDTO> vehiculos;
+    private string error;
+    private string Titulo = "";
+    private bool modoEdicion = false;
+    private bool puedeAcceder = false;
+
+    // Propiedad auxiliar para manejar la hora como texto en el input type="time"
+    private string horaSalidaString
+    {
+        get => viajeModel?.FechaHora.ToString("HH:mm") ?? "00:00";
+        set
+        {
+            if (TimeSpan.TryParse(value, out var time))
+            {
+                if (viajeModel != null)
+                {
+                    var fechaActual = viajeModel.FechaHora.Date;
+                    viajeModel.FechaHora = fechaActual + time;
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
+        {
+            puedeAcceder = true;
+            await CargarListasDesplegables(); // Cargamos localidades y vehículos
+
+            if (IdViaje > 0) // Si IdViaje tiene valor, estamos editando
+            {
+                modoEdicion = true;
+                Titulo = "Editar Viaje";
+                // Buscamos el viaje específico por su ID (necesitamos añadir GetAsync(id) a ViajeApiClient si no existe)
+                // Por ahora, asumimos que existe un método GetAsync(int idViaje)
+                try
+                {
+                    // Nota: Tu ViajeApiClient.GetAsync actual recibe string, hay que adaptarlo o crear uno nuevo para int
+                    // Asumiendo que ya tienes o creas ViajeApiClient.GetByIdAsync(int id)
+                    viajeModel = await ViajeApiClient.GetAsync(IdViaje.ToString());
+                }
+                catch (Exception ex)
+                {
+                    error = $"No se pudo cargar el viaje: {ex.Message}";
+                    viajeModel = null; // Para que muestre error en la UI
+                }
+            }
+            else // Si no hay IdViaje, estamos creando uno nuevo
+            {
+                modoEdicion = false;
+                Titulo = "Publicar Nuevo Viaje";
+                viajeModel = new ViajeDTO
+                {
+                    IdConductor = SesionUsuario.UsuarioActual.IdUsuario,
+                    FechaHora = DateTime.Now.Date.AddHours(DateTime.Now.Hour + 1) // Fecha de hoy, hora siguiente
+                };
+            }
+        }
+        else
+        {
+            puedeAcceder = false;
+            // Opcional: Redirigir si no tiene permiso
+            // Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task CargarListasDesplegables()
+    {
+        try
+        {
+            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
+            // Usamos los API clients que ya existen
+            localidades = (await LocalidadApiClient.GetAllAsync()).ToList();
+            vehiculos = (await VehiculoApiClient.GetByUsuarioAsync(idUsuario)).ToList();
+        }
+        catch (Exception ex)
+        {
+            error = $"Error al cargar listas: {ex.Message}";
+            localidades = new List<LocalidadDTO>();
+            vehiculos = new List<VehiculoDTO>();
+        }
+    }
+
+    private async Task GuardarViaje()
+    {
+        error = string.Empty;
+
+        // --- Validaciones Adicionales (similares a tu WinForms) ---
+        if (viajeModel.FechaHora < DateTime.Now)
+        {
+            error = "La fecha y hora no pueden ser anteriores a la actual.";
+            return;
+        }
+        if (string.IsNullOrEmpty(viajeModel.OrigenCodPostal) || string.IsNullOrEmpty(viajeModel.DestinoCodPostal))
+        {
+            error = "Debe seleccionar origen y destino.";
+            return;
+        }
+        if (viajeModel.OrigenCodPostal == viajeModel.DestinoCodPostal)
+        {
+            error = "El origen y el destino no pueden ser iguales.";
+            return;
+        }
+        if (viajeModel.IdVehiculo <= 0)
+        {
+            error = "Debe seleccionar un vehículo.";
+            return;
+        }
+        if (viajeModel.CantLugares <= 0)
+        {
+            error = "La cantidad de lugares debe ser mayor a cero.";
+            return;
+        }
+        // Validación de capacidad vs vehículo seleccionado (más compleja)
+        var vehiculoSeleccionado = vehiculos?.FirstOrDefault(v => v.IdVehiculo == viajeModel.IdVehiculo);
+        if (vehiculoSeleccionado != null && viajeModel.CantLugares > vehiculoSeleccionado.CantLugares)
+        {
+            error = $"La cantidad de lugares ({viajeModel.CantLugares}) no puede superar la capacidad del vehículo seleccionado ({vehiculoSeleccionado.CantLugares}).";
+            return;
+        }
+        if (viajeModel.Precio < 0)
+        {
+            error = "El precio no puede ser negativo.";
+            return;
+        }
+        // --- Fin Validaciones ---
+
+
+        try
+        {
+            if (modoEdicion)
+            {
+                await ViajeApiClient.UpdateAsync(viajeModel);
+            }
+            else
+            {
+                await ViajeApiClient.AddAsync(viajeModel);
+            }
+            Navigation.NavigateTo("/viajes"); // Volvemos a la lista
+        }
+        catch (Exception ex)
+        {
+            // Capturamos errores de la API (como licencia vencida)
+            error = $"No se pudo guardar el viaje: {ex.Message}";
+        }
+    }
+
+    private void Cancelar()
+    {
+        Navigation.NavigateTo("/viajes");
+    }
+}

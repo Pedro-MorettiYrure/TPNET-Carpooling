@@ -1,0 +1,136 @@
+﻿@page "/viajes"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@using Domain.Model // Necesario para usar el enum EstadoViaje
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+
+<h3>Mis Viajes Publicados</h3>
+
+@if (puedeAcceder)
+{
+    <div class="mb-3">
+        <button class="btn btn-success" @onclick="AgregarViaje">
+            <span class="bi bi-plus-circle-fill"></span> Publicar Nuevo Viaje
+        </button>
+    </div>
+
+    @if (viajes == null)
+    {
+        <p><em>Cargando viajes...</em></p>
+    }
+    else if (viajes.Count == 0)
+    {
+        <p>Aún no has publicado ningún viaje.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Origen</th>
+                    <th>Destino</th>
+                    <th>Lugares Disp.</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var viaje in viajes)
+                {
+                    <tr>
+                        <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@viaje.OrigenCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
+                        <td>@viaje.DestinoCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
+                        <td>@viaje.CantLugares</td>
+                        <td>@viaje.Precio.ToString("C")</td>
+                        <td>@viaje.Estado</td>
+                        <td>
+                            @if (viaje.Estado == EstadoViaje.Pendiente) // Solo permitir editar si está pendiente
+                            {
+                                <button class="btn btn-primary btn-sm" @onclick="() => EditarViaje(viaje.IdViaje)">Editar</button>
+                            }
+                            @if (viaje.Estado != EstadoViaje.Realizado && viaje.Estado != EstadoViaje.Cancelado) // Permitir cancelar si no está realizado o ya cancelado
+                            {
+                                <button class="btn btn-danger btn-sm" @onclick="() => CancelarViaje(viaje.IdViaje)">Cancelar</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <div class="alert alert-warning">No tienes permiso para acceder a esta sección. Debes ser conductor.</div>
+}
+
+
+@code {
+    private List<ViajeDTO> viajes;
+    private bool puedeAcceder = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
+        {
+            puedeAcceder = true;
+            await CargarViajes();
+        }
+        else
+        {
+            puedeAcceder = false;
+        }
+    }
+
+    private async Task CargarViajes()
+    {
+        try
+        {
+            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
+            // Usamos el cliente de API que ya tenías para traer los viajes del conductor
+            var viajesList = await ViajeApiClient.GetByConductorAsync(idUsuario);
+            viajes = viajesList.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar viajes: {ex.Message}");
+            viajes = new List<ViajeDTO>(); // Dejar la lista vacía si hay error
+        }
+    }
+
+    private void AgregarViaje()
+    {
+        // Navegamos a la página para crear un nuevo viaje (la crearemos después)
+        Navigation.NavigateTo("/viaje/nuevo");
+    }
+
+    private void EditarViaje(int idViaje)
+    {
+        // Navegamos a la página de detalle para editar el viaje específico
+        Navigation.NavigateTo($"/viaje/editar/{idViaje}");
+    }
+
+    private async Task CancelarViaje(int idViaje)
+    {
+        // Podríamos agregar un diálogo de confirmación aquí si quisiéramos
+
+        try
+        {
+            // Llamamos al método Delete de la API. Recordá que este hace una baja lógica (cambia el estado a Cancelado)
+            await ViajeApiClient.DeleteAsync(idViaje);
+            // Recargamos la lista para que se actualice el estado del viaje cancelado
+            await CargarViajes();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cancelar el viaje: {ex.Message}");
+            // Mostrar un mensaje de error al usuario sería ideal
+        }
+    }
+}
