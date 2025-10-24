@@ -189,24 +189,50 @@ app.MapGet("/usuarios/{email}", (string email, UsuarioService usuarioService) =>
 // web api.cs
 app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", (int idUsuario, [FromBody] ConductorUpgradeDTO dto, UsuarioService usuarioService) =>
 {
-    bool ok = usuarioService.ConvertirAConductor(idUsuario, dto);
+    try
+    {
+        bool ok = usuarioService.ConvertirAConductor(idUsuario, dto);
+        if (!ok) return Results.NotFound();
+    }
+    catch (ArgumentException argEx)
+    {
+        return Results.BadRequest(new { error = argEx.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }
 
-    return ok ? Results.Ok() : Results.BadRequest();
+    return Results.Ok();
 })
 .WithName("ConvertirAConductor")
 .Produces(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
 app.MapPut("/usuarios/{idUsuario}", (int idUsuario, UsuarioDTO dto, UsuarioService usuarioService) =>
 {
-    bool ok = usuarioService.Actualizar(idUsuario, dto);
+    try
+    {
+        bool ok = usuarioService.Actualizar(idUsuario, dto);
 
-    return ok ? Results.Ok() : Results.BadRequest();
+        if(!ok) return Results.NotFound();
+    }
+    catch (ArgumentException argEx)
+    {
+        return Results.BadRequest(new { error = argEx.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }
+    return Results.Ok();
 })
 .WithName("ActualizarUsuario")
 .Produces(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
 
@@ -240,11 +266,22 @@ app.MapPost("/vehiculos/{idUsuario}", ([FromRoute] int idUsuario, [FromBody] Veh
 // PUT: actualizar un vehículo
 app.MapPut("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
 {
-    vehiculoDto.Patente = patente;
-    vehiculoDto.IdUsuario = idUsuario;
+    try
+    {
+        vehiculoDto.Patente = patente;
+        vehiculoDto.IdUsuario = idUsuario;
 
-    var updated = vehiculoService.Update(vehiculoDto);
-    if (!updated) return Results.NotFound();
+        var updated = vehiculoService.Update(vehiculoDto);
+        if (!updated) return Results.NotFound();
+    }
+    catch (ArgumentException argEx)
+    {
+        return Results.BadRequest(new { error = argEx.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }
     return Results.Ok(vehiculoDto);
 });
 
@@ -298,7 +335,6 @@ app.MapPost("/viajes/", ([FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServi
     }
     catch (ArgumentException ex)
     {
-         
         // Capturamos la excepción de validación y devolvemos 400 Bad Request
         // El mensaje de 'ex.Message' es el que dice "La licencia del conductor esta vencida..."
         return Results.BadRequest(new { error = ex.Message });
@@ -319,8 +355,19 @@ app.MapPut("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromBody] ViajeDTO vi
 {
     viajeDTO.IdViaje = idViaje;
 
-    var updated = viajeService.Update(viajeDTO);
-    if (!updated) return Results.NotFound();
+    try
+    {
+        var updated = viajeService.Update(viajeDTO);
+        if (!updated) return Results.NotFound();
+    }
+    catch (ArgumentException argEx)
+    {
+        return Results.BadRequest(new { error = argEx.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
+    }
     return Results.Ok(viajeDTO);
 });
 

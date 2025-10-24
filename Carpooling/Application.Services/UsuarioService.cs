@@ -82,7 +82,7 @@ namespace Application.Services
             }
             catch (ArgumentException)
             {
-                return false;
+                throw;
             }
         }
 
@@ -107,10 +107,13 @@ namespace Application.Services
                 }
                 catch (ArgumentException)
                 {
-                    return false; // Retorna false si los datos del DTO no son válidos
+                    throw; // Retorna false si los datos del DTO no son válidos
                 }
             }
-            return false;
+            else
+            {
+                throw new Exception(message: "El usuario no es Pasajero");
+            }
         }
     }
 }

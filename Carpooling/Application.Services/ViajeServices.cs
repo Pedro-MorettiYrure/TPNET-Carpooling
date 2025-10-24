@@ -148,40 +148,41 @@ namespace Application.Services
 
         public bool Update(ViajeDTO dto)
         {
-            var viajeExistente = _viajeRepo.Get(dto.IdViaje);
-            if (viajeExistente == null)
-            {
-                return false;
-            }
-
-            if (viajeExistente.Estado != EstadoViaje.Pendiente)
-            {
-                throw new InvalidOperationException("Solo se pueden editar viajes en estado Pendiente.");
-            }
-
-            var conductor = _usuarioRepo.GetById(dto.IdConductor);
-            var vehiculo = _vehiculoRepo.GetById(dto.IdVehiculo);
-
-            if (conductor == null || conductor.TipoUsuario != TipoUsuario.PasajeroConductor)
-            {
-                throw new ArgumentException("El ID de usuario proporcionado no corresponde a un conductor válido.");
-            }
-            if (conductor.fechaVencimientoLicencia == null || conductor.fechaVencimientoLicencia.Value.Date < dto.FechaHora.Date)
-            {
-                throw new ArgumentException("La licencia del conductor está vencida en la fecha del viaje.");
-            }
-            if (vehiculo == null || vehiculo.IdUsuario != dto.IdConductor)
-            {
-                throw new ArgumentException("El vehículo no pertenece al conductor.");
-            }
-            if (dto.CantLugares > vehiculo.CantLugares)
-            {
-                throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
-            }
-
-            // actualizamos campos del viaje existente con los datos del DTO
             try
             {
+                var viajeExistente = _viajeRepo.Get(dto.IdViaje);
+                if (viajeExistente == null)
+                {
+                    return false;
+                }
+
+                if (viajeExistente.Estado != EstadoViaje.Pendiente)
+                {
+                    throw new InvalidOperationException("Solo se pueden editar viajes en estado Pendiente.");
+                }
+
+                var conductor = _usuarioRepo.GetById(dto.IdConductor);
+                var vehiculo = _vehiculoRepo.GetById(dto.IdVehiculo);
+
+                if (conductor == null || conductor.TipoUsuario != TipoUsuario.PasajeroConductor)
+                {
+                    throw new ArgumentException("El ID de usuario proporcionado no corresponde a un conductor válido.");
+                }
+                if (conductor.fechaVencimientoLicencia == null || conductor.fechaVencimientoLicencia.Value.Date < dto.FechaHora.Date)
+                {
+                    throw new ArgumentException("La licencia del conductor está vencida en la fecha del viaje.");
+                }
+                if (vehiculo == null || vehiculo.IdUsuario != dto.IdConductor)
+                {
+                    throw new ArgumentException("El vehículo no pertenece al conductor.");
+                }
+                if (dto.CantLugares > vehiculo.CantLugares)
+                {
+                    throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
+                }
+
+            // actualizamos campos del viaje existente con los datos del DTO
+            
                 viajeExistente.SetFechaHora(dto.FechaHora);
                 viajeExistente.SetCantLugares(dto.CantLugares);
                 viajeExistente.SetPrecio(dto.Precio);
