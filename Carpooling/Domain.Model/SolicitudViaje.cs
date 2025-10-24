@@ -1,63 +1,62 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Domain.Model;  //no se si es necesario
+using Domain.Model;  
 
 namespace Domain.Model
 {
     public class SolicitudViaje
     {
-        public int idSolicitud { get; set; }
+        public int IdSolicitud { get; set; }
         public DateTime SolicitudFecha { get; set; }
         public EstadoSolicitud Estado { get; set; }
 
         //claves foraneas
+        public int IdViaje { get; private set; }
+        public int IdPasajero { get; private set; }
 
-        public int IdViaje { get; set; }
-        public int IdPasajero { get; set; }
 
-
-        //prop de navegacion para el EF core
+        //props de navegacion para el EF core
         public Viaje Viaje { get; set; }
         public Usuario Pasajero { get; set; }
-    }
+
+        public SolicitudViaje() { }
+
+        public SolicitudViaje(int idViaje, int idPasajero)
+        {
+            SetIdViaje(idViaje);
+            SetIdPasajero(idPasajero);
+            this.SolicitudFecha = DateTime.Now; 
+            this.Estado = EstadoSolicitud.Pendiente; 
+        }
+
+        public void SetIdViaje(int idViaje)
+        {
+            if (idViaje <= 0) 
+                throw new ArgumentOutOfRangeException(nameof(idViaje));
+            IdViaje = idViaje;
+        }
+
+        public void SetIdPasajero(int idPasajero)
+        {
+            if (idPasajero <= 0)
+                throw new ArgumentOutOfRangeException(nameof(idPasajero));
+            IdPasajero = idPasajero;
+        }
+
+        public void Cancelar()
+        {
+            if (Estado == EstadoSolicitud.Pendiente || Estado == EstadoSolicitud.Aprobada)
+            {
+                Estado = EstadoSolicitud.Cancelada; 
+            }
+        }
+
+        public void Rechazar()
+        {
+            if (Estado == EstadoSolicitud.Pendiente)
+            {
+                Estado = EstadoSolicitud.Rechazada;
+            }
+        }
+    } 
 }
 
-
-
-/*using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Domain.Model
-{
-    public class Localidad
-    {
-        public string codPostal { get; set; }
-        public string nombreLoc { get; set; }
-
-        public Localidad() { }
-
-        public Localidad(string codigopostal, string nombre)
-        {
-            SetCodPostal(codigopostal);
-            SetNombreLoc(nombre);
-        }
-
-        public void SetNombreLoc(string nombre)
-        {
-            if (string.IsNullOrWhiteSpace(nombre))
-                throw new ArgumentException("El nombre no puede ser nulo o vacío.", nameof(nombre));
-            nombreLoc = nombre;
-        }
-
-        public void SetCodPostal(string codigopostal)
-        {
-            if (string.IsNullOrWhiteSpace(codigopostal))
-                throw new ArgumentException("El nombre no puede ser nulo o vacío.", nameof(codigopostal));
-            codPostal = codigopostal;
-        }
-    }
-}
-*/

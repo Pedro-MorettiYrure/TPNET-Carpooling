@@ -9,6 +9,7 @@ namespace Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<Viaje> Viajes { get; set; }
+        public DbSet<SolicitudViaje> SolicitudesViaje { get; set; }
 
         // Constructor que EF y DI usarán
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
@@ -39,6 +40,7 @@ namespace Data
             // ---------------- Localidad ----------------
             modelBuilder.Entity<Localidad>(entity =>
             {
+                entity.ToTable("Localidades");
                 entity.HasKey(e => e.codPostal);
                 entity.Property(e => e.nombreLoc).IsRequired().HasMaxLength(100);
 
@@ -99,6 +101,27 @@ namespace Data
                      .HasForeignKey(v => v.IdVehiculo)
                      .OnDelete(DeleteBehavior.NoAction);
                         });
+
+            // ---------------- Solicitud Viaje ----------------
+            modelBuilder.Entity<SolicitudViaje>(entity =>
+            {
+                entity.ToTable("SolicitudesViaje");
+                entity.HasKey(e => e.IdSolicitud);
+                entity.Property(e => e.SolicitudFecha).IsRequired();
+                entity.Property(e => e.Estado).IsRequired();
+
+                entity.HasOne(e => e.Viaje)
+                      .WithMany()
+                      .HasForeignKey(s => s.IdViaje)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction); 
+
+                entity.HasOne(s => s.Pasajero)
+                      .WithMany()
+                      .HasForeignKey(s => s.IdPasajero)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction); 
+            });
         }
 
         

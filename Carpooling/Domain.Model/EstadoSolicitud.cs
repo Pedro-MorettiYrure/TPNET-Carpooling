@@ -10,7 +10,8 @@ namespace Domain.Model
     {
         Pendiente = 0,
         Aprobada = 1 ,
-        Rechazada = 2 
+        Rechazada = 2,
+        Cancelada = 3
 
     }
 }
