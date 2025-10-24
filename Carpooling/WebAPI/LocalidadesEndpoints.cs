@@ -70,13 +70,21 @@ namespace WebAPI
             // DELETE: eliminar una localidad
             app.MapDelete("/localidades/{codPostal}", (string codPostal, LocalidadService localidadService) =>
             {
-                bool deleted = localidadService.Delete(codPostal);
+                try
+                {
+                    bool deleted = localidadService.Delete(codPostal);
 
-                return deleted ? Results.NoContent() : Results.NotFound();
+                    return deleted ? Results.NoContent() : Results.NotFound();
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { message = ex.Message });
+                }                
             })
             .WithName("DeleteLocalidad")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest)
             .WithOpenApi();
         }
     }

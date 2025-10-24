@@ -1,5 +1,6 @@
 ﻿using Application.Services;
 using DTOs;
+using Microsoft.AspNetCore.Mvc;
 using static DTOs.UsuarioDTO;
 
 namespace WebAPI
