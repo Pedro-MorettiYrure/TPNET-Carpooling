@@ -144,7 +144,6 @@ namespace Application.Services
             }).ToList();
         }
 
-        // ARCHIVO: Application.Services/ViajeServices.cs (Método Update)
 
         public bool Update(ViajeDTO dto)
         {
@@ -199,6 +198,30 @@ namespace Application.Services
                 // hacemos q el controlador maneje el error
                 throw;
             }
+        }
+
+        public IEnumerable<ViajeDTO> BuscarViajesDisponibles(string origenCodPostal, string destinoCodPostal)
+        {
+            var viajes = _viajeRepo.GetViajesDisponiblesPorRuta(origenCodPostal, destinoCodPostal);
+
+            // Mapear la lista de Viaje a ViajeDTO directamente aquí
+            return viajes.Select(v => new ViajeDTO
+            {
+                IdViaje = v.IdViaje,
+                FechaHora = v.FechaHora,
+                CantLugares = v.CantLugares,
+                Precio = v.Precio,
+                Comentario = v.Comentario,
+                Estado = v.Estado, // O v.Estado.ToString() si el DTO lo necesita como string
+                OrigenCodPostal = v.OrigenCodPostal,
+                DestinoCodPostal = v.DestinoCodPostal,
+                IdConductor = v.IdConductor,
+                IdVehiculo = v.IdVehiculo,
+                // Asegúrate de que Origen y Destino se carguen en el repo con .Include()
+                NombreOrigen = v.Origen?.nombreLoc,
+                NombreDestino = v.Destino?.nombreLoc
+                // Agrega otros campos mapeados si es necesario
+            }).ToList();
         }
     }
 }

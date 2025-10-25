@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Domain.Model;
+using DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Model;
-using DTOs;
 
 namespace API.Clients
 {
@@ -35,6 +36,21 @@ namespace API.Clients
             HttpResponseMessage response = await client.GetAsync($"viajes/{idViaje}");
             return await response.Content.ReadFromJsonAsync<ViajeDTO>();
         }
+        public static async Task<IEnumerable<ViajeDTO>> BuscarViajesAsync(string origenCodPostal, string destinoCodPostal)
+        {
+            string requestUri = $"viajes/buscar?origen={origenCodPostal}&destino={destinoCodPostal}"; //Usamos requestUri xq esta llamada a la API necesita enviar datos (el origen y el destino) como query parameters en la URL
+
+            HttpResponseMessage response = await client.GetAsync(requestUri);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al buscar viajes: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<IEnumerable<ViajeDTO>>();
+        }
+
 
         public static async Task AddAsync(ViajeDTO viaje)
         {
@@ -87,5 +103,7 @@ namespace API.Clients
                 }
             }
         }
+
+
     }
 }

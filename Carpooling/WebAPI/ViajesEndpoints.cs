@@ -37,7 +37,31 @@ namespace WebAPI
             .Produces(StatusCodes.Status404NotFound)
             .WithOpenApi();
 
-            // POST: agregar un viaje
+            // get los viajes que busca un pasajero por ruta
+            app.MapGet("/viajes/buscar", async ([FromQuery] string origen, [FromQuery] string destino, [FromServices] ViajeServices viajeService) =>
+            {
+                if (string.IsNullOrWhiteSpace(origen) || string.IsNullOrWhiteSpace(destino))
+                {
+                    return Results.BadRequest("Debe especificar origen y destino.");
+                }
+
+                try
+                {
+                    var viajes = viajeService.BuscarViajesDisponibles(origen, destino);
+                    return Results.Ok(viajes);
+                }
+                catch (Exception ex)
+                {
+                    return Results.StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            })
+            .WithName("BuscarViajesDisponibles")
+            .Produces<IEnumerable<ViajeDTO>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithOpenApi();
+
+
             app.MapPost("/viajes/", ([FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServices viajeService) =>
             {
                 try
@@ -58,12 +82,12 @@ namespace WebAPI
                     return Results.StatusCode(StatusCodes.Status500InternalServerError);
                 }
             })
-            .WithName("AddViaje") // Opcional, pero bueno para Swagger
+            .WithName("AddViaje") 
             .Produces<ViajeDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithOpenApi(); // Opcional
+            .WithOpenApi();
 
-            // PUT: actualizar un vehículo
+
             app.MapPut("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromBody] ViajeDTO viajeDTO, [FromServices] ViajeServices viajeService) =>
             {
                 viajeDTO.IdViaje = idViaje;
@@ -84,14 +108,12 @@ namespace WebAPI
                 return Results.Ok(viajeDTO);
             });
 
-            // DELETE: eliminar un vehículo
             app.MapDelete("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromServices] ViajeServices viajeService) =>
             {
                 var deleted = viajeService.Delete(idViaje);
                 if (!deleted) return Results.NotFound();
                 return Results.NoContent();
             });
-
         }
     }
 }
