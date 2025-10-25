@@ -11,7 +11,49 @@ namespace WebAPI
         
         public static void MapSolicitudViajeEndpoints(this WebApplication app)
         {
-            
+            app.MapGet("/solicitudes/viaje/{idViaje}", (int idViaje, [FromServices] SolicitudViajeService service) =>
+            {
+                try
+                {
+                    var solicitudes = service.GetSolicitudesByViaje(idViaje);
+                    return Results.Ok(solicitudes);
+                }
+                catch (Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
+            })
+            .WithName("GetSolicitudesPorViaje")
+            .Produces<IEnumerable<SolicitudViajeDTO>>(StatusCodes.Status200OK)
+            .WithOpenApi();
+
+
+            app.MapGet("/solicitudes/pasajero/{idPasajero}", (int idPasajero, [FromServices] SolicitudViajeService service) =>
+            {
+                try
+                {
+                    var solicitudes = service.GetSolicitudesByPasajero(idPasajero);
+                    return Results.Ok(solicitudes);
+                }
+                catch (Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
+            })
+            .WithName("GetSolicitudesPorPasajero")
+            .Produces<IEnumerable<SolicitudViajeDTO>>(StatusCodes.Status200OK)
+            .WithOpenApi();
+
+
+            app.MapGet("/solicitudes/{idSolicitud}", (int idSolicitud, [FromServices] SolicitudViajeService service) =>
+            {
+                try
+                {
+                    var solicitud = service.GetSolicitudById(idSolicitud);
+                    return solicitud == null ? Results.NotFound() : Results.Ok(solicitud);
+                }
+                catch (Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
+            })
+            .WithName("GetSolicitudPorId")
+            .Produces<SolicitudViajeDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi();
+
+
             app.MapPost("/solicitudes", ([FromBody] SolicitudViajeDTO dto, [FromServices] SolicitudViajeService service) =>
             {
                 try
@@ -29,47 +71,7 @@ namespace WebAPI
             .WithOpenApi(); 
 
 
-            app.MapGet("/solicitudes/viaje/{idViaje}", (int idViaje, [FromServices] SolicitudViajeService service) =>
-            {
-                try
-                {
-                    var solicitudes = service.GetSolicitudesByViaje(idViaje);
-                    return Results.Ok(solicitudes);
-                }
-                catch (Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
-            })
-            .WithName("GetSolicitudesPorViaje")
-            .Produces<IEnumerable<SolicitudViajeDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
-
-           
-            app.MapGet("/solicitudes/pasajero/{idPasajero}", (int idPasajero, [FromServices] SolicitudViajeService service) =>
-            {
-                try
-                {
-                    var solicitudes = service.GetSolicitudesByPasajero(idPasajero);
-                    return Results.Ok(solicitudes);
-                }
-                catch (Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
-            })
-            .WithName("GetSolicitudesPorPasajero")
-            .Produces<IEnumerable<SolicitudViajeDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
-
             
-            app.MapGet("/solicitudes/{idSolicitud}", (int idSolicitud, [FromServices] SolicitudViajeService service) =>
-            {
-                try
-                {
-                    var solicitud = service.GetSolicitudById(idSolicitud);
-                    return solicitud == null ? Results.NotFound() : Results.Ok(solicitud);
-                }
-                catch (Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
-            })
-            .WithName("GetSolicitudPorId")
-            .Produces<SolicitudViajeDTO>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
 
            
             app.MapPut("/solicitudes/{idSolicitud}/aceptar", (int idSolicitud, [FromServices] SolicitudViajeService service /* TODO: Inject Auth */) =>

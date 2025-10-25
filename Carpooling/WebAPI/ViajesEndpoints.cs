@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using System.ComponentModel.DataAnnotations;
+using Application.Services;
 using DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,7 +30,7 @@ namespace WebAPI
             //GET: viaje por Id
             app.MapGet("/viajes/{idViaje}", (int idViaje, ViajeServices viajeService) =>
             {
-                ViajeDTO dto = viajeService.Get(idViaje);
+                ViajeDTO? dto = viajeService.Get(idViaje);
                 return dto == null ? Results.NotFound() : Results.Ok(dto);
             })
             .WithName("GetViaje")
@@ -50,9 +51,9 @@ namespace WebAPI
                 {
                     // Capturamos la excepción de validación y devolvemos 400 Bad Request
                     // El mensaje de 'ex.Message' es el que dice "La licencia del conductor esta vencida..."
-                    return Results.BadRequest(new { error = ex.Message });
+                    return Results.BadRequest(ex.Message);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Manejo de errores inesperados (p.ej., problemas de la base de datos)
                     return Results.StatusCode(StatusCodes.Status500InternalServerError);
@@ -75,22 +76,38 @@ namespace WebAPI
                 }
                 catch (ArgumentException argEx)
                 {
-                    return Results.BadRequest(new { error = argEx.Message });
+                    return Results.BadRequest(argEx.Message);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return Results.StatusCode(StatusCodes.Status500InternalServerError);
                 }
                 return Results.Ok(viajeDTO);
-            });
+            })
+            .WithName("UpdateViaje")
+            .Produces<ViajeDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi();
 
             // DELETE: eliminar un vehículo
             app.MapDelete("/viajes/{idViaje}", ([FromRoute] int idViaje, [FromServices] ViajeServices viajeService) =>
             {
-                var deleted = viajeService.Delete(idViaje);
-                if (!deleted) return Results.NotFound();
-                return Results.NoContent();
-            });
+                try
+                {
+                    var deleted = viajeService.Delete(idViaje);
+                    if (!deleted) return Results.NotFound();
+                    return Results.NoContent();
+                }
+                catch(InvalidOperationException ex)
+                {
+                    return Results.Conflict(ex.Message);
+                }
+                catch(Exception) { return Results.StatusCode(StatusCodes.Status500InternalServerError); }
+            }).WithName("DeleteViaje")
+            .Produces<ViajeDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status409Conflict)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi();
 
         }
     }

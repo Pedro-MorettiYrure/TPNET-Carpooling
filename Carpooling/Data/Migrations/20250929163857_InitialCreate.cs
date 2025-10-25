@@ -10,9 +10,25 @@ namespace Data.Migrations
     /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+           /* migrationBuilder.DropTable(
+                name: "Viajes");
+
+            migrationBuilder.DropTable(
+                name: "Localidades");
+
+            migrationBuilder.DropTable(
+                name: "Vehiculos");
+
+            migrationBuilder.DropTable(
+                name: "Usuario");
+           */
+        }
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        {/*
             migrationBuilder.CreateTable(
                 name: "Localidades",
                 columns: table => new
@@ -143,22 +159,10 @@ namespace Data.Migrations
                 name: "IX_Viajes_OrigenCodPostal",
                 table: "Viajes",
                 column: "OrigenCodPostal");
+            */
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Viajes");
-
-            migrationBuilder.DropTable(
-                name: "Localidades");
-
-            migrationBuilder.DropTable(
-                name: "Vehiculos");
-
-            migrationBuilder.DropTable(
-                name: "Usuario");
-        }
+        
     }
 }

@@ -7,10 +7,13 @@ namespace Application.Services
     public class VehiculoService
     {
         private readonly VehiculoRepository _repo;
+        private readonly TPIContext _context;
 
-        public VehiculoService(VehiculoRepository repo)
+
+        public VehiculoService(VehiculoRepository repo, TPIContext context)
         {
             _repo = repo;
+            _context = context;
         }
 
         public VehiculoDTO Add(VehiculoDTO dto)
@@ -40,6 +43,11 @@ namespace Application.Services
             var vehiculo = _repo.Get(patente);
             if (vehiculo != null && vehiculo.IdUsuario == idUsuario)
             {
+                bool estaEnUso = _context.Viajes.Any(v => v.IdVehiculo == vehiculo.IdVehiculo);
+                if (estaEnUso)
+                {
+                    throw new InvalidOperationException($"Existen viajes que referencian al vehiculo '{vehiculo.Patente}'");
+                }
                 _repo.Delete(vehiculo);
                 return true;
             }

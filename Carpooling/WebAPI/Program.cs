@@ -68,8 +68,7 @@ using (var scope = app.Services.CreateScope())
 
     if (!context.Usuarios.Any(u => u.Email == "admin@gmail.com"))
     {
-        var admin = Usuario.Crear("Admin", "Admin", "admin@gmail.com", "1234", null);
-        admin.TipoUsuario = TipoUsuario.Administrador;
+        var admin = Usuario.Crear("Admin", "Admin", "admin@gmail.com", "1234", null, TipoUsuario.Administrador);
         context.Usuarios.Add(admin);
         context.SaveChanges();
     }
@@ -90,6 +89,8 @@ app.MapVehiculosEndpoints();
 // ==================== Viajes ====================
 
 app.MapViajesEndpoints();
+
+app.MapSolicitudViajeEndpoints();
 
 // === Run === 
 app.Run();

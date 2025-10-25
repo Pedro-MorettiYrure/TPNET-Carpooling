@@ -1,11 +1,24 @@
 [
   {
-    "Name": "Nuevo perfil",
+    "Name": "Iniciar Todo",
     "Projects": [
       {
         "Path": "WindowsForms\\WindowsForms.csproj",
         "Action": "Start"
       },
+      {
+        "Path": "WebAPI\\WebAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Carpooling.Blazor\\Carpooling.Blazor.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Api y Blazor",
+    "Projects": [
       {
         "Path": "WebAPI\\WebAPI.csproj",
         "Action": "Start"
