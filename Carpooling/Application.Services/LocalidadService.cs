@@ -33,10 +33,10 @@ namespace Application.Services
         public bool Delete(string cod)
         {
             bool estaEnUso = _context.Viajes
-                                .Any(v => v.OrigenCodPostal == cod || v.DestinoCodPostal == cod); ;
+                                .Any(v => v.OrigenCodPostal == cod || v.DestinoCodPostal == cod);
             if (estaEnUso)
-                {
-                    throw new InvalidOperationException($"No se puede eliminar la localidad con Código Postal '{cod}' porque está en uso en viajes.");
+            {
+                throw new InvalidOperationException($"Existen viajes que referencian a la Ciudad con Cod Postal '{cod}'");
             }
             return _repo.Delete(cod);
         }

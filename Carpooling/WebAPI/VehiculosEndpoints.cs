@@ -14,7 +14,10 @@ namespace WebAPI
             {
                 var vehiculos = vehiculoService.GetByUsuario(idUsuario);
                 return Results.Ok(vehiculos);
-            });
+            })
+            .WithName("GetAllVehiculos")
+            .Produces<IEnumerable<VehiculoDTO>>(StatusCodes.Status200OK)
+            .WithOpenApi();
 
             // GET: un vehículo por patente y usuario
             app.MapGet("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
@@ -24,15 +27,27 @@ namespace WebAPI
 
                 if (vehiculo == null) return Results.NotFound();
                 return Results.Ok(vehiculo);
-            });
+            })
+            .WithName("GetVehiculo")
+            .Produces<VehiculoDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi(); 
 
             // POST: agregar un vehículo
             app.MapPost("/vehiculos/{idUsuario}", ([FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
             {
-                vehiculoDto.IdUsuario = idUsuario; // aseguramos que el dto tenga el idUsuario correcto
-                var created = vehiculoService.Add(vehiculoDto);
-                return Results.Created($"/vehiculos/{created.Patente}/{idUsuario}", created);
-            });
+                try
+                {
+                    vehiculoDto.IdUsuario = idUsuario; // aseguramos que el dto tenga el idUsuario correcto
+                    var created = vehiculoService.Add(vehiculoDto);
+                    return Results.Created($"/vehiculos/{created.Patente}/{idUsuario}", created);
+                }
+                catch(ArgumentException ex) { return Results.BadRequest(ex.Message); }
+            })
+            .WithName("AddVehiculo")
+            .Produces<VehiculoDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi(); 
 
             // PUT: actualizar un vehículo
             app.MapPut("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
@@ -47,22 +62,36 @@ namespace WebAPI
                 }
                 catch (ArgumentException argEx)
                 {
-                    return Results.BadRequest(new { error = argEx.Message });
+                    return Results.BadRequest(argEx.Message);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return Results.StatusCode(StatusCodes.Status500InternalServerError);
                 }
                 return Results.Ok(vehiculoDto);
-            });
+            })
+            .WithName("UpdateVehiculo")
+            .Produces<VehiculoDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest)
+            .WithOpenApi(); 
 
             // DELETE: eliminar un vehículo
             app.MapDelete("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
             {
-                var deleted = vehiculoService.Delete(patente, idUsuario);
-                if (!deleted) return Results.NotFound();
-                return Results.NoContent();
-            });
+                try
+                {
+                    var deleted = vehiculoService.Delete(patente, idUsuario);
+                    if (!deleted) return Results.NotFound();
+                    return Results.NoContent();
+                }
+                catch(InvalidOperationException ex) { return Results.Conflict(ex.Message); }
+            })
+            .WithName("DeleteVehiculo")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status409Conflict)
+            .WithOpenApi();
 
 
         }

@@ -36,7 +36,7 @@ namespace WebAPI
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { error = ex.Message });
+                    return Results.BadRequest(ex.Message);
                 }
             })
             .WithName("AddLocalidad")
@@ -56,7 +56,7 @@ namespace WebAPI
                 }
                 catch (ArgumentException ex)
                 {
-                    return Results.BadRequest(new { error = ex.Message });
+                    return Results.BadRequest(ex.Message);
                 }
             })
             .WithName("UpdateLocalidad")
@@ -76,15 +76,15 @@ namespace WebAPI
 
                     return deleted ? Results.NoContent() : Results.NotFound();
                 }
-                catch (Exception ex)
+                catch (InvalidOperationException ex)
                 {
-                    return Results.BadRequest(new { message = ex.Message });
+                    return Results.Conflict(ex.Message);
                 }                
             })
             .WithName("DeleteLocalidad")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status409Conflict)
             .WithOpenApi();
         }
     }

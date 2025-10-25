@@ -9,11 +9,11 @@ namespace Domain.Model
     public class Usuario
     {
         public int IdUsuario { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public string Email { get; set; }
+        public string Nombre { get; set; } = null!;  //Se inicializa como null ya que se asigna en Crear
+        public string Apellido { get; set; } = null!; //Se silencian las advertencias
+        public string Email { get; set; } = null!;
         public TipoUsuario TipoUsuario { get; set; }
-        public string ContraseñaHash { get; private set; }
+        public string ContraseñaHash { get; private set; } = null!;
         public string? Telefono { get; set; }
 
         public string? nroLicenciaConductor { get; set; } // Solo para conductores
@@ -29,7 +29,7 @@ namespace Domain.Model
 
         public Usuario() { }
 
-        public static Usuario Crear(string nombre, string apellido, string email, string contraseña, string? telefono)
+        public static Usuario Crear(string nombre, string apellido, string email, string contraseña, string? telefono, TipoUsuario tipoUsuario = TipoUsuario.Pasajero)
         {
             var u = new Usuario();
             u.SetNombre(nombre);
@@ -37,7 +37,7 @@ namespace Domain.Model
             u.SetEmail(email);
             u.SetContraseña(contraseña);
             u.SetTelefono(telefono);
-            u.TipoUsuario = TipoUsuario.Pasajero; // Asignar el tipo "Pasajero" por defecto
+            u.TipoUsuario = tipoUsuario; // Asignar el tipo "Pasajero" por defecto
             return u;
         }
 
