@@ -36,6 +36,7 @@ namespace API.Clients
             HttpResponseMessage response = await client.GetAsync($"viajes/{idViaje}");
             return await response.Content.ReadFromJsonAsync<ViajeDTO>();
         }
+
         public static async Task<IEnumerable<ViajeDTO>> BuscarViajesAsync(string origenCodPostal, string destinoCodPostal)
         {
             string requestUri = $"viajes/buscar?origen={origenCodPostal}&destino={destinoCodPostal}"; //Usamos requestUri xq esta llamada a la API necesita enviar datos (el origen y el destino) como query parameters en la URL

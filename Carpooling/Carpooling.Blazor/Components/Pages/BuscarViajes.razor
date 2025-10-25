@@ -5,76 +5,141 @@
 @using API.Clients
 @using Domain.Model
 @inject ServicioSesionUsuario SesionUsuario
+
 @inject NavigationManager Navigation
 
 <h3>Buscar Viajes</h3>
 
-
-    @if (viajes == null)
-    {
-        <p><em>Cargando viajes...</em></p>
-    }
-    else if (viajes.Count == 0)
-    {
-        <p>No hay viajes publicados.</p>
-    }
-    else
-    {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Fecha y Hora</th>
-                    <th>Origen</th>
-                    <th>Destino</th>
-                    <th>Lugares Disp.</th>
-                    <th>Precio</th>
-                    <th>Estado</th>
-                    <th>Comentarios</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var viaje in viajes)
+<EditForm Model="@viajeModel" OnValidSubmit="CargarViajesAsync" FormName="FiltroForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary /> @* Muestra un resumen de todos los errores *@
+    <div class="mb-3">
+        <label class="form-label">Origen:</label>
+        <InputSelect class="form-select" @bind-Value="viajeModel.OrigenCodPostal">
+            <option value="">Seleccione una localidad...</option>
+            @if (localidades != null)
+            {
+                @foreach (var loc in localidades)
                 {
-                    @if (viaje.Estado == EstadoViaje.Pendiente){
-                        <tr>
-                            <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@viaje.OrigenCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
-                            <td>@viaje.DestinoCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
-                            <td>@viaje.CantLugares</td>
-                            <td>@viaje.Precio.ToString("C")</td>
-                            <td>@viaje.Estado</td>
-                            <td>@viaje.Comentario</td>
-                            <td>
-                                
-                                <button class="btn btn-primary btn-sm" @onclick="() => SolicitarViaje(viaje.IdViaje)">Solicitar</button>
-                                
-                            </td>
-                        </tr>
-                    }
+                    <option value="@loc.CodPostal">@loc.Nombre (@loc.CodPostal)</option>
                 }
-            </tbody>
-        </table>
-    }
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Destino:</label>
+        <InputSelect class="form-select" @bind-Value="viajeModel.DestinoCodPostal">
+            <option value="">Seleccione una localidad...</option>
+            @if (localidades != null)
+            {
+                @foreach (var loc in localidades)
+                {
+                    <option value="@loc.CodPostal">@loc.Nombre (@loc.CodPostal)</option>
+                }
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Buscar</button>
+
+</EditForm>
+
+<br />
+
+@if (origen == null || destino == null)
+{
+    <p><em>Seleccione el Origen y Destino</em></p>
+}
+else if(viajes == null)
+{
+    <p><em>Cargando viajes...</em></p>
+}
+else if (viajes.Count == 0)
+{
+    <p>No hay viajes publicados de @origen.Nombre a @destino.Nombre.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Lugares Disp.</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Comentarios</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var viaje in viajes)
+            {
+                @if (viaje.Estado == EstadoViaje.Pendiente){
+                    <tr>
+                        <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@viaje.OrigenCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
+                        <td>@viaje.DestinoCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
+                        <td>@viaje.CantLugares</td>
+                        <td>@viaje.Precio.ToString("C")</td>
+                        <td>@viaje.Estado</td>
+                        <td>@viaje.Comentario</td>
+                        <td>
+
+                            <button class="btn btn-primary btn-sm" @onclick="() => SolicitarViajeAsync(viaje.IdViaje)">Solicitar</button>
+
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
 
 
 
 @code {
+    private ViajeDTO viajeModel = new ViajeDTO();
+    private string? origenCodPostal;
+    private string? destinoCodPostal;
+    private LocalidadDTO? origen;
+    private LocalidadDTO? destino;
     private List<ViajeDTO>? viajes;
+    private List<LocalidadDTO>? localidades;
     private bool puedeAcceder = false;
+    private string? error;
 
     protected override async Task OnInitializedAsync()
     {
-        
-            await CargarViajes();
-        
+        await CargarLocalidades();
+        //await CargarViajes();
+
     }
 
-    private async Task CargarViajes()
+    private async Task CargarLocalidades()
     {
         try
         {
-            var viajesList = await ViajeApiClient.GetByConductorAsync(1); //PRUEBA TEST BORRAR
+            localidades = (await LocalidadApiClient.GetAllAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            error = $"Error al cargar listas: {ex.Message}";
+            localidades = new List<LocalidadDTO>();
+
+        }
+    } 
+
+    private async Task CargarViajesAsync()
+    {
+        try
+        {
+            origen = (LocalidadDTO) localidades.Where(l=> l.CodPostal == viajeModel.OrigenCodPostal).First();
+            destino = (LocalidadDTO) localidades.Where(l => l.CodPostal == viajeModel.DestinoCodPostal).First();
+
+            var viajesList = await ViajeApiClient.BuscarViajesAsync(origen.CodPostal, destino.CodPostal);
             viajes = viajesList.ToList();
         }
         catch (Exception ex)
@@ -84,42 +149,25 @@
         }
     }
 
-    private void AgregarViaje()
+    private async void SolicitarViajeAsync(int idViaje)
     {
-        // Navegamos a la página para crear un nuevo viaje
-        Navigation.NavigateTo("/viaje/nuevo");
-    }
-
-    private void EditarViaje(int idViaje)
-    {
-        // Navegamos a la página de detalle para editar el viaje específico
-        Navigation.NavigateTo($"/viaje/editar/{idViaje}");
-    }
-
-    private async Task CancelarViaje(int idViaje)
-    {
-        // Podríamos agregar un diálogo de confirmación aquí si quisiéramos
-
         try
         {
-            // Llamamos al método Delete de la API.
-            await ViajeApiClient.DeleteAsync(idViaje);
-            // Recargamos la lista para que se actualice el estado del viaje cancelado
-            await CargarViajes();
+            var usuario = SesionUsuario.UsuarioActual;
+
+            SolicitudViajeDTO sol = new SolicitudViajeDTO()
+                {
+                    SolicitudFecha = DateTime.Now,
+                    IdViaje = idViaje,
+                    IdPasajero = usuario.IdUsuario,
+                    NombrePasajero = usuario.Nombre,    //revisar si dejar o sacar
+                    ApellidoPasajero = usuario.Apellido
+                };
+            await SolicitudViajeApiClient.CrearSolicitudAsync(sol);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al cancelar el viaje: {ex.Message}");
-            // Mostrar un mensaje de error al usuario sería ideal
+            error = $"No se pudo guardar el viaje: {ex.Message}";   
         }
-
-    }
-
-    //================================================================================================
-
-    private void SolicitarViaje(int idViaje)
-    {
-        // Navegamos a la página de detalle para editar el viaje específico
-        Navigation.NavigateTo($"/viaje/editar/{idViaje}");
     }
 }

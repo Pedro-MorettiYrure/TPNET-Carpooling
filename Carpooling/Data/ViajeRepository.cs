@@ -82,12 +82,12 @@ namespace Data
                              v.Estado == EstadoViaje.Pendiente && 
                              v.FechaHora > ahora) 
                                                   // Subconsulta para calcular lugares ocupados 
-                .Select(v => new {
-                    Viaje = v,
-                    LugaresOcupados = _context.SolicitudesViaje.Count(s => s.IdViaje == v.IdViaje && s.Estado == EstadoSolicitud.Aprobada)
-                })
-                .Where(x => x.LugaresOcupados < x.Viaje.CantLugares)
-                .Select(x => x.Viaje)
+                //.Select(v => new {
+                //    Viaje = v,
+                //    LugaresOcupados = _context.SolicitudesViaje.Count(s => s.IdViaje == v.IdViaje && s.Estado == EstadoSolicitud.Aprobada)
+                //})
+                //.Where(x => x.LugaresOcupados < x.Viaje.CantLugares)
+                //.Select(x => x.Viaje)
                 .ToList(); 
         }
     }

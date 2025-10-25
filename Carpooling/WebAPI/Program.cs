@@ -27,6 +27,7 @@ builder.Services.AddScoped<LocalidadRepository>();
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<VehiculoRepository>();
 builder.Services.AddScoped<ViajeRepository>(); 
+builder.Services.AddScoped<SolicitudViajeRepository>();
 
 
 // Inyección de servicios
@@ -34,6 +35,7 @@ builder.Services.AddScoped<LocalidadService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ViajeServices>();
+builder.Services.AddScoped<SolicitudViajeService>();
 
 var app = builder.Build();
 
