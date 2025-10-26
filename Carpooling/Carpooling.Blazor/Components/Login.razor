@@ -1,8 +1,10 @@
 ﻿@page "/login"
 @using DTOs
 @using API.Clients
-@inject ServicioSesionUsuario SesionUsuario
+@using Carpooling.Blazor.Components
+@inject IAuthService SesionUsuario
 @inject NavigationManager Navigation
+
 
 <h3>Iniciar Sesión</h3>
 
@@ -35,7 +37,7 @@
     {
         try
         {
-            bool loginExitoso = await UsuarioApiClient.LoginAsync(loginModel.Email, loginModel.Contraseña);
+            bool loginExitoso = await SesionUsuario.LoginAsync(loginModel.Email, loginModel.Contraseña);
 
             if (loginExitoso)
             {

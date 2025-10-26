@@ -1,12 +1,18 @@
 using Carpooling.Blazor.Components;
+using API.Auth.Blazor;
+using API.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddSingleton<ServicioSesionUsuario>(); 
+builder.Services.AddSingleton<IAuthService, ServicioSesionUsuario>(); 
 var app = builder.Build();
+
+// Configurar AuthServiceProvider para ApiClients
+var authService = app.Services.GetRequiredService<IAuthService>();
+AuthServiceProvider.Register(authService); 
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

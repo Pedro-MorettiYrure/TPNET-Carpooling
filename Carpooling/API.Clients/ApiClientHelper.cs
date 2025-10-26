@@ -8,10 +8,10 @@ using System.Collections.Generic;
 
 namespace API.Clients
 {
-    internal static class ApiClientHelper
+    public static class ApiClientHelper
     {
         // Método centralizado para enviar peticiones autenticadas
-        internal static async Task<HttpResponseMessage> SendAuthenticatedRequestAsync(HttpClient client, HttpMethod method, string requestUri, string? token, HttpContent? content = null)
+        public static async Task<HttpResponseMessage> SendAuthenticatedRequestAsync(HttpClient client, HttpMethod method, string requestUri, string? token, HttpContent? content = null)
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -33,7 +33,7 @@ namespace API.Clients
         }
 
         // Método centralizado para manejar errores de respuesta de la API
-        internal static async Task HandleResponseErrorsAsync(HttpResponseMessage response, string operationDescription = "la operación")
+        public static async Task HandleResponseErrorsAsync(HttpResponseMessage response, string operationDescription = "la operación")
         {
             if (!response.IsSuccessStatusCode)
             {
