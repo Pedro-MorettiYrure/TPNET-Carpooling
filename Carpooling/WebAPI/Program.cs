@@ -10,12 +10,48 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore;
 using WebAPI;
 using static DTOs.UsuarioDTO;
+//using Microsoft.OpenApi.Models; // Ya estaba arriba
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging; // Agregado por si lo usás
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// --- Servicios ---
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // ... (Tu configuración de SwaggerGen con AddSecurityDefinition y AddSecurityRequirement va aquí, está OK) ...
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Carpooling WebAPI", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Ingresa 'Bearer' [espacio] y luego tu token JWT.\n\nEjemplo: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+}); // <-- Asegúrate que AddSwaggerGen cierre aquí
+
 builder.Services.AddHttpLogging(o => { });
 
 // Configuración de DbContext con DI
@@ -26,9 +62,9 @@ builder.Services.AddDbContext<TPIContext>(options =>
 builder.Services.AddScoped<LocalidadRepository>();
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<VehiculoRepository>();
-builder.Services.AddScoped<ViajeRepository>(); 
+builder.Services.AddScoped<ViajeRepository>();
 builder.Services.AddScoped<SolicitudViajeRepository>();
-
+builder.Services.AddScoped<CalificacionRepository>(); // Asegúrate que esté
 
 // Inyección de servicios
 builder.Services.AddScoped<LocalidadService>();
@@ -36,6 +72,38 @@ builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ViajeServices>();
 builder.Services.AddScoped<SolicitudViajeService>();
+builder.Services.AddScoped<CalificacionService>(); // Asegúrate que esté
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EsAdmin", policy =>
+        policy.RequireRole(nameof(TipoUsuario.Administrador))); 
+
+    options.AddPolicy("EsConductor", policy =>
+        policy.RequireRole(nameof(TipoUsuario.PasajeroConductor))); 
+
+    options.AddPolicy("EsPasajero", policy =>
+        policy.RequireRole(nameof(TipoUsuario.Pasajero), nameof(TipoUsuario.PasajeroConductor))); 
+
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 
@@ -46,28 +114,19 @@ if (app.Environment.IsDevelopment())
     app.UseHttpLogging();
 }
 
-//COMANDO PARA MIGRAR LA BDD
-// dotnet ef migrations add NombreMigracion 
-
-//dotnet ef database update
-
-//IServiceScope scope = app.Services.CreateScope();
-//TPIContext context = scope.ServiceProvider.GetRequiredService<TPIContext>();
-//context.Database.Migrate();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
-    //db.Database.Migrate();
+    // db.Database.Migrate();
 }
 
 app.UseHttpsRedirection();
-
-
+app.UseAuthentication(); 
+app.UseAuthorization(); 
 
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TPIContext>();
-
     if (!context.Usuarios.Any(u => u.Email == "admin@gmail.com"))
     {
         var admin = Usuario.Crear("Admin", "Admin", "admin@gmail.com", "1234", null, TipoUsuario.Administrador);
@@ -75,24 +134,13 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
-// ==================== Localidades ====================
+
 
 app.MapLocalidadesEndpoints();
-
-
-// ==================== Usuarios ====================
-
 app.MapUsuariosEndpoints();
-
-// ==================== Vehiculos ====================
-
 app.MapVehiculosEndpoints();
-
-// ==================== Viajes ====================
-
 app.MapViajesEndpoints();
-
 app.MapSolicitudViajeEndpoints();
+app.MapCalificacionesEndpoints();
 
-// === Run === 
 app.Run();

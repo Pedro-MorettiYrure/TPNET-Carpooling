@@ -12,12 +12,13 @@ namespace Application.Services
         private readonly ViajeRepository _viajeRepo;
         private readonly VehiculoRepository _vehiculoRepo;
         private readonly UsuarioRepository _usuarioRepo;
-
-        public ViajeServices(ViajeRepository viajeRepo, VehiculoRepository vehiculoRepo, UsuarioRepository usuarioRepo)
+        private readonly SolicitudViajeRepository _solicitudRepo;
+        public ViajeServices(ViajeRepository viajeRepo, VehiculoRepository vehiculoRepo, UsuarioRepository usuarioRepo, SolicitudViajeRepository solicitudRepo)
         {
             _viajeRepo = viajeRepo;
             _vehiculoRepo = vehiculoRepo;
             _usuarioRepo = usuarioRepo;
+            _solicitudRepo = solicitudRepo; // Asignar
         }
 
         public ViajeDTO Add(ViajeDTO dto)
@@ -212,16 +213,51 @@ namespace Application.Services
                 CantLugares = v.CantLugares,
                 Precio = v.Precio,
                 Comentario = v.Comentario,
-                Estado = v.Estado, // O v.Estado.ToString() si el DTO lo necesita como string
+                Estado = v.Estado,
                 OrigenCodPostal = v.OrigenCodPostal,
                 DestinoCodPostal = v.DestinoCodPostal,
                 IdConductor = v.IdConductor,
                 IdVehiculo = v.IdVehiculo,
-                // Asegúrate de que Origen y Destino se carguen en el repo con .Include()
-                NombreOrigen = v.Origen?.nombreLoc,
-                NombreDestino = v.Destino?.nombreLoc
-                // Agrega otros campos mapeados si es necesario
+                NombreOrigen = v.Origen.nombreLoc,
+                NombreDestino = v.Destino.nombreLoc
             }).ToList();
+        }
+        public bool IniciarViaje(int idViaje, int idUsuarioConductor)
+        {
+            var viaje = _viajeRepo.Get(idViaje); // Asume que Get carga el Conductor
+            if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
+            if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor puede iniciar el viaje.");
+            if (viaje.Estado != EstadoViaje.Pendiente) throw new InvalidOperationException($"El viaje no está pendiente (estado actual: {viaje.Estado}).");
+
+            
+            viaje.Estado = EstadoViaje.EnCurso;
+            return _viajeRepo.Update(viaje);
+        }
+
+        // *** NUEVO: Finalizar Viaje ***
+        public IEnumerable<UsuarioDTO> FinalizarViaje(int idViaje, int idUsuarioConductor)
+        {
+            var viaje = _viajeRepo.Get(idViaje); // Asume que Get carga Conductor y Solicitudes->Pasajero
+            if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
+            if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor puede finalizar el viaje.");
+            if (viaje.Estado != EstadoViaje.EnCurso) throw new InvalidOperationException($"El viaje no está en curso (estado actual: {viaje.Estado}).");
+
+            viaje.Estado = EstadoViaje.Realizado;
+            if (_viajeRepo.Update(viaje))
+            {
+                // Devolver la lista de pasajeros APROBADOS para calificar
+                return _solicitudRepo.GetAllByViaje(idViaje)
+                                    .Where(s => s.Estado == EstadoSolicitud.Aprobada)
+                                    .Select(s => new UsuarioDTO
+                                    { // Mapear a DTO
+                                        IdUsuario = s.Pasajero.IdUsuario,
+                                        Nombre = s.Pasajero.Nombre,
+                                        Apellido = s.Pasajero.Apellido,
+                                        Email = s.Pasajero.Email // Y otros campos si los necesitas
+                                    })
+                                    .ToList();
+            }
+            return Enumerable.Empty<UsuarioDTO>(); // Devuelve lista vacía si falla el update
         }
     }
 }

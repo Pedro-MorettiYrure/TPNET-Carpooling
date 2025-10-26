@@ -1,135 +1,120 @@
 ﻿using DTOs;
 using API.Clients;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Linq; // Para .All
+using System.Globalization; // Para NumberStyles
 
 namespace WindowsForms
 {
     public partial class LocalidadDetalle : Form
     {
+        public LocalidadDTO Localidad { get; set; } = new LocalidadDTO();
+        public FormMode Mode { get; set; } = FormMode.Add;
+
+        public enum FormMode { Add, Update }
+
+        // Mantenemos la propiedad 'mode' si el designer la usa
+        private FormMode mode;
+
         public LocalidadDetalle()
         {
             InitializeComponent();
-            Mode = FormMode.Add;
+            this.Load += LocalidadDetalle_Load;
         }
 
-        public enum FormMode
+        private void LocalidadDetalle_Load(object sender, EventArgs e)
         {
-            Add,
-            Update
-        }
-
-        private LocalidadDTO localidad;
-        private FormMode mode;
-
-        public LocalidadDTO Localidad
-        {
-            get { return localidad; }
-            set
+            SetFormMode(Mode);
+            if (Mode == FormMode.Update)
             {
-                localidad = value;
-                this.SetLocalidad();
-            }
-        }
-
-        public FormMode Mode
-        {
-            get
-            {
-                return mode;
-            }
-            set
-            {
-                SetFormMode(value);
+                SetLocalidad();
             }
         }
 
         private async void btnConfirmar_Click(object sender, EventArgs e)
         {
-            if (this.ValidateLocalidad())
+            if (!ValidateLocalidad()) return;
+
+            btnConfirmar.Enabled = false;
+
+            try
             {
-                try
+                string? token = SessionManager.JwtToken;
+                // Validar token ANTES de actualizar el DTO
+                if (string.IsNullOrEmpty(token)) throw new UnauthorizedAccessException("Sesión inválida. Se requieren permisos de Administrador.");
+
+                Localidad.Nombre = txtNombre.Text;
+                Localidad.CodPostal = txtCodPostal.Text;
+
+                if (this.Mode == FormMode.Update)
                 {
-                    this.Localidad.Nombre = txtNombre.Text;
-                    this.Localidad.CodPostal = txtCodPostal.Text;
-
-                    //El Detalle se esta llevando la responsabilidad de llamar al servicio
-                    //pero tal vez deberia ser solo una vista y que esta responsabilidad quede
-                    //en la Lista o tal vez en un Presenter o Controler
-
-                    if (this.Mode == FormMode.Update)
-                    {
-                        await LocalidadApiClient.UpdateAsync(this.Localidad);
-                    }
-                    else
-                    {
-                        await LocalidadApiClient.AddAsync(this.Localidad);
-                    }
-
-                    this.Dispose();
+                    // *** CORREGIDO: Pasar el token a UpdateAsync ***
+                    await LocalidadApiClient.UpdateAsync(Localidad, token); // <- Pasar token aquí
+                    MessageBox.Show("Localidad actualizada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                catch (Exception ex)
+                else // Mode == FormMode.Add
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // *** CORREGIDO: Pasar el token a AddAsync ***
+                    await LocalidadApiClient.AddAsync(Localidad, token); // <- Pasar token aquí
+                    MessageBox.Show("Localidad agregada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
+            catch (UnauthorizedAccessException authEx) { MessageBox.Show($"Error de autorización: {authEx.Message}", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            catch (ArgumentException argEx) { MessageBox.Show($"Datos inválidos: {argEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            catch (Exception ex) { MessageBox.Show($"Error al guardar la localidad: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            finally { if (!this.IsDisposed) btnConfirmar.Enabled = true; }
         }
 
         private void btnSalir_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
         private void SetLocalidad()
         {
+            if (Localidad == null) return;
             this.txtCodPostal.Text = this.Localidad.CodPostal;
             this.txtNombre.Text = this.Localidad.Nombre;
         }
 
         private void SetFormMode(FormMode value)
         {
-            mode = value;
+            mode = value; // Actualizar la variable interna si el designer la necesita
+            Mode = value; // Actualizar la propiedad pública
 
-            if (Mode == FormMode.Add)
-            {
-                labelCodPostal.Visible = true;
-                labelNombre.Visible = true;
-            }
+            txtCodPostal.Enabled = (Mode == FormMode.Add);
+            this.Text = (Mode == FormMode.Add) ? "Nueva Localidad" : "Editar Localidad";
 
-            if (Mode == FormMode.Update)
-            {
-                labelCodPostal.Visible = true; 
-                txtCodPostal.Enabled = false;
-                labelNombre.Visible = true;
-            }
+            labelCodPostal.Visible = true;
+            labelNombre.Visible = true;
+            label1.Visible = true;
         }
 
         private bool ValidateLocalidad()
         {
             bool isValid = true;
+            errorProvider.Clear();
 
-            errorProvider.SetError(txtNombre, string.Empty);
-            errorProvider.SetError(txtCodPostal, string.Empty);
-
-
-            if (this.txtNombre.Text == string.Empty)
+            if (string.IsNullOrWhiteSpace(this.txtNombre.Text))
             {
                 isValid = false;
-                errorProvider.SetError(txtNombre, "El Nombre de la localidad es Requerido");
+                errorProvider.SetError(txtNombre, "El Nombre de la localidad es Requerido.");
             }
-            if (this.txtCodPostal.Text == string.Empty)
+            if (string.IsNullOrWhiteSpace(this.txtCodPostal.Text))
             {
                 isValid = false;
-                errorProvider.SetError(txtCodPostal, "El Codigo Postal es Requerido");
+                errorProvider.SetError(txtCodPostal, "El Código Postal es Requerido.");
             }
-
+            else if (Mode == FormMode.Add && (txtCodPostal.Text.Length != 4 || !txtCodPostal.Text.All(char.IsDigit)))
+            {
+                isValid = false;
+                errorProvider.SetError(txtCodPostal, "El Código Postal debe tener 4 dígitos numéricos.");
+            }
 
             return isValid;
         }

@@ -1,13 +1,6 @@
 ﻿using API.Clients;
 using DTOs;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DTOs.UsuarioDTO;
 using Domain.Model;
@@ -16,50 +9,82 @@ namespace WindowsForms
 {
     public partial class FormConductorUpgrade : Form
     {
-
-        private readonly UsuarioDTO _usuarioLogueado; // <-- usuario logueado
+        private readonly UsuarioDTO _usuarioLogueado;
 
         public FormConductorUpgrade(UsuarioDTO usuarioLogueado)
         {
             InitializeComponent();
-            _usuarioLogueado = usuarioLogueado;
+            _usuarioLogueado = usuarioLogueado ?? throw new ArgumentNullException(nameof(usuarioLogueado));
+
+            if (_usuarioLogueado.TipoUsuario != TipoUsuario.Pasajero)
+            {
+                MessageBox.Show("Ya tienes permisos de conductor o eres Administrador.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtNroLicencia.Enabled = false;
+                dtpFechaVencimiento.Enabled = false;
+                btnConfirmar.Enabled = false;
+                this.Load += (s, e) => this.Close(); // Cerrar automáticamente al cargar
+            }
         }
 
         private async void btnConfirmar_Click(object sender, EventArgs e)
         {
-            // 1. Recolectar los datos del formulario
-            var nroLicencia = txtNroLicencia.Text;
-            var fechaVencimiento = dtpFechaVencimiento.Value;
-
-            // 2. Crear una instancia del DTO que la API espera
-            var dto = new ConductorUpgradeDTO
+            if (string.IsNullOrWhiteSpace(txtNroLicencia.Text))
             {
-                nroLicenciaConductor = nroLicencia,
-                fechaVencimientoLicencia = fechaVencimiento
-            };
+                MessageBox.Show("Debe ingresar el número de licencia.", "Dato requerido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNroLicencia.Focus();
+                return;
+            }
+            if (dtpFechaVencimiento.Value.Date <= DateTime.Today)
+            {
+                MessageBox.Show("La fecha de vencimiento debe ser futura.", "Fecha inválida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                dtpFechaVencimiento.Focus();
+                return;
+            }
+
+            btnConfirmar.Enabled = false;
 
             try
             {
-                // 3. Llamar al cliente de la API para enviar la solicitud
-                bool exito = await UsuarioApiClient.ConvertirAConductorAsync(_usuarioLogueado.IdUsuario, dto);
+                string? tokenActual = SessionManager.JwtToken;
+                if (string.IsNullOrEmpty(tokenActual)) throw new UnauthorizedAccessException("Sesión inválida.");
 
-                // 4. Manejar la respuesta
-                if (exito)
+                var dto = new ConductorUpgradeDTO
                 {
-                    MessageBox.Show("¡Felicidades! Ahora eres un conductor. Se ha guardado tu información.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    // Opcional: actualizar el DTO local para que la aplicación refleje el cambio de rol
+                    nroLicenciaConductor = txtNroLicencia.Text,
+                    fechaVencimientoLicencia = dtpFechaVencimiento.Value
+                };
+
+                string? nuevoToken = await UsuarioApiClient.ConvertirAConductorAsync(_usuarioLogueado.IdUsuario, dto, tokenActual);
+
+                if (!string.IsNullOrEmpty(nuevoToken)) 
+                {
+                    MessageBox.Show("¡Felicidades! Ahora eres un conductor.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                     _usuarioLogueado.TipoUsuario = TipoUsuario.PasajeroConductor;
-                    this.DialogResult = DialogResult.OK; // Para cerrar el formulario
+                    _usuarioLogueado.nroLicenciaConductor = dto.nroLicenciaConductor;
+                    _usuarioLogueado.fechaVencimientoLicencia = dto.fechaVencimientoLicencia;
+
+                    // ACTUALIZAR LA SESIÓN CON EL NUEVO TOKEN
+                    SessionManager.IniciarSesion(_usuarioLogueado, nuevoToken);
+
+                    this.DialogResult = DialogResult.OK; 
                     this.Close();
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo completar el registro como conductor. Revise si la licencia está vencida o si faltan datos obligatorios.", "Error de Validación",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                    MessageBox.Show("No se pudo completar la actualización. Verifique los datos o si ya es conductor.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            catch (UnauthorizedAccessException authEx) { MessageBox.Show($"Error de autorización: {authEx.Message}", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            catch (ArgumentException argEx) { MessageBox.Show($"Datos inválidos: {argEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            catch (InvalidOperationException opEx) { MessageBox.Show($"Operación inválida: {opEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (!this.IsDisposed) { btnConfirmar.Enabled = true; }
             }
         }
     }

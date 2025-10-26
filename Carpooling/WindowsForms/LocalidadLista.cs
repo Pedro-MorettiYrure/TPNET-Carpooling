@@ -1,16 +1,10 @@
 using API.Clients;
 using DTOs;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System.Collections.Generic; 
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static WindowsForms.LocalidadDetalle;
-
 
 namespace WindowsForms
 {
@@ -19,26 +13,72 @@ namespace WindowsForms
         public LocalidadLista()
         {
             InitializeComponent();
+            ConfigureDataGridView();
+        }
+
+        private void ConfigureDataGridView()
+        {
+            // Configurar DGV
+            dgvLocalidad.AutoGenerateColumns = false;
+            dgvLocalidad.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvLocalidad.MultiSelect = false;
+            dgvLocalidad.ReadOnly = true;
+            dgvLocalidad.AllowUserToAddRows = false;
+            dgvLocalidad.AllowUserToDeleteRows = false;
+
+            dgvLocalidad.Columns.Clear();
+            dgvLocalidad.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Código Postal", DataPropertyName = "CodPostal", Width = 100 });
+            dgvLocalidad.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Nombre", DataPropertyName = "Nombre", Width = 250, AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
         }
 
 
         private void LocalidadLista_Load(object sender, EventArgs e)
         {
-            this.GetAllAndLoad();
+            _ = GetAllAndLoadAsync();
         }
 
-        private void btnCrear_Click(object sender, EventArgs e)
+        private async Task GetAllAndLoadAsync()
         {
-            LocalidadDetalle formCrear = new LocalidadDetalle();
-            LocalidadDTO localidadNueva = new LocalidadDTO();
+            try
+            {
+                this.Invoke((MethodInvoker)delegate {
+                    dgvLocalidad.DataSource = null;
+                    btnEditar.Enabled = false; 
+                    btnEliminar.Enabled = false;
+                });
 
-            formCrear.Mode = FormMode.Add;
-            formCrear.Localidad = localidadNueva;
+                var localidades = (await LocalidadApiClient.GetAllAsync()).ToList();
 
-            formCrear.ShowDialog();
+                this.Invoke((MethodInvoker)delegate {
+                    dgvLocalidad.DataSource = localidades;
+                    bool tieneFilas = localidades.Any();
+                    btnEditar.Enabled = tieneFilas;
+                    btnEliminar.Enabled = tieneFilas;
+                    if (tieneFilas) dgvLocalidad.Rows[0].Selected = true;
+                });
+            }
+            catch (Exception ex)
+            {
+                this.Invoke((MethodInvoker)delegate {
+                    MessageBox.Show($"Error al cargar la lista de localidades: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    btnEditar.Enabled = false;
+                    btnEliminar.Enabled = false;
+                });
+            }
+        }
 
-            this.GetAllAndLoad();
+        private async void btnCrear_Click(object sender, EventArgs e)
+        {
+            using (LocalidadDetalle formCrear = new LocalidadDetalle())
+            {
+                formCrear.Mode = LocalidadDetalle.FormMode.Add;
+                formCrear.Localidad = new LocalidadDTO(); 
 
+                if (formCrear.ShowDialog() == DialogResult.OK)
+                {
+                    await GetAllAndLoadAsync(); 
+                }
+            }
         }
 
         private void btnSalir_Click(object sender, EventArgs e)
@@ -46,139 +86,99 @@ namespace WindowsForms
             this.Close();
         }
 
-        /*
-        private async void tsbEditar_Click(object sender, EventArgs e)
+        private LocalidadDTO? SelectedItem()
         {
-            try
+            if (dgvLocalidad.SelectedRows.Count > 0 && dgvLocalidad.SelectedRows[0].DataBoundItem is LocalidadDTO localidad)
             {
-                LocalidadDetalle formEditar = new LocalidadDetalle();
-                string codPostal = this.SelectedItem().CodPostal;
-
-                LocalidadDTO localidad = await LocalidadApiClient.GetAsync(codPostal);
-
-                formEditar.Mode = FormMode.Update;
-                formEditar.Localidad = localidad;
-
-                formEditar.ShowDialog();
-
-                this.GetAllAndLoad();
+                return localidad;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar localidad para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async void tsbEliminar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string codPostal = this.SelectedItem().CodPostal;
-
-                var result = MessageBox.Show($"¿Está seguro que desea eliminar la localidad con codigo postal {codPostal}?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                {
-                    await LocalidadApiClient.DeleteAsync(codPostal);
-                    this.GetAllAndLoad();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al eliminar localidad: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        */
-
-
-        private async void GetAllAndLoad()
-        {
-            try
-            {
-                this.dgvLocalidad.DataSource = null;
-                this.dgvLocalidad.DataSource = await LocalidadApiClient.GetAllAsync();
-
-                if (this.dgvLocalidad.Rows.Count > 0)
-                {
-                    this.dgvLocalidad.Rows[0].Selected = true;
-                    this.btnEliminar.Enabled = true;
-                    this.btnEditar.Enabled = true;
-                }
-                else
-                {
-                    this.btnEditar.Enabled = false;
-                    this.btnEliminar.Enabled = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar la lista de localidades: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.btnEliminar.Enabled = false;
-                this.btnEditar.Enabled = false;
-            }
-        }
-
-        private LocalidadDTO SelectedItem()
-        {
-            LocalidadDTO localidad;
-
-            localidad = (LocalidadDTO)dgvLocalidad.SelectedRows[0].DataBoundItem;
-
-            return localidad;
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-
+            MessageBox.Show("Por favor, seleccione una localidad de la lista.", "Selección requerida", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return null;
         }
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
+            var localidadSeleccionada = SelectedItem();
+            if (localidadSeleccionada == null) return; 
 
-            try
+            string codPostal = localidadSeleccionada.CodPostal;
+            var result = MessageBox.Show($"¿Está seguro que desea eliminar la localidad '{localidadSeleccionada.Nombre}' (CP: {codPostal})?",
+                "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
             {
-                string codPostal = this.SelectedItem().CodPostal;
-
-                var result = MessageBox.Show($"¿Está seguro que desea eliminar la localidad con codigo postal {codPostal}?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
+                btnEliminar.Enabled = false; 
+                btnEditar.Enabled = false;
+                try
                 {
-                    await LocalidadApiClient.DeleteAsync(codPostal);
-                    this.GetAllAndLoad();
+                    string? token = SessionManager.JwtToken;
+                    if (string.IsNullOrEmpty(token)) throw new UnauthorizedAccessException("Sesión inválida. Se requieren permisos de Administrador.");
+
+                    await LocalidadApiClient.DeleteAsync(codPostal, token);
+
+                    MessageBox.Show("Localidad eliminada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await GetAllAndLoadAsync(); 
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al eliminar localidad: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                catch (UnauthorizedAccessException authEx) { MessageBox.Show($"Error de autorización: {authEx.Message}", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+                catch (InvalidOperationException opEx) { MessageBox.Show($"No se puede eliminar: {opEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); } // Ej: Conflicto 409
+                catch (Exception ex) { MessageBox.Show($"Error al eliminar localidad: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                finally
+                {
+                    if (!this.IsDisposed && dgvLocalidad.Rows.Count == 0)
+                    {
+                        btnEliminar.Enabled = false;
+                        btnEditar.Enabled = false;
+                    }
+                }
             }
         }
 
         private async void btnEditar_Click(object sender, EventArgs e)
         {
+            var localidadSeleccionada = SelectedItem();
+            if (localidadSeleccionada == null) return;
+
+            btnEditar.Enabled = false; 
+            btnEliminar.Enabled = false;
+
             try
             {
-                LocalidadDetalle formEditar = new LocalidadDetalle();
-                string codPostal = this.SelectedItem().CodPostal;
+                var localidadParaEditar = await LocalidadApiClient.GetAsync(localidadSeleccionada.CodPostal);
 
-                LocalidadDTO localidad = await LocalidadApiClient.GetAsync(codPostal);
+                if (localidadParaEditar == null)
+                {
+                    MessageBox.Show("La localidad seleccionada ya no existe.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    await GetAllAndLoadAsync();
+                    return;
+                }
 
-                formEditar.Mode = FormMode.Update;
-                formEditar.Localidad = localidad;
+                using (LocalidadDetalle formEditar = new LocalidadDetalle())
+                {
+                    formEditar.Mode = LocalidadDetalle.FormMode.Update;
+                    formEditar.Localidad = localidadParaEditar; 
 
-                formEditar.ShowDialog();
-
-                this.GetAllAndLoad();
+                    if (formEditar.ShowDialog() == DialogResult.OK)
+                    {
+                        await GetAllAndLoadAsync(); 
+                    }
+                    else
+                    {
+                        btnEditar.Enabled = true;
+                        btnEliminar.Enabled = true;
+                    }
+                }
             }
+            catch (KeyNotFoundException) { MessageBox.Show("La localidad seleccionada no fue encontrada.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); await GetAllAndLoadAsync(); }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar localidad para modificar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnEditar.Enabled = true; 
+                btnEliminar.Enabled = true;
             }
-
+            
         }
 
-        private void tscLocalidades_TopToolStripPanel_Click(object sender, EventArgs e)
-        {
+        private void tscLocalidades_TopToolStripPanel_Click(object sender, EventArgs e) { }
 
-        }
     }
-}
+} 

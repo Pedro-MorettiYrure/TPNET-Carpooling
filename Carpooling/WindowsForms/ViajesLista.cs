@@ -29,14 +29,33 @@ namespace WindowsForms
         {
             try
             {
+                string? token = SessionManager.JwtToken;
+                if (string.IsNullOrEmpty(token))
+                {
+                    MessageBox.Show("Sesión inválida. Por favor, inicie sesión.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    this.Close(); // O redirigir a login
+                    return;
+                }
+
                 this.dgvViajesLista.DataSource = null;
-                var viajes = await ViajeApiClient.GetByConductorAsync(_usuario.IdUsuario);
+                // Pasar el token al método del ApiClient
+                var viajes = await ViajeApiClient.GetByConductorAsync(_usuario.IdUsuario, token);
                 this.dgvViajesLista.DataSource = viajes.ToList();
 
-                //if (dgvViajesLista.Columns["IdViaje"]) != null)
-                //{
-                //        dgvViajesLista.Columns["IdViaje"].Visible = false;
-                //}
+                if (dgvViajesLista.Columns["IdConductor"] != null) dgvViajesLista.Columns["IdConductor"].Visible = false;
+                if (dgvViajesLista.Columns["IdVehiculo"] != null) dgvViajesLista.Columns["IdVehiculo"].Visible = false;
+
+
+                bool tieneFilas = this.dgvViajesLista.Rows.Count > 0;
+                this.btnEliminar.Enabled = tieneFilas;
+                this.btnEditar.Enabled = tieneFilas;
+                if (tieneFilas) dgvViajesLista.Rows[0].Selected = true;
+            }
+            catch (UnauthorizedAccessException authEx) 
+            {
+                MessageBox.Show($"Error de autorización: {authEx.Message}. Verifique su sesión.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                SessionManager.CerrarSesion(); 
+                this.Close(); // O redirigir a login
             }
             catch (Exception ex)
             {
@@ -53,20 +72,18 @@ namespace WindowsForms
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
-            ViajeDetalle formCrear = new ViajeDetalle(_usuario);
-            formCrear.Mode = FormMode.Add;
-            formCrear.ShowDialog();
-
-            this.GetAllAndLoad();
-            //ViajeDTO viajeNuevo = new ViajeDTO
-            //{
-            //    IdConductor = _usuario.IdUsuario
-            //}
+            using (ViajeDetalle formCrear = new ViajeDetalle(_usuario))
+            {
+                // formCrear.Mode ya se establece en el constructor
+                if (formCrear.ShowDialog() == DialogResult.OK)
+                {
+                    this.GetAllAndLoad(); // Recargar si se creó OK
+                }
+            }
         }
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
-           
             if (dgvViajesLista.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Debe seleccionar un viaje para cancelar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -80,37 +97,32 @@ namespace WindowsForms
 
             DialogResult result = MessageBox.Show(
                 $"¿Está seguro de que desea cancelar el viaje con ID: {viajeDTO.IdViaje}?",
-                "Confirmar Cancelación",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+                "Confirmar Cancelación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
                 try
                 {
-                    // en el API, esta llamada DELETE realiza la baja lógica cambiando el estado.
-                    await ViajeApiClient.DeleteAsync(viajeDTO.IdViaje);
+                    // Obtener token
+                    string? token = SessionManager.JwtToken;
+                    if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("Sesión inválida.");
+
+                    await ViajeApiClient.DeleteAsync(viajeDTO.IdViaje, token);
 
                     MessageBox.Show("Viaje cancelado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                     await GetAllAndLoad();
                 }
+                catch (UnauthorizedAccessException authEx) { MessageBox.Show($"Error de autorización: {authEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+                catch (InvalidOperationException sessionEx) { MessageBox.Show($"Error: {sessionEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(
-                        $"Error al cancelar el viaje.\nDetalle: {ex.Message}",
-                        "Error de Cancelación",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
+                    MessageBox.Show($"Error al cancelar el viaje.\nDetalle: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
         private async void btnEditar_Click(object sender, EventArgs e)
         {
-          
             if (dgvViajesLista.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Debe seleccionar un viaje para editar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -118,19 +130,27 @@ namespace WindowsForms
             }
 
             var selectedRow = dgvViajesLista.SelectedRows[0];
-            var viajeDTO = selectedRow.DataBoundItem as ViajeDTO;
+            var viajeSeleccionado = selectedRow.DataBoundItem as ViajeDTO;
 
-            if (viajeDTO == null) return;
+            if (viajeSeleccionado == null) return;
 
-            // abrimos el formulario de detalle en modo EDICIÓN
-            // Usamos el constructor que creamos en ViajeDetalle.cs
-            using (var formDetalle = new ViajeDetalle(_usuario, viajeDTO)) // 
+            try
             {
-                if (formDetalle.ShowDialog() == DialogResult.OK)
+                // El formulario ViajeDetalle obtendrá el token antes de llamar a UpdateAsync
+                using (var formDetalle = new ViajeDetalle(_usuario, viajeSeleccionado))
                 {
-                    await GetAllAndLoad();
+                    if (formDetalle.ShowDialog() == DialogResult.OK)
+                    {
+                        await GetAllAndLoad(); 
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al preparar la edición del viaje: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
 }
+    
+

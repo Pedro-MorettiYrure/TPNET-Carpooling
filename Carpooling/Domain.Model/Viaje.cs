@@ -34,6 +34,7 @@ namespace Domain.Model
 
         public Vehiculo Vehiculo { get; set; }
         public int IdVehiculo { get; set; }
+        public virtual ICollection<SolicitudViaje> Solicitudes { get; set; } = new List<SolicitudViaje>();
 
         public Viaje() { }
 

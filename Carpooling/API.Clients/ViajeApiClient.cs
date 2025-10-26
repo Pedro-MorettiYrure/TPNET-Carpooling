@@ -1,110 +1,148 @@
-﻿using Domain.Model;
-using DTOs;
+﻿using DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+//using WindowsForms; // NO USAR ESTO
 
 namespace API.Clients
 {
     public class ViajeApiClient
     {
-        private static readonly HttpClient client;
+        private static readonly HttpClient _httpClient; // Renombrado
 
         static ViajeApiClient()
         {
-            client = new HttpClient
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7139/") };
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        // GetByConductorAsync necesita token
+        public static async Task<IEnumerable<ViajeDTO>> GetByConductorAsync(int idUsuario, string token) // <-- Recibe token
+        {
+            try
             {
-                BaseAddress = new Uri("https://localhost:7139/")
-            };
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, $"viajes/conductor/{idUsuario}", token);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener viajes del conductor {idUsuario}");
+                return await response.Content.ReadFromJsonAsync<IEnumerable<ViajeDTO>>() ?? Enumerable.Empty<ViajeDTO>();
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task<IEnumerable<ViajeDTO>> GetByConductorAsync(int idUsuario)
+        // GetAsync público (asumido)
+        public static async Task<ViajeDTO?> GetAsync(string idViaje)
         {
-            HttpResponseMessage response = await client.GetAsync($"viajes/conductor/{idUsuario}");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<IEnumerable<ViajeDTO>>();
+            try
+            {
+                HttpResponseMessage response = await _httpClient.GetAsync($"viajes/{idViaje}");
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener viaje {idViaje}"); // Aún puede haber otros errores
+                return await response.Content.ReadFromJsonAsync<ViajeDTO>();
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task<ViajeDTO> GetAsync(string idViaje)
-        {
-            HttpResponseMessage response = await client.GetAsync($"viajes/{idViaje}");
-            return await response.Content.ReadFromJsonAsync<ViajeDTO>();
-        }
-
+        // BuscarViajesAsync público
         public static async Task<IEnumerable<ViajeDTO>> BuscarViajesAsync(string origenCodPostal, string destinoCodPostal)
         {
-            string requestUri = $"viajes/buscar?origen={origenCodPostal}&destino={destinoCodPostal}"; //Usamos requestUri xq esta llamada a la API necesita enviar datos (el origen y el destino) como query parameters en la URL
-
-            HttpResponseMessage response = await client.GetAsync(requestUri);
-
-            if (!response.IsSuccessStatusCode)
+            string requestUri = $"viajes/buscar?origen={Uri.EscapeDataString(origenCodPostal)}&destino={Uri.EscapeDataString(destinoCodPostal)}"; // Usar EscapeDataString
+            try
             {
-                string errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Error al buscar viajes: {errorContent}");
+                HttpResponseMessage response = await _httpClient.GetAsync(requestUri);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, "buscar viajes");
+                return await response.Content.ReadFromJsonAsync<IEnumerable<ViajeDTO>>() ?? Enumerable.Empty<ViajeDTO>();
             }
-
-            return await response.Content.ReadFromJsonAsync<IEnumerable<ViajeDTO>>();
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-
-        public static async Task AddAsync(ViajeDTO viaje)
+        // AddAsync necesita token
+        public static async Task AddAsync(ViajeDTO viaje, string token) // <-- Recibe token
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync($"viajes", viaje);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                // 1. Intentar leer el cuerpo de la respuesta, donde está el mensaje de error del servicio.
-                string errorContent = await response.Content.ReadAsStringAsync();
-
-                // 2. Intentar lanzar una excepción más descriptiva.
-                // Asumo que el cuerpo del error contiene el mensaje "La licencia..."
-                // Si el error es 400 (Bad Request), usamos el mensaje del cuerpo.
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-                {
-                    // Lanzamos una nueva excepción con el mensaje de validación del backend.
-                    throw new Exception(errorContent);
-                }
-                else
-                {
-                    // Para otros errores (500, etc.), lanzamos la excepción genérica con el estado.
-                    response.EnsureSuccessStatusCode();
-                }
+                JsonContent content = JsonContent.Create(viaje);
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Post, "viajes", token, content);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, "agregar viaje");
+                // Podríamos leer el ViajeDTO creado desde response.Content si la API lo devuelve y este método lo retornara
             }
-            
-        }
-        
-
-        public static async Task DeleteAsync(int idViaje)
-        {
-            HttpResponseMessage response = await client.DeleteAsync($"viajes/{idViaje}");
-            response.EnsureSuccessStatusCode();
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task UpdateAsync(ViajeDTO viaje)
+        // DeleteAsync (Cancelar) necesita token
+        public static async Task DeleteAsync(int idViaje, string token) // <-- Recibe token
         {
-            HttpResponseMessage response = await client.PutAsJsonAsync($"viajes/{viaje.IdViaje}", viaje);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                string errorContent = await response.Content.ReadAsStringAsync();
-
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-                {
-                    throw new Exception(errorContent);
-                }
-                else
-                {
-                    response.EnsureSuccessStatusCode();
-                }
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Delete, $"viajes/{idViaje}", token);
+                // HandleResponseErrorsAsync ya maneja los errores, incluso si la respuesta esperada es 204
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"cancelar viaje {idViaje}");
             }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
+        // UpdateAsync necesita token
+        public static async Task UpdateAsync(ViajeDTO viaje, string token) // <-- Recibe token
+        {
+            try
+            {
+                JsonContent content = JsonContent.Create(viaje);
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Put, $"viajes/{viaje.IdViaje}", token, content);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"actualizar viaje {viaje.IdViaje}");
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
+        }
 
+        // IniciarViajeAsync necesita token
+        public static async Task IniciarViajeAsync(int idViaje, string token) // <-- Recibe token
+        {
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Put, $"viajes/{idViaje}/iniciar", token, null);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"iniciar viaje {idViaje}");
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
+        }
+
+        // FinalizarViajeAsync necesita token
+        public static async Task<FinalizarViajeResponse?> FinalizarViajeAsync(int idViaje, string token) // <-- Recibe token
+        {
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Put, $"viajes/{idViaje}/finalizar", token, null);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"finalizar viaje {idViaje}");
+                return await response.Content.ReadFromJsonAsync<FinalizarViajeResponse>();
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
+        }
+
+        // Clase auxiliar interna
+        public class FinalizarViajeResponse
+        {
+            public string? mensaje { get; set; }
+            public List<UsuarioDTO>? pasajeros { get; set; }
+        }
+        // *** FALTARÍA APLICAR ESTE PATRÓN A LOS MÉTODOS DE CALIFICACIÓN ***
+        // Si tienes CalificacionApiClient, modifícalo de forma similar.
     }
 }

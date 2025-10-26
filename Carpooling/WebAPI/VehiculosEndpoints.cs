@@ -1,7 +1,13 @@
 ﻿using Application.Services;
 using DTOs;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Domain.Model;
+using System;      
+using System.Linq; 
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 namespace WebAPI
 {
     public static class VehiculosEndpoints
@@ -9,91 +15,145 @@ namespace WebAPI
         public static void MapVehiculosEndpoints(this WebApplication app)
         {
 
-            // GET: todos los vehículos de un usuario
-            app.MapGet("/vehiculos/{idUsuario}", ([FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
+            app.MapGet("/vehiculos/{idUsuario}", [Authorize] (int idUsuario, ClaimsPrincipal user, [FromServices] VehiculoService vehiculoService) =>
             {
-                var vehiculos = vehiculoService.GetByUsuario(idUsuario);
-                return Results.Ok(vehiculos);
+                var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idUsuarioClaim, out int currentUserId) || (currentUserId != idUsuario && !user.IsInRole(TipoUsuario.Administrador.ToString())))
+                {
+                    return Results.Forbid(); 
+                }
+
+                try
+                {
+                    var vehiculos = vehiculoService.GetByUsuario(idUsuario);
+                    return Results.Ok(vehiculos);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem($"Error inesperado al obtener vehículos: {ex.Message}");
+                }
             })
             .WithName("GetAllVehiculos")
             .Produces<IEnumerable<VehiculoDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization(); 
 
-            // GET: un vehículo por patente y usuario
-            app.MapGet("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
+            app.MapGet("/vehiculos/{patente}/{idUsuario}", [Authorize] (string patente, int idUsuario, ClaimsPrincipal user, [FromServices] VehiculoService vehiculoService) =>
             {
-                var vehiculo = vehiculoService.GetByUsuario(idUsuario)
-                                 .FirstOrDefault(v => v.Patente == patente);
+                var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idUsuarioClaim, out int currentUserId) || (currentUserId != idUsuario && !user.IsInRole(TipoUsuario.Administrador.ToString())))
+                {
+                    return Results.Forbid(); 
+                }
 
-                if (vehiculo == null) return Results.NotFound();
-                return Results.Ok(vehiculo);
+                try
+                {
+                    var vehiculo = vehiculoService.GetByUsuario(idUsuario)
+                                     .FirstOrDefault(v => v.Patente.Equals(patente, StringComparison.OrdinalIgnoreCase));
+
+                    if (vehiculo == null) return Results.NotFound();
+                    return Results.Ok(vehiculo);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem($"Error inesperado al obtener vehículo: {ex.Message}"); // 500
+                }
             })
             .WithName("GetVehiculo")
             .Produces<VehiculoDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi(); 
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization();
 
-            // POST: agregar un vehículo
-            app.MapPost("/vehiculos/{idUsuario}", ([FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
+            
+            app.MapPost("/vehiculos/{idUsuario}", [Authorize(Policy = "EsConductor")] (int idUsuario, [FromBody] VehiculoDTO vehiculoDto, ClaimsPrincipal user, [FromServices] VehiculoService vehiculoService) =>
             {
+                var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idUsuarioClaim, out int currentUserId) || currentUserId != idUsuario)
+                {
+                    return Results.Problem(detail: "No puedes agregar vehículos a otro usuario.", statusCode: StatusCodes.Status403Forbidden);
+                }
+
                 try
                 {
-                    vehiculoDto.IdUsuario = idUsuario; // aseguramos que el dto tenga el idUsuario correcto
+                    vehiculoDto.IdUsuario = idUsuario;
                     var created = vehiculoService.Add(vehiculoDto);
                     return Results.Created($"/vehiculos/{created.Patente}/{idUsuario}", created);
                 }
-                catch(ArgumentException ex) { return Results.BadRequest(ex.Message); }
+                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("AddVehiculo")
-            .Produces<VehiculoDTO>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi(); 
+            .Produces<VehiculoDTO>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization("EsConductor")
+            .WithOpenApi();
 
-            // PUT: actualizar un vehículo
-            app.MapPut("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromBody] VehiculoDTO vehiculoDto, [FromServices] VehiculoService vehiculoService) =>
+            
+            app.MapPut("/vehiculos/{patente}/{idUsuario}", [Authorize(Policy = "EsConductor")] (string patente, int idUsuario, [FromBody] VehiculoDTO vehiculoDto, ClaimsPrincipal user, [FromServices] VehiculoService vehiculoService) =>
             {
+                var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idUsuarioClaim, out int currentUserId) || currentUserId != idUsuario)
+                {
+                    return Results.Problem(detail: "No puedes modificar vehículos de otro usuario.", statusCode: StatusCodes.Status403Forbidden);
+                }
+
+                vehiculoDto.Patente = patente;
+                vehiculoDto.IdUsuario = idUsuario;
+
                 try
                 {
-                    vehiculoDto.Patente = patente;
-                    vehiculoDto.IdUsuario = idUsuario;
-
                     var updated = vehiculoService.Update(vehiculoDto);
-                    if (!updated) return Results.NotFound();
+                    if (!updated) return Results.NotFound("Vehículo no encontrado o no pertenece al usuario.");
+                    return Results.Ok(vehiculoDto); // Devolver DTO actualizado
                 }
-                catch (ArgumentException argEx)
-                {
-                    return Results.BadRequest(argEx.Message);
-                }
-                catch (Exception)
-                {
-                    return Results.StatusCode(StatusCodes.Status500InternalServerError);
-                }
-                return Results.Ok(vehiculoDto);
+                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } // 400
+                catch (Exception ex) { return Results.Problem($"Error inesperado al actualizar vehículo: {ex.Message}"); } // 500
             })
             .WithName("UpdateVehiculo")
             .Produces<VehiculoDTO>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithOpenApi(); 
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization("EsConductor")
+            .WithOpenApi();
 
-            // DELETE: eliminar un vehículo
-            app.MapDelete("/vehiculos/{patente}/{idUsuario}", ([FromRoute] string patente, [FromRoute] int idUsuario, [FromServices] VehiculoService vehiculoService) =>
+         
+            app.MapDelete("/vehiculos/{patente}/{idUsuario}", [Authorize(Policy = "EsConductor")] (string patente, int idUsuario, ClaimsPrincipal user, [FromServices] VehiculoService vehiculoService) =>
             {
+                var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idUsuarioClaim, out int currentUserId) || currentUserId != idUsuario)
+                {
+                    return Results.Problem(detail: "No puedes eliminar vehículos de otro usuario.", statusCode: StatusCodes.Status403Forbidden);
+                }
+
                 try
                 {
                     var deleted = vehiculoService.Delete(patente, idUsuario);
-                    if (!deleted) return Results.NotFound();
-                    return Results.NoContent();
+                    if (!deleted) return Results.NotFound("Vehículo no encontrado o no pertenece al usuario.");
+                    return Results.NoContent(); // 204
                 }
-                catch(InvalidOperationException ex) { return Results.Conflict(ex.Message); }
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409
+                catch (Exception ex) { return Results.Problem($"Error inesperado al eliminar vehículo: {ex.Message}"); } // 500
             })
             .WithName("DeleteVehiculo")
             .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization("EsConductor")
             .WithOpenApi();
-
-
         }
     }
 }

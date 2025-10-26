@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // Necesario para Include/ThenInclude
 using Domain.Model;
 using Data;
-
 
 namespace Data
 {
@@ -16,7 +15,7 @@ namespace Data
 
         public ViajeRepository(TPIContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public void Add(Viaje viaje)
@@ -27,68 +26,69 @@ namespace Data
 
         public bool Update(Viaje viaje)
         {
-            var viajeExistente = _context.Viajes.Find(viaje.IdViaje);
-
-            if (viajeExistente != null)
-            {
-                _context.Viajes.Update(viaje);      //usar Set() para validar?
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
+            //var viajeExistente = _context.Viajes.Find(viaje.IdViaje); // Find no usa Includes
+            //if (viajeExistente != null)
+            //{
+            _context.Viajes.Update(viaje);
+            return _context.SaveChanges() > 0; // Devuelve true si se afectaron filas
+            //}
+            //return false;
         }
-
-
-        //ya no usamos este metodo, hacemos baja logica en el servicio
-
-        /*public void Delete(Viaje viaje)
-        {
-            _context.Viajes.Remove(viaje);
-            _context.SaveChanges();
-        }*/
 
         public Vehiculo? GetVehiculo(int idVehiculo)
         {
             return _context.Vehiculos.FirstOrDefault(v => v.IdVehiculo == idVehiculo);
         }
 
-
-        public Viaje Get(int id)
+        // *** MODIFICADO: Get(id) ahora incluye Origen, Destino y Conductor ***
+        public Viaje? Get(int id) // Devuelve nullable
         {
-            return _context.Viajes.FirstOrDefault(v => v.IdViaje == id);
+            return _context.Viajes
+                .Include(v => v.Origen)
+                .Include(v => v.Destino)
+                .Include(v => v.Conductor)
+                // .Include(v => v.Vehiculo) // Descomentar si es necesario
+                // .Include(v => v.Solicitudes).ThenInclude(s => s.Pasajero) // Descomentar si es necesario
+                .FirstOrDefault(v => v.IdViaje == id);
         }
 
         public IEnumerable<Viaje> GetAllByConductor(int idUsuario)
         {
-            return _context.Viajes.Where(v => v.IdConductor == idUsuario).ToList();
+            // *** MODIFICADO: Incluir Origen y Destino para el DTO ***
+            return _context.Viajes
+                .Include(v => v.Origen)
+                .Include(v => v.Destino)
+                .Where(v => v.IdConductor == idUsuario)
+                .OrderByDescending(v => v.FechaHora)
+                .ToList();
         }
 
         public IEnumerable<Viaje> GetAll()
         {
-            return _context.Viajes.OrderBy(p => p.IdViaje).ToList();
+            return _context.Viajes
+                .Include(v => v.Origen)
+                .Include(v => v.Destino)
+                .OrderBy(p => p.IdViaje)
+                .ToList();
         }
 
         public IEnumerable<Viaje> GetViajesDisponiblesPorRuta(string origenCodPostal, string destinoCodPostal)
         {
-            var ahora = DateTime.Now; 
+            var ahora = DateTime.Now;
 
             return _context.Viajes
-                .Include(v => v.Origen)
-                .Include(v => v.Destino)
-                .Include(v => v.Conductor) 
-                .Include(v => v.Vehiculo) 
+                .Include(v => v.Origen)  // Necesario para NombreOrigen
+                .Include(v => v.Destino) // Necesario para NombreDestino
+                .Include(v => v.Conductor) // Opcional, si la búsqueda muestra el nombre
+                .Include(v => v.Vehiculo)  // Opcional, si la búsqueda muestra el auto
                 .Where(v => v.OrigenCodPostal == origenCodPostal &&
                              v.DestinoCodPostal == destinoCodPostal &&
-                             v.Estado == EstadoViaje.Pendiente && 
-                             v.FechaHora > ahora) 
-                                                  // Subconsulta para calcular lugares ocupados 
-                //.Select(v => new {
-                //    Viaje = v,
-                //    LugaresOcupados = _context.SolicitudesViaje.Count(s => s.IdViaje == v.IdViaje && s.Estado == EstadoSolicitud.Aprobada)
-                //})
-                //.Where(x => x.LugaresOcupados < x.Viaje.CantLugares)
-                //.Select(x => x.Viaje)
-                .ToList(); 
+                             v.Estado == EstadoViaje.Pendiente &&
+                             v.FechaHora > ahora)
+                // La lógica de lugares disponibles debería estar en el servicio de Solicitud (al crear)
+                // O podrías filtrarlo aquí si es un requisito estricto de búsqueda
+                .OrderBy(v => v.FechaHora) // Más próximos primero
+                .ToList();
         }
     }
 }

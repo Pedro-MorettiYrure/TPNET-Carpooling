@@ -10,7 +10,7 @@ namespace Data
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<Viaje> Viajes { get; set; }
         public DbSet<SolicitudViaje> SolicitudesViaje { get; set; }
-
+        public DbSet<Calificacion> Calificaciones { get; set; }
         // Constructor que EF y DI usarán
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
@@ -32,8 +32,16 @@ namespace Data
                 entity.Property(e => e.Telefono).HasMaxLength(200);
                 entity.Property(e => e.nroLicenciaConductor).HasMaxLength(50);
                 entity.Property(e => e.fechaVencimientoLicencia).HasColumnType("datetime2");
+                entity.HasMany(u => u.CalificacionesRecibidas)
+                      .WithOne(c => c.Calificado)
+                      .HasForeignKey(c => c.IdCalificado)
+                      .OnDelete(DeleteBehavior.Restrict); // Evita borrar usuario si tiene calificaciones
 
-               
+                entity.HasMany(u => u.CalificacionesDadas)
+                      .WithOne(c => c.Calificador)
+                      .HasForeignKey(c => c.IdCalificador)
+                      .OnDelete(DeleteBehavior.Restrict); // Evita borrar usuario si dio calificaciones
+
 
             });
 
@@ -100,7 +108,11 @@ namespace Data
                      .WithMany()
                      .HasForeignKey(v => v.IdVehiculo)
                      .OnDelete(DeleteBehavior.NoAction);
-                        });
+                entity.HasMany(v => v.Solicitudes)         
+                       .WithOne(s => s.Viaje)                
+                       .HasForeignKey(s => s.IdViaje)        // Clave foránea en SolicitudViaje
+                       .OnDelete(DeleteBehavior.Cascade);            
+            });
 
             // ---------------- Solicitud Viaje ----------------
             modelBuilder.Entity<SolicitudViaje>(entity =>
@@ -121,6 +133,26 @@ namespace Data
                       .HasForeignKey(s => s.IdPasajero)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.NoAction); 
+            });
+            // ---------------- Calificaciones ----------------
+
+            modelBuilder.Entity<Calificacion>(entity =>
+            {
+                entity.ToTable("Calificaciones");
+                entity.HasKey(c => c.IdCalificacion);
+                entity.Property(c => c.Puntaje).IsRequired();
+                entity.Property(c => c.Comentario).HasMaxLength(500); // Límite para comentarios
+                entity.Property(c => c.FechaHora).IsRequired();
+                entity.Property(c => c.RolCalificado).IsRequired();
+
+                // Relación con Viaje
+                entity.HasOne(c => c.Viaje)
+                      .WithMany() // Un viaje puede tener muchas calificaciones
+                      .HasForeignKey(c => c.IdViaje)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict); // No borrar viaje si tiene calificaciones? O Cascade?
+
+                // Las relaciones con Calificador y Calificado ya están definidas en Usuario
             });
         }
 

@@ -5,164 +5,87 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-
-
+using System.Collections.Generic; 
+using System.Linq; 
 
 namespace API.Clients
 {
     public class LocalidadApiClient
     {
-        private static HttpClient loc = new HttpClient();
+        private static readonly HttpClient _httpClient; 
+
         static LocalidadApiClient()
         {
-            loc.BaseAddress = new Uri("https://localhost:7139/");
-            loc.DefaultRequestHeaders.Accept.Clear();
-            loc.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7139/") };
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-
-        public static async Task<LocalidadDTO> GetAsync(string codPos)
+        public static async Task<LocalidadDTO?> GetAsync(string codPos) 
         {
             try
             {
-                HttpResponseMessage response = await loc.GetAsync("localidades/" + codPos);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadFromJsonAsync<LocalidadDTO>();
-                }
-                else
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al obtener localidad con codigo postal {codPos}. Status: {response.StatusCode}, Detalle: {errorContent}");
-                }
+                HttpResponseMessage response = await _httpClient.GetAsync($"localidades/{codPos}");
+                if (response.StatusCode == HttpStatusCode.NotFound) return null;
+                // Usamos el helper solo para otros errores (ej: 500)
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener localidad {codPos}");
+                return await response.Content.ReadFromJsonAsync<LocalidadDTO>();
             }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception($"Error de conexión al obtener localidad con codigo postal {codPos}: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw new Exception($"Timeout al obtener localidad con codigo postal {codPos}: {ex.Message}", ex);
-            }
+            catch (KeyNotFoundException) { return null; } // Si el helper lanza KeyNotFound por 404
+            catch (HttpRequestException ex) { throw new Exception($"Error de conexión: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
-
 
         public static async Task<IEnumerable<LocalidadDTO>> GetAllAsync()
         {
             try
             {
-                HttpResponseMessage response = await loc.GetAsync("localidades");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadFromJsonAsync<IEnumerable<LocalidadDTO>>();
-                }
-                else
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al obtener lista de localidades. Status: {response.StatusCode}, Detalle: {errorContent}");
-                }
+                HttpResponseMessage response = await _httpClient.GetAsync("localidades");
+                await ApiClientHelper.HandleResponseErrorsAsync(response, "obtener todas las localidades");
+                return await response.Content.ReadFromJsonAsync<IEnumerable<LocalidadDTO>>() ?? Enumerable.Empty<LocalidadDTO>();
             }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception($"Error de conexión al obtener lista de localidades: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw new Exception($"Timeout al obtener lista de localidades: {ex.Message}", ex);
-            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de conexión: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public async static Task AddAsync(LocalidadDTO localidad)
+        public static async Task AddAsync(LocalidadDTO localidad, string token) 
         {
             try
             {
-                HttpResponseMessage response = await loc.PostAsJsonAsync("localidades", localidad);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al crear localidad. Status: {response.StatusCode}, Detalle: {errorContent}");
-                }
+                JsonContent content = JsonContent.Create(localidad);
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Post, "localidades", token, content);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, "agregar localidad");
             }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception($"Error de conexión al crear localidad: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw new Exception($"Timeout al crear localidad: {ex.Message}", ex);
-            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de conexión: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task DeleteAsync(string codPostal)
+        public static async Task DeleteAsync(string codPostal, string token) 
         {
             try
             {
-                HttpResponseMessage response = await loc.DeleteAsync("localidades/" + codPostal);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    if (!string.IsNullOrWhiteSpace(errorContent)) {
-                        try
-                        {
-                            var errorDetails = System.Text.Json.JsonDocument.Parse(errorContent);
-                            if (errorDetails.RootElement.TryGetProperty("detail", out var detail))
-                            {
-                                errorContent = detail.GetString();
-                            }
-                            else if (errorDetails.RootElement.TryGetProperty("title", out var title))
-                            {
-                                errorContent = title.GetString();
-                            }
-                        }
-
-                        catch (System.Text.Json.JsonException)
-                        {
-                            // No es un JSON válido, se deja el contenido original
-                        }
-                    }
-                    else
-                    {
-                        response.EnsureSuccessStatusCode();
-                    }
-                        throw new Exception($"Error al eliminar localidad con codigo postal {codPostal}. Status: {response.StatusCode}, Detalle: {errorContent}");
-                }
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Delete, $"localidades/{codPostal}", token);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"eliminar localidad {codPostal}");
             }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception($"Error de conexión al eliminar localidad con codigo postal {codPostal}: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw new Exception($"Timeout al eliminar localidad con codigo postal {codPostal}: {ex.Message}", ex);
-            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de conexión: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task UpdateAsync(LocalidadDTO localidad)
+        public static async Task UpdateAsync(LocalidadDTO localidad, string token) 
         {
             try
             {
-                HttpResponseMessage response = await loc.PutAsJsonAsync("localidades/" + localidad.CodPostal, localidad);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Error al actualizar localidad con codigo postal {localidad.CodPostal}. Status: {response.StatusCode}, Detalle: {errorContent}");
-                }
+                JsonContent content = JsonContent.Create(localidad);
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Put, $"localidades/{localidad.CodPostal}", token, content);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"actualizar localidad {localidad.CodPostal}");
             }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception($"Error de conexión al actualizar localidad con codigo postal {localidad.CodPostal}: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                throw new Exception($"Timeout al actualizar localidad con codigo postal {localidad.CodPostal}: {ex.Message}", ex);
-            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de conexión: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
     }
 }
-

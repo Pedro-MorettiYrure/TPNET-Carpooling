@@ -2,33 +2,35 @@
 using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Linq;
-using System.Collections.Generic;
+using System.Collections.Generic; 
 
 namespace Domain.Model
 {
     public class Usuario
     {
         public int IdUsuario { get; set; }
-        public string Nombre { get; set; } = null!;  //Se inicializa como null ya que se asigna en Crear
-        public string Apellido { get; set; } = null!; //Se silencian las advertencias
+        public string Nombre { get; set; } = null!;
+        public string Apellido { get; set; } = null!;
         public string Email { get; set; } = null!;
         public TipoUsuario TipoUsuario { get; set; }
         public string ContraseñaHash { get; private set; } = null!;
         public string? Telefono { get; set; }
-
-        public string? nroLicenciaConductor { get; set; } // Solo para conductores
-
-        public DateTime? fechaVencimientoLicencia { get; set; } // Solo para conductores
-
-        // Colección de vehículos del usuario
+        public string? nroLicenciaConductor { get; set; }
+        public DateTime? fechaVencimientoLicencia { get; set; }
         public ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
+
+        // *** NUEVO: Colección de calificaciones recibidas ***
+        public virtual ICollection<Calificacion> CalificacionesRecibidas { get; set; } = new List<Calificacion>();
+
+        // *** NUEVO: Colección de calificaciones dadas ***
+        public virtual ICollection<Calificacion> CalificacionesDadas { get; set; } = new List<Calificacion>();
+
 
         private const int SaltSize = 16;
         private const int KeySize = 32;
         private const int Iterations = 10000;
 
-        public Usuario() { }
-
+        // ... (resto de los métodos como Crear, Setters, HashPassword, VerificarContraseña, ConvertirAConductor sin cambios)...
         public static Usuario Crear(string nombre, string apellido, string email, string contraseña, string? telefono, TipoUsuario tipoUsuario = TipoUsuario.Pasajero)
         {
             var u = new Usuario();
@@ -73,7 +75,7 @@ namespace Domain.Model
 
         public void SetTelefono(string? telefono)
         {
-           
+
             if (!string.IsNullOrWhiteSpace(telefono) && telefono.Length > 20)
             {
                 throw new ArgumentException("El número de teléfono es demasiado largo.", nameof(telefono));
@@ -138,8 +140,5 @@ namespace Domain.Model
             this.nroLicenciaConductor = nroLicencia;
             this.fechaVencimientoLicencia = fechaVencimiento;
         }
-
-
     }
 }
-        

@@ -5,54 +5,83 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq; 
 
 namespace API.Clients
 {
     public class VehiculoApiClient
     {
-        private static readonly HttpClient client;
+        private static readonly HttpClient _httpClient; 
 
         static VehiculoApiClient()
         {
-            client = new HttpClient
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7139/") };
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        public static async Task<IEnumerable<VehiculoDTO>> GetByUsuarioAsync(int idUsuario, string token) 
+        {
+            try
             {
-                BaseAddress = new Uri("https://localhost:7139/")
-            };
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, $"vehiculos/{idUsuario}", token);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener vehículos del usuario {idUsuario}");
+                return await response.Content.ReadFromJsonAsync<IEnumerable<VehiculoDTO>>() ?? Enumerable.Empty<VehiculoDTO>();
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task<IEnumerable<VehiculoDTO>> GetByUsuarioAsync(int idUsuario)
+        public static async Task<VehiculoDTO> GetAsync(string patente, int idUsuario, string token) 
         {
-            HttpResponseMessage response = await client.GetAsync($"vehiculos/{idUsuario}");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<IEnumerable<VehiculoDTO>>();
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, $"vehiculos/{patente}/{idUsuario}", token);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener vehículo {patente}");
+                return await response.Content.ReadFromJsonAsync<VehiculoDTO>() ?? throw new Exception("Respuesta inválida al obtener vehículo.");
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task<VehiculoDTO> GetAsync(string patente, int idUsuario)
+        public static async Task AddAsync(VehiculoDTO vehiculo, string token) 
         {
-            HttpResponseMessage response = await client.GetAsync($"vehiculos/{patente}/{idUsuario}");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<VehiculoDTO>();
+            try
+            {
+                JsonContent content = JsonContent.Create(vehiculo);
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Post, $"vehiculos/{vehiculo.IdUsuario}", token, content);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, "agregar vehículo");
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task AddAsync(VehiculoDTO vehiculo)
+        public static async Task DeleteAsync(string patente, int idUsuario, string token) 
         {
-            // Ahora POST pide /vehiculos/{idUsuario}
-            HttpResponseMessage response = await client.PostAsJsonAsync($"vehiculos/{vehiculo.IdUsuario}", vehiculo);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Delete, $"vehiculos/{patente}/{idUsuario}", token);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"eliminar vehículo {patente}");
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
 
-        public static async Task DeleteAsync(string patente, int idUsuario)
+        public static async Task UpdateAsync(VehiculoDTO vehiculo, string token) 
         {
-            HttpResponseMessage response = await client.DeleteAsync($"vehiculos/{patente}/{idUsuario}");
-            response.EnsureSuccessStatusCode();
-        }
-
-        public static async Task UpdateAsync(VehiculoDTO vehiculo)
-        {
-            HttpResponseMessage response = await client.PutAsJsonAsync($"vehiculos/{vehiculo.Patente}/{vehiculo.IdUsuario}", vehiculo);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                JsonContent content = JsonContent.Create(vehiculo);
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Put, $"vehiculos/{vehiculo.Patente}/{vehiculo.IdUsuario}", token, content);
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"actualizar vehículo {vehiculo.Patente}");
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
         }
     }
 }
