@@ -27,11 +27,13 @@ namespace WindowsForms
             btnLocalidadLista.Visible = false;
             btnBuscarViaje.Visible = false;
             btnMisSolicitudes.Visible = false;
-
+            btnReportes.Visible = false; 
             switch (_usuarioLogueado.TipoUsuario)
             {
                 case TipoUsuario.Administrador:
                     btnLocalidadLista.Visible = true;
+                    btnReportes.Visible = true;
+
                     break;
 
                 case TipoUsuario.Pasajero:
@@ -48,7 +50,13 @@ namespace WindowsForms
                     break;
             }
         }
-
+        private void btnReportes_Click(object sender, EventArgs e)
+        {
+            using (FormReportes formReportes = new FormReportes())
+            {
+                formReportes.ShowDialog();
+            }
+        }
 
         private void btnLocalidadLista_Click(object sender, EventArgs e)
         {
@@ -72,8 +80,7 @@ namespace WindowsForms
 
         private void btnViajeLista_Click(object sender, EventArgs e) 
         {
-            // si el rol es PasajeroConductor
-            if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor) // Asegúrate de usar el enum o string correcto ("Pasajero-Conductor")
+            if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor) 
             {
                 DialogResult eleccion = MessageBox.Show(
                     "¿Desea ver sus viajes como conductor o como pasajero?",
@@ -88,16 +95,13 @@ namespace WindowsForms
                 }
                 else if (eleccion == DialogResult.No) // como pasajero
                 {
-                    // Muestra el NUEVO formulario para ver solicitudes hechas
                     ViajesListaPasajero formViajesPasajero = new ViajesListaPasajero(_usuarioLogueado);
                     formViajesPasajero.ShowDialog();
                 }
-                // Si elige Cancelar (cerrando el MessageBox), no hace nada.
             }
             
             else if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero) 
             {
-                // Muestra directamente el NUEVO formulario para ver viajes del pasajero
                 ViajesListaPasajero formViajesPasajero = new ViajesListaPasajero(_usuarioLogueado);
                 formViajesPasajero.ShowDialog();
             }

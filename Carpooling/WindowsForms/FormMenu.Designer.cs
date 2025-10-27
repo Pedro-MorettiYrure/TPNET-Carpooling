@@ -38,6 +38,7 @@
             btnBuscarViaje = new Button();
             btnViajeLista = new Button();
             btnLocalidadLista = new Button();
+            btnReportes = new Button();
             tlMain.SuspendLayout();
             SuspendLayout();
             // 
@@ -50,14 +51,15 @@
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlMain.Controls.Add(lbMain, 1, 1);
-            tlMain.Controls.Add(btnEditarUsuario, 0, 0);
-            tlMain.Controls.Add(btnMisSolicitudes, 3, 6);
             tlMain.Controls.Add(label1, 1, 2);
-            tlMain.Controls.Add(btnConvertirAConductor, 1, 6);
-            tlMain.Controls.Add(btnVehiculoLista, 0, 1);
             tlMain.Controls.Add(btnBuscarViaje, 2, 5);
             tlMain.Controls.Add(btnViajeLista, 1, 5);
-            tlMain.Controls.Add(btnLocalidadLista, 1, 4);
+            tlMain.Controls.Add(btnReportes, 1, 3);
+            tlMain.Controls.Add(btnLocalidadLista, 2, 3);
+            tlMain.Controls.Add(btnMisSolicitudes, 2, 6);
+            tlMain.Controls.Add(btnVehiculoLista, 1, 6);
+            tlMain.Controls.Add(btnEditarUsuario, 1, 4);
+            tlMain.Controls.Add(btnConvertirAConductor, 1, 4);
             tlMain.Location = new Point(0, 0);
             tlMain.Name = "tlMain";
             tlMain.RowCount = 7;
@@ -90,21 +92,21 @@
             // 
             // btnEditarUsuario
             // 
-            tlMain.SetColumnSpan(btnEditarUsuario, 2);
-            btnEditarUsuario.Location = new Point(3, 3);
+            btnEditarUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            btnEditarUsuario.Location = new Point(421, 208);
             btnEditarUsuario.Name = "btnEditarUsuario";
-            btnEditarUsuario.Size = new Size(102, 25);
-            btnEditarUsuario.TabIndex = 5;
+            btnEditarUsuario.Size = new Size(122, 49);
+            btnEditarUsuario.TabIndex = 4;
             btnEditarUsuario.Text = "Editar mis datos";
             btnEditarUsuario.UseVisualStyleBackColor = true;
             btnEditarUsuario.Click += btnEditarUsuario_Click;
             // 
             // btnMisSolicitudes
             // 
-            btnMisSolicitudes.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnMisSolicitudes.Location = new Point(647, 345);
+            btnMisSolicitudes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            btnMisSolicitudes.Location = new Point(422, 318);
             btnMisSolicitudes.Name = "btnMisSolicitudes";
-            btnMisSolicitudes.Size = new Size(116, 26);
+            btnMisSolicitudes.Size = new Size(119, 53);
             btnMisSolicitudes.TabIndex = 8;
             btnMisSolicitudes.Text = "Ver mis solicitudes";
             btnMisSolicitudes.UseVisualStyleBackColor = true;
@@ -128,22 +130,22 @@
             // 
             // btnConvertirAConductor
             // 
-            btnConvertirAConductor.Anchor = AnchorStyles.Bottom;
-            tlMain.SetColumnSpan(btnConvertirAConductor, 2);
-            btnConvertirAConductor.Location = new Point(316, 345);
+            btnConvertirAConductor.Anchor = AnchorStyles.Top;
+            btnConvertirAConductor.Location = new Point(221, 208);
             btnConvertirAConductor.Name = "btnConvertirAConductor";
-            btnConvertirAConductor.Size = new Size(131, 26);
-            btnConvertirAConductor.TabIndex = 1;
+            btnConvertirAConductor.Size = new Size(133, 49);
+            btnConvertirAConductor.TabIndex = 4;
             btnConvertirAConductor.Text = "Quiero ser conductor";
             btnConvertirAConductor.UseVisualStyleBackColor = true;
             btnConvertirAConductor.Click += btnConvertirAConductor_Click;
             // 
             // btnVehiculoLista
             // 
+            btnVehiculoLista.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             btnVehiculoLista.ForeColor = SystemColors.ControlText;
-            btnVehiculoLista.Location = new Point(3, 43);
+            btnVehiculoLista.Location = new Point(223, 318);
             btnVehiculoLista.Name = "btnVehiculoLista";
-            btnVehiculoLista.Size = new Size(115, 35);
+            btnVehiculoLista.Size = new Size(129, 53);
             btnVehiculoLista.TabIndex = 1;
             btnVehiculoLista.Text = "Mis vehiculos";
             btnVehiculoLista.UseVisualStyleBackColor = true;
@@ -173,15 +175,24 @@
             // 
             // btnLocalidadLista
             // 
-            btnLocalidadLista.Anchor = AnchorStyles.Top;
-            tlMain.SetColumnSpan(btnLocalidadLista, 2);
-            btnLocalidadLista.Location = new Point(316, 208);
+            btnLocalidadLista.Location = new Point(391, 153);
             btnLocalidadLista.Name = "btnLocalidadLista";
-            btnLocalidadLista.Size = new Size(131, 47);
+            btnLocalidadLista.Size = new Size(182, 47);
             btnLocalidadLista.TabIndex = 0;
             btnLocalidadLista.Text = "Localidades";
             btnLocalidadLista.UseVisualStyleBackColor = true;
             btnLocalidadLista.Click += btnLocalidadLista_Click;
+            // 
+            // btnReportes
+            // 
+            btnReportes.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            btnReportes.Location = new Point(191, 155);
+            btnReportes.Name = "btnReportes";
+            btnReportes.Size = new Size(194, 45);
+            btnReportes.TabIndex = 9;
+            btnReportes.Text = "Generar Reportes";
+            btnReportes.UseVisualStyleBackColor = true;
+            btnReportes.Click += btnReportes_Click;
             // 
             // FormMenu
             // 
@@ -209,5 +220,6 @@
         private Button btnEditarUsuario;
         private Button btnBuscarViaje;
         private Button btnMisSolicitudes;
+        private Button btnReportes;
     }
 }
