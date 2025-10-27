@@ -1,4 +1,7 @@
-﻿using System;
+﻿using API.Clients;
+using Domain.Model;
+using DTOs;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,8 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DTOs;
-using API.Clients;
 using static WindowsForms.ViajeDetalle;
 
 namespace WindowsForms
@@ -38,7 +39,6 @@ namespace WindowsForms
                 }
 
                 this.dgvViajesLista.DataSource = null;
-                // Pasar el token al método del ApiClient
                 var viajes = await ViajeApiClient.GetByConductorAsync(_usuario.IdUsuario, token);
                 this.dgvViajesLista.DataSource = viajes.ToList();
 
@@ -74,10 +74,9 @@ namespace WindowsForms
         {
             using (ViajeDetalle formCrear = new ViajeDetalle(_usuario))
             {
-                // formCrear.Mode ya se establece en el constructor
                 if (formCrear.ShowDialog() == DialogResult.OK)
                 {
-                    this.GetAllAndLoad(); // Recargar si se creó OK
+                    this.GetAllAndLoad(); 
                 }
             }
         }
@@ -103,7 +102,6 @@ namespace WindowsForms
             {
                 try
                 {
-                    // Obtener token
                     string? token = SessionManager.JwtToken;
                     if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("Sesión inválida.");
 
@@ -136,7 +134,6 @@ namespace WindowsForms
 
             try
             {
-                // El formulario ViajeDetalle obtendrá el token antes de llamar a UpdateAsync
                 using (var formDetalle = new ViajeDetalle(_usuario, viajeSeleccionado))
                 {
                     if (formDetalle.ShowDialog() == DialogResult.OK)
@@ -177,13 +174,281 @@ namespace WindowsForms
                 formSolicitudes.ShowDialog(); 
             }
 
-            await GetAllAndLoad(); //actualiza lista de viajes
+            await GetAllAndLoad(); 
         }
 
         private void dgvViajesLista_SelectionChanged(object sender, EventArgs e)
         {
-            btnVerSolicitudes.Enabled = (dgvViajesLista.SelectedRows.Count > 0);
+            btnIniciarViaje.Enabled = false; 
+            btnFinalizarViaje.Enabled = false; 
+            btnEditar.Enabled = false;
+            btnEliminar.Enabled = false; 
+            btnVerSolicitudes.Enabled = false;
+            btnCalificarPasajeros.Enabled = false;
+
+            if (dgvViajesLista.SelectedRows.Count > 0)
+            {
+                if (dgvViajesLista.SelectedRows[0].DataBoundItem is ViajeDTO viajeSeleccionado)
+                {
+                    btnVerSolicitudes.Enabled = true;
+
+                    switch (viajeSeleccionado.Estado)
+                    {
+                        case EstadoViaje.Pendiente:
+                            btnEditar.Enabled = true;
+                            btnEliminar.Enabled = true; 
+
+                            // Habilitar Iniciar SOLO si la fecha del viaje es HOY
+                            if (viajeSeleccionado.FechaHora.Date == DateTime.Today.Date)
+                            {
+                                btnIniciarViaje.Enabled = true;
+                            }
+                            break;
+
+                        case EstadoViaje.EnCurso:
+                            // Habilitar Finalizar si está En Curso
+                            btnFinalizarViaje.Enabled = true;
+                            break;
+
+                        case EstadoViaje.Realizado:
+                            // Habilitar Calificar Pasajeros si está Realizado
+                            btnCalificarPasajeros.Enabled = true;
+                            break;
+
+                        case EstadoViaje.Cancelado:
+                            // No se habilitan acciones principales si está Cancelado
+                            break;
+                    }
+                }
+            }
         }
+        private async void btnIniciarViaje_Click(object sender, EventArgs e)
+        {
+            if (dgvViajesLista.SelectedRows.Count == 0 || !(dgvViajesLista.SelectedRows[0].DataBoundItem is ViajeDTO viajeSeleccionado)) return;
+
+            if (viajeSeleccionado.Estado != EstadoViaje.Pendiente || viajeSeleccionado.FechaHora.Date != DateTime.Today.Date)
+            {
+                MessageBox.Show("Este viaje no se puede iniciar ahora (no está pendiente o no es hoy).", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            SetBotonesAccionEnabled(false);
+
+            try
+            {
+                string? token = SessionManager.JwtToken;
+                if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("Sesión inválida.");
+
+                await ViajeApiClient.IniciarViajeAsync(viajeSeleccionado.IdViaje, token); 
+                MessageBox.Show("Viaje iniciado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await GetAllAndLoad(); // Recargar la grilla para ver el estado actualizado
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al iniciar el viaje: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!this.IsDisposed) SetBotonesAccionEnabled(true); 
+            }
+        }
+
+        private async void btnFinalizarViaje_Click(object sender, EventArgs e)
+        {
+            if (dgvViajesLista.SelectedRows.Count == 0 || !(dgvViajesLista.SelectedRows[0].DataBoundItem is ViajeDTO viajeSeleccionado)) return;
+
+            if (viajeSeleccionado.Estado != EstadoViaje.EnCurso)
+            {
+                MessageBox.Show("Este viaje no se puede finalizar (no está en curso).", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            SetBotonesAccionEnabled(false);
+
+            try
+            {
+                string? token = SessionManager.JwtToken;
+                if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("Sesión inválida.");
+
+                var response = await ViajeApiClient.FinalizarViajeAsync(viajeSeleccionado.IdViaje, token); // Llamada API
+
+                if (response != null) 
+                {
+                    MessageBox.Show(response.mensaje ?? "Viaje finalizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await GetAllAndLoad(); 
+                }
+                else
+                {
+                    throw new Exception("La respuesta de la API al finalizar el viaje fue inesperada.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al finalizar el viaje: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!this.IsDisposed) SetBotonesAccionEnabled(true);
+            }
+        }
+
+        private async void btnCalificarPasajeros_Click(object sender, EventArgs e)
+        {
+            await GetAllAndLoad();
+            await Task.Delay(200); 
+
+            if (dgvViajesLista.SelectedRows.Count == 0 || !(dgvViajesLista.SelectedRows[0].DataBoundItem is ViajeDTO viajeSeleccionado))
+            {
+                MessageBox.Show("Seleccione un viaje realizado para calificar.", "Selección Requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (viajeSeleccionado.Estado != EstadoViaje.Realizado)
+            {
+                MessageBox.Show("Solo se pueden calificar pasajeros de viajes realizados.", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            SetBotonesAccionEnabled(false);
+
+            try
+            {
+                string? token = SessionManager.JwtToken;
+                if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("Sesión inválida.");
+
+                // Obtener la lista de pasajeros confirmados
+                var pasajerosConfirmados = (await ViajeApiClient.GetPasajerosConfirmadosAsync(viajeSeleccionado.IdViaje, token)).ToList();
+
+                if (!pasajerosConfirmados.Any())
+                {
+                    MessageBox.Show("No hay pasajeros confirmados (o pendientes de calificar) en este viaje.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+                    btnCalificarPasajeros.Enabled = false;
+                    return;
+                }
+
+                bool algunaCalificacionEnviada = false;
+                var calificacionesYaHechas = (await CalificacionApiClient.GetCalificacionesDadasAsync(_usuario.IdUsuario, token)).ToList();
+
+                foreach (var pasajero in pasajerosConfirmados)
+                {
+                    // Verificar si ya se calificó a ESTE pasajero en ESTE viaje
+                    bool yaCalificado = calificacionesYaHechas.Any(c =>
+                        c.IdViaje == viajeSeleccionado.IdViaje &&
+                        c.IdCalificado == pasajero.IdUsuario &&
+                        c.RolCalificado == RolCalificado.Pasajero.ToString() 
+                    );
+
+                    if (yaCalificado)
+                    {
+                        Console.WriteLine($"Pasajero {pasajero.Nombre} ya calificado para viaje {viajeSeleccionado.IdViaje}, omitiendo.");
+                        continue; 
+                    }
+
+                    DialogResult preguntarCalificar = MessageBox.Show($"¿Desea calificar al pasajero {pasajero.Nombre} {pasajero.Apellido}?",
+                                                                  "Calificar Pasajero", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                    if (preguntarCalificar == DialogResult.Cancel) break;
+                    if (preguntarCalificar == DialogResult.No) continue;
+
+                    using (FormCalificar formCalificar = new FormCalificar(
+                        _usuario.IdUsuario,
+                        pasajero.IdUsuario,
+                        viajeSeleccionado.IdViaje,
+                        RolCalificado.Pasajero
+                    ))
+                    {
+                        if (formCalificar.ShowDialog() == DialogResult.OK)
+                        {
+                            try
+                            {
+                                CalificacionInputDTO calificacionInput = formCalificar.CalificacionIngresada;
+                                await CalificacionApiClient.CalificarPasajeroAsync(viajeSeleccionado.IdViaje, pasajero.IdUsuario, calificacionInput, token);
+                                algunaCalificacionEnviada = true;
+                                calificacionesYaHechas.Add(new CalificacionDTO { IdViaje = viajeSeleccionado.IdViaje, IdCalificado = pasajero.IdUsuario, RolCalificado = RolCalificado.Pasajero.ToString() });
+                                MessageBox.Show($"Calificación para {pasajero.Nombre} enviada.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            catch (InvalidOperationException opEx) when (opEx.Message.Contains("Ya has calificado"))
+                            {
+                                MessageBox.Show($"Ya habías calificado a {pasajero.Nombre} para este viaje (detectado por API).", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                if (!calificacionesYaHechas.Any(c => c.IdViaje == viajeSeleccionado.IdViaje && c.IdCalificado == pasajero.IdUsuario))
+                                {
+                                    calificacionesYaHechas.Add(new CalificacionDTO { IdViaje = viajeSeleccionado.IdViaje, IdCalificado = pasajero.IdUsuario, RolCalificado = RolCalificado.Pasajero.ToString() });
+                                }
+                            }
+                            catch (Exception exCalif)
+                            {
+                                MessageBox.Show($"Error al calificar a {pasajero.Nombre}: {exCalif.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                        }
+                        else
+                        {
+                            DialogResult seguir = MessageBox.Show("No se envió calificación. ¿Continuar calificando a otros pasajeros?",
+                                                               "Continuar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                            if (seguir == DialogResult.No) break;
+                        }
+                    } 
+                } 
+                  
+
+                bool quedanPendientes = false;
+                var pasajerosActualizados = (await ViajeApiClient.GetPasajerosConfirmadosAsync(viajeSeleccionado.IdViaje, token)).ToList(); // Volver a pedir por si acaso
+                var calificacionesActualizadas = (await CalificacionApiClient.GetCalificacionesDadasAsync(_usuario.IdUsuario, token)).ToList(); // Volver a pedir
+                foreach (var p in pasajerosActualizados)
+                {
+                    if (!calificacionesActualizadas.Any(c => c.IdViaje == viajeSeleccionado.IdViaje && c.IdCalificado == p.IdUsuario && c.RolCalificado == RolCalificado.Pasajero.ToString()))
+                    {
+                        quedanPendientes = true;
+                        break;
+                    }
+                }
+
+                if (!quedanPendientes)
+                {
+                    MessageBox.Show("Todos los pasajeros de este viaje han sido calificados.", "Completado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+                    btnCalificarPasajeros.Enabled = false;
+                }
+                else if (algunaCalificacionEnviada)
+                {
+                    MessageBox.Show("Proceso de calificación finalizado por ahora.", "Calificación Parcial", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("No se enviaron nuevas calificaciones.", "Calificación", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error en el proceso de calificación: {ex.Message}", "Error General", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (!this.IsDisposed && dgvViajesLista.SelectedRows.Count > 0)
+                {
+                    dgvViajesLista_SelectionChanged(dgvViajesLista, EventArgs.Empty);
+                }
+                else if (!this.IsDisposed) // Si no hay nada seleccionado, deshabilitamos todo
+                {
+                    SetBotonesAccionEnabled(false);
+                    btnVerSolicitudes.Enabled = false; 
+                }
+            }
+        }
+
+        private void SetBotonesAccionEnabled(bool enabled)
+        {
+            
+            if (this.InvokeRequired)
+            {
+                this.Invoke((MethodInvoker)delegate { SetBotonesAccionEnabled(enabled); });
+            }
+            else
+            {
+                btnIniciarViaje.Enabled = enabled;
+                btnFinalizarViaje.Enabled = enabled;
+                btnEditar.Enabled = enabled;
+                btnEliminar.Enabled = enabled; // Cancelar
+                btnVerSolicitudes.Enabled = enabled;
+                btnCalificarPasajeros.Enabled = enabled;
+            }
+        }
+
     }
 }
     

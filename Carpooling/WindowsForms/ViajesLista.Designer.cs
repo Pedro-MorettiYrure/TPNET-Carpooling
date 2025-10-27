@@ -35,8 +35,10 @@
             btnCrear = new Button();
             btnEliminar = new Button();
             btnEditar = new Button();
-            btnVerSolicitudes = new Button();
             btnCalificarPasajeros = new Button();
+            btnVerSolicitudes = new Button();
+            btnIniciarViaje = new Button();
+            btnFinalizarViaje = new Button();
             tsViajesLista.ContentPanel.SuspendLayout();
             tsViajesLista.SuspendLayout();
             tlpViajesLista.SuspendLayout();
@@ -73,6 +75,8 @@
             tlpViajesLista.Controls.Add(btnEditar, 2, 1);
             tlpViajesLista.Controls.Add(btnCalificarPasajeros, 5, 2);
             tlpViajesLista.Controls.Add(btnVerSolicitudes, 5, 1);
+            tlpViajesLista.Controls.Add(btnIniciarViaje, 4, 1);
+            tlpViajesLista.Controls.Add(btnFinalizarViaje, 4, 2);
             tlpViajesLista.Dock = DockStyle.Fill;
             tlpViajesLista.Location = new Point(0, 0);
             tlpViajesLista.Name = "tlpViajesLista";
@@ -116,11 +120,12 @@
             // 
             // btnEliminar
             // 
+            btnEliminar.Enabled = false;
             btnEliminar.Location = new Point(145, 361);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(100, 23);
             btnEliminar.TabIndex = 4;
-            btnEliminar.Text = "Eliminar Viaje";
+            btnEliminar.Text = "Cancelar Viaje";
             btnEliminar.UseVisualStyleBackColor = true;
             btnEliminar.Click += btnEliminar_Click;
             // 
@@ -134,6 +139,19 @@
             btnEditar.UseVisualStyleBackColor = true;
             btnEditar.Click += btnEditar_Click;
             // 
+            // btnCalificarPasajeros
+            // 
+            btnCalificarPasajeros.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCalificarPasajeros.BackColor = SystemColors.MenuHighlight;
+            btnCalificarPasajeros.Enabled = false;
+            btnCalificarPasajeros.Location = new Point(687, 394);
+            btnCalificarPasajeros.Name = "btnCalificarPasajeros";
+            btnCalificarPasajeros.Size = new Size(110, 28);
+            btnCalificarPasajeros.TabIndex = 6;
+            btnCalificarPasajeros.Text = "CalificarPasajeros";
+            btnCalificarPasajeros.UseVisualStyleBackColor = false;
+            btnCalificarPasajeros.Click += btnCalificarPasajeros_Click;
+            // 
             // btnVerSolicitudes
             // 
             btnVerSolicitudes.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -146,15 +164,29 @@
             btnVerSolicitudes.UseVisualStyleBackColor = true;
             btnVerSolicitudes.Click += btnVerSolicitudes_Click;
             // 
-            // btnCalificarPasajeros
+            // btnIniciarViaje
             // 
-            btnCalificarPasajeros.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnCalificarPasajeros.Location = new Point(687, 394);
-            btnCalificarPasajeros.Name = "btnCalificarPasajeros";
-            btnCalificarPasajeros.Size = new Size(110, 28);
-            btnCalificarPasajeros.TabIndex = 6;
-            btnCalificarPasajeros.Text = "CalificarPasajeros";
-            btnCalificarPasajeros.UseVisualStyleBackColor = true;
+            btnIniciarViaje.BackColor = SystemColors.Highlight;
+            btnIniciarViaje.Enabled = false;
+            btnIniciarViaje.Location = new Point(466, 361);
+            btnIniciarViaje.Name = "btnIniciarViaje";
+            btnIniciarViaje.Size = new Size(75, 23);
+            btnIniciarViaje.TabIndex = 7;
+            btnIniciarViaje.Text = "Iniciar Viaje";
+            btnIniciarViaje.UseVisualStyleBackColor = false;
+            btnIniciarViaje.Click += btnIniciarViaje_Click;
+            // 
+            // btnFinalizarViaje
+            // 
+            btnFinalizarViaje.BackColor = SystemColors.Highlight;
+            btnFinalizarViaje.Enabled = false;
+            btnFinalizarViaje.Location = new Point(466, 394);
+            btnFinalizarViaje.Name = "btnFinalizarViaje";
+            btnFinalizarViaje.Size = new Size(100, 23);
+            btnFinalizarViaje.TabIndex = 8;
+            btnFinalizarViaje.Text = "Finalizar Viaje";
+            btnFinalizarViaje.UseVisualStyleBackColor = false;
+            btnFinalizarViaje.Click += btnFinalizarViaje_Click;
             // 
             // ViajesLista
             // 
@@ -184,5 +216,7 @@
         private Button btnEliminar;
         private Button btnVerSolicitudes;
         private Button btnCalificarPasajeros;
+        private Button btnIniciarViaje;
+        private Button btnFinalizarViaje;
     }
 }
