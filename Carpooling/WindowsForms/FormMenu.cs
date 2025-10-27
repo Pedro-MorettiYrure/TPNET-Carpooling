@@ -26,7 +26,7 @@ namespace WindowsForms
             btnViajeLista.Visible = false;
             btnLocalidadLista.Visible = false;
             btnBuscarViaje.Visible = false;
-            btnSolicitudesLista.Visible = false;
+            btnMisSolicitudes.Visible = false;
 
             switch (_usuarioLogueado.TipoUsuario)
             {
@@ -38,13 +38,12 @@ namespace WindowsForms
                     btnConvertirAConductor.Visible = true;
                     btnViajeLista.Visible = true;
                     btnBuscarViaje.Visible = true;
-                    btnSolicitudesLista.Visible = true;
+                    btnMisSolicitudes.Visible = true;
                     break;
 
                 case TipoUsuario.PasajeroConductor:
                     btnVehiculoLista.Visible = true;
                     btnViajeLista.Visible = true;
-                    btnSolicitudesLista.Visible = true;
                     btnBuscarViaje.Visible = true;
                     break;
             }
@@ -98,7 +97,7 @@ namespace WindowsForms
             
             else if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero) 
             {
-                // Muestra directamente el NUEVO formulario para ver solicitudes hechas
+                // Muestra directamente el NUEVO formulario para ver viajes del pasajero
                 ViajesListaPasajero formViajesPasajero = new ViajesListaPasajero(_usuarioLogueado);
                 formViajesPasajero.ShowDialog();
             }
@@ -119,5 +118,12 @@ namespace WindowsForms
             formBusqueda.ShowDialog();
         }
 
+        private void btnMisSolicitudes_Click(object sender, EventArgs e)
+        {
+            SolicitudesListaPasajero formSolicitudesPasajero = new SolicitudesListaPasajero(_usuarioLogueado);
+            formSolicitudesPasajero.ShowDialog();
+        }
+
     }
 }
+

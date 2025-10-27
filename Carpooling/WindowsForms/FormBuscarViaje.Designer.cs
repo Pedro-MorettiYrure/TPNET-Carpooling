@@ -35,6 +35,8 @@
             comboBoxOrigen = new ComboBox();
             dgvBuscarViaje = new DataGridView();
             btnBuscar = new Button();
+            label2 = new Label();
+            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvBuscarViaje).BeginInit();
             SuspendLayout();
             // 
@@ -46,6 +48,7 @@
             btnSolicitarViaje.TabIndex = 0;
             btnSolicitarViaje.Text = "Solicitar viaje";
             btnSolicitarViaje.UseVisualStyleBackColor = true;
+            btnSolicitarViaje.Click += btnSolicitarViaje_Click;
             // 
             // btnCancelar
             // 
@@ -55,6 +58,7 @@
             btnCancelar.TabIndex = 1;
             btnCancelar.Text = "Cancelar";
             btnCancelar.UseVisualStyleBackColor = true;
+            btnCancelar.Click += btnCancelar_Click;
             // 
             // label1
             // 
@@ -67,20 +71,18 @@
             // comboBoxDestino
             // 
             comboBoxDestino.FormattingEnabled = true;
-            comboBoxDestino.Location = new Point(175, 9);
+            comboBoxDestino.Location = new Point(176, 23);
             comboBoxDestino.Name = "comboBoxDestino";
             comboBoxDestino.Size = new Size(140, 23);
             comboBoxDestino.TabIndex = 5;
-            comboBoxDestino.Text = "Seleccione el destino";
             // 
             // comboBoxOrigen
             // 
             comboBoxOrigen.FormattingEnabled = true;
-            comboBoxOrigen.Location = new Point(21, 9);
+            comboBoxOrigen.Location = new Point(21, 23);
             comboBoxOrigen.Name = "comboBoxOrigen";
             comboBoxOrigen.Size = new Size(139, 23);
             comboBoxOrigen.TabIndex = 6;
-            comboBoxOrigen.Text = "Seleccione el origen";
             // 
             // dgvBuscarViaje
             // 
@@ -92,18 +94,39 @@
             // 
             // btnBuscar
             // 
-            btnBuscar.Location = new Point(339, 9);
+            btnBuscar.Location = new Point(341, 23);
             btnBuscar.Name = "btnBuscar";
             btnBuscar.Size = new Size(75, 23);
             btnBuscar.TabIndex = 8;
             btnBuscar.Text = "Buscar";
             btnBuscar.UseVisualStyleBackColor = true;
+            btnBuscar.Click += btnBuscar_Click;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(21, 5);
+            label2.Name = "label2";
+            label2.Size = new Size(43, 15);
+            label2.TabIndex = 9;
+            label2.Text = "Origen";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(176, 5);
+            label3.Name = "label3";
+            label3.Size = new Size(47, 15);
+            label3.TabIndex = 10;
+            label3.Text = "Destino";
             // 
             // FormBuscarViaje
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(503, 281);
+            Controls.Add(label3);
+            Controls.Add(label2);
             Controls.Add(btnBuscar);
             Controls.Add(dgvBuscarViaje);
             Controls.Add(comboBoxOrigen);
@@ -113,6 +136,7 @@
             Controls.Add(btnSolicitarViaje);
             Name = "FormBuscarViaje";
             Text = "FormBuscarViaje";
+            Click += FormBuscarViaje_Load;
             ((System.ComponentModel.ISupportInitialize)dgvBuscarViaje).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -127,5 +151,7 @@
         private ComboBox comboBoxOrigen;
         private DataGridView dgvBuscarViaje;
         private Button btnBuscar;
+        private Label label2;
+        private Label label3;
     }
 }

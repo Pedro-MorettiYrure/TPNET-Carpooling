@@ -9,10 +9,6 @@
       {
         "Path": "WebAPI\\WebAPI.csproj",
         "Action": "Start"
-      },
-      {
-        "Path": "Carpooling.Blazor\\Carpooling.Blazor.csproj",
-        "Action": "Start"
       }
     ]
   },

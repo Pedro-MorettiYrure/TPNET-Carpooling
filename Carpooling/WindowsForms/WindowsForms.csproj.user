@@ -4,6 +4,15 @@
     <Compile Update="FormBuscarViaje.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="FormCalificar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="SolicitudesLista.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="SolicitudesListaPasajero.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="ViajesListaPasajero.cs">
       <SubType>Form</SubType>
     </Compile>

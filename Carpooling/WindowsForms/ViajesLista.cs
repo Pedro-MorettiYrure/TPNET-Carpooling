@@ -51,10 +51,10 @@ namespace WindowsForms
                 this.btnEditar.Enabled = tieneFilas;
                 if (tieneFilas) dgvViajesLista.Rows[0].Selected = true;
             }
-            catch (UnauthorizedAccessException authEx) 
+            catch (UnauthorizedAccessException authEx)
             {
                 MessageBox.Show($"Error de autorización: {authEx.Message}. Verifique su sesión.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                SessionManager.CerrarSesion(); 
+                SessionManager.CerrarSesion();
                 this.Close(); // O redirigir a login
             }
             catch (Exception ex)
@@ -141,7 +141,7 @@ namespace WindowsForms
                 {
                     if (formDetalle.ShowDialog() == DialogResult.OK)
                     {
-                        await GetAllAndLoad(); 
+                        await GetAllAndLoad();
                     }
                 }
             }
@@ -149,6 +149,40 @@ namespace WindowsForms
             {
                 MessageBox.Show($"Error al preparar la edición del viaje: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+
+        private async void btnVerSolicitudes_Click(object sender, EventArgs e)
+        {
+            if (dgvViajesLista.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Por favor, seleccione un viaje de la lista para ver sus solicitudes.",
+                                "Selección Requerida",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                return;
+            }
+
+            var selectedRow = dgvViajesLista.SelectedRows[0];
+            var viajeSeleccionado = selectedRow.DataBoundItem as ViajeDTO;
+
+            if (viajeSeleccionado == null)
+            {
+                MessageBox.Show("Error al obtener los datos del viaje seleccionado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using (SolicitudesLista formSolicitudes = new SolicitudesLista(viajeSeleccionado.IdViaje, _usuario))
+            {
+                formSolicitudes.ShowDialog(); 
+            }
+
+            await GetAllAndLoad(); //actualiza lista de viajes
+        }
+
+        private void dgvViajesLista_SelectionChanged(object sender, EventArgs e)
+        {
+            btnVerSolicitudes.Enabled = (dgvViajesLista.SelectedRows.Count > 0);
         }
     }
 }

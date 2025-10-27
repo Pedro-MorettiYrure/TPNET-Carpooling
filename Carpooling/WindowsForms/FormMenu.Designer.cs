@@ -31,7 +31,7 @@
             tlMain = new TableLayoutPanel();
             lbMain = new Label();
             btnEditarUsuario = new Button();
-            btnSolicitudesLista = new Button();
+            btnMisSolicitudes = new Button();
             label1 = new Label();
             btnConvertirAConductor = new Button();
             btnVehiculoLista = new Button();
@@ -51,7 +51,7 @@
             tlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tlMain.Controls.Add(lbMain, 1, 1);
             tlMain.Controls.Add(btnEditarUsuario, 0, 0);
-            tlMain.Controls.Add(btnSolicitudesLista, 3, 6);
+            tlMain.Controls.Add(btnMisSolicitudes, 3, 6);
             tlMain.Controls.Add(label1, 1, 2);
             tlMain.Controls.Add(btnConvertirAConductor, 1, 6);
             tlMain.Controls.Add(btnVehiculoLista, 0, 1);
@@ -99,15 +99,16 @@
             btnEditarUsuario.UseVisualStyleBackColor = true;
             btnEditarUsuario.Click += btnEditarUsuario_Click;
             // 
-            // btnSolicitudesLista
+            // btnMisSolicitudes
             // 
-            btnSolicitudesLista.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnSolicitudesLista.Location = new Point(647, 345);
-            btnSolicitudesLista.Name = "btnSolicitudesLista";
-            btnSolicitudesLista.Size = new Size(116, 26);
-            btnSolicitudesLista.TabIndex = 8;
-            btnSolicitudesLista.Text = "Ver solicitudes";
-            btnSolicitudesLista.UseVisualStyleBackColor = true;
+            btnMisSolicitudes.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnMisSolicitudes.Location = new Point(647, 345);
+            btnMisSolicitudes.Name = "btnMisSolicitudes";
+            btnMisSolicitudes.Size = new Size(116, 26);
+            btnMisSolicitudes.TabIndex = 8;
+            btnMisSolicitudes.Text = "Ver mis solicitudes";
+            btnMisSolicitudes.UseVisualStyleBackColor = true;
+            btnMisSolicitudes.Click += btnMisSolicitudes_Click;
             // 
             // label1
             // 
@@ -207,6 +208,6 @@
         private Button btnViajeLista;
         private Button btnEditarUsuario;
         private Button btnBuscarViaje;
-        private Button btnSolicitudesLista;
+        private Button btnMisSolicitudes;
     }
 }

@@ -11,7 +11,6 @@ namespace Data
         public DbSet<Viaje> Viajes { get; set; }
         public DbSet<SolicitudViaje> SolicitudesViaje { get; set; }
         public DbSet<Calificacion> Calificaciones { get; set; }
-        // Constructor que EF y DI usarán
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
             this.Database.EnsureCreated();

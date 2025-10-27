@@ -1,9 +1,12 @@
-﻿using DTOs;
-using API.Clients;
+﻿using System; 
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq; 
 using System.Security.Claims;
+using System.Threading.Tasks; 
+using DTOs;
+using API.Clients;
 
-namespace API.Auth.WindowsForms
+namespace API.Auth.WindowsForms 
 {
     public class WindowsFormsAuthService : IAuthService
     {
@@ -13,6 +16,15 @@ namespace API.Auth.WindowsForms
         private int ExpirationTime = 30;
 
         public event Action<bool>? AuthenticationStateChanged;
+
+        public event Action? OnChange;
+
+        public void NotifyStateChanged()
+        {
+            bool isAuthenticated = !string.IsNullOrEmpty(_currentToken) && DateTime.UtcNow < _tokenExpiration;
+            AuthenticationStateChanged?.Invoke(isAuthenticated);
+            OnChange?.Invoke();
+        }
 
         public async Task<bool> IsAuthenticatedAsync()
         {
@@ -37,13 +49,13 @@ namespace API.Auth.WindowsForms
 
             if (token != null)
             {
-                UsuarioDTO user = await UsuarioApiClient.GetByEmailAsync(email, token);
+                UsuarioDTO user = await UsuarioApiClient.GetByEmailAsync(email, token); 
 
                 _currentToken = token;
                 _tokenExpiration = DateTime.UtcNow.AddMinutes(ExpirationTime);
                 _currentUser = user;
 
-                AuthenticationStateChanged?.Invoke(true);
+                NotifyStateChanged(); 
                 return true;
             }
 
@@ -56,7 +68,8 @@ namespace API.Auth.WindowsForms
             _tokenExpiration = default;
             _currentUser = null;
 
-            AuthenticationStateChanged?.Invoke(false);
+            // AuthenticationStateChanged?.Invoke(false); 
+            NotifyStateChanged();
         }
 
         public async Task CheckTokenExpirationAsync()

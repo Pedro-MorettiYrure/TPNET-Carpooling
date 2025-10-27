@@ -37,9 +37,9 @@ namespace Application.Services
             if (viaje.Estado != EstadoViaje.Pendiente)
                 throw new InvalidOperationException("Solo se pueden realizar solicitudes a viajes pendientes.");
 
-            // Usar el método del repo que chequea solicitudes ACTIVAS
+            // Usamos el método del repo que chequea solicitudes pendientes, aprobadas o rechazadas
             if (_solicitudRepo.ExisteSolicitudActiva(idViaje, idPasajero))
-                throw new InvalidOperationException("Ya existe una solicitud pendiente o aprobada para este viaje.");
+                throw new InvalidOperationException("Ya existe una solicitud pendiente, aprobada o rechazada para este viaje.");
 
             var solicitudesAprobadas = _solicitudRepo.GetAllByViaje(idViaje)
                                            .Count(s => s.Estado == EstadoSolicitud.Aprobada);

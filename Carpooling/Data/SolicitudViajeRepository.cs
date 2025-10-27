@@ -71,14 +71,13 @@ namespace Data
             return _context.SolicitudesViaje.Any(s => s.IdViaje == idViaje && s.IdPasajero == idPasajero);
         }
 
-        // *** MODIFICADO: Chequear si existe solicitud ACTIVA (Pendiente o Aprobada) ***
-        // (Tu servicio ya lo usaba, pero este es el lugar correcto para la lógica)
+        //  Esto se usa p cuando se quiere solicitar un viaje, q valide si el pasajero no tiene ya una solicitud rechazada, pendiente o aprobada(si tiene una cancelada le permitimos volver a solicitar)
         public bool ExisteSolicitudActiva(int idViaje, int idPasajero)
         {
             return _context.SolicitudesViaje.Any(s =>
                s.IdViaje == idViaje &&
                s.IdPasajero == idPasajero &&
-               (s.Estado == EstadoSolicitud.Pendiente || s.Estado == EstadoSolicitud.Aprobada));
+               (s.Estado == EstadoSolicitud.Pendiente || s.Estado == EstadoSolicitud.Aprobada  || s.Estado == EstadoSolicitud.Rechazada));
         }
     }
 }

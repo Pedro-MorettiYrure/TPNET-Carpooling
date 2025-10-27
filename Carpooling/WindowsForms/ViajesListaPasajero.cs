@@ -1,159 +1,248 @@
 ﻿using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DTOs;
-using API.Clients;
+using API.Clients; // Namespace de tus ApiClients
+using DTOs;       // Namespace de tus DTOs
+using Domain.Model; // Namespace para EstadoSolicitud y EstadoViaje
 
 namespace WindowsForms
 {
     public partial class ViajesListaPasajero : Form
     {
-        private readonly UsuarioDTO _usuario;
+        private readonly UsuarioDTO _pasajeroLogueado;
+        private List<SolicitudViajeDTO> _misViajesConfirmados; // Guarda las solicitudes aprobadas
 
-        public ViajesListaPasajero(UsuarioDTO usuario)
+        public ViajesListaPasajero(UsuarioDTO pasajeroLogueado)
         {
-            InitializeComponent();
-            _usuario = usuario ?? throw new ArgumentNullException(nameof(usuario));
-            ConfigureDataGridView();
+            InitializeComponent(); // Asegúrate que esta línea no dé error
+            _pasajeroLogueado = pasajeroLogueado;
+            _misViajesConfirmados = new List<SolicitudViajeDTO>();
         }
 
-        private void ConfigureDataGridView()
-        {
-            dataGridView1.AutoGenerateColumns = false;
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.MultiSelect = false;
-            dataGridView1.ReadOnly = true;
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AllowUserToDeleteRows = false;
-
-            dataGridView1.Columns.Clear();
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "ID Solicitud", DataPropertyName = "IdSolicitud", Width = 80 });
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Fecha Solicitud", DataPropertyName = "SolicitudFecha", DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" }, Width = 120 });
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Estado Solicitud", DataPropertyName = "Estado", Width = 100 });
-            dataGridView1.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "ID Viaje", DataPropertyName = "IdViaje", Width = 60 });
-            
-            DataGridViewButtonColumn btnCancelCol = new DataGridViewButtonColumn();
-            btnCancelCol.Name = "CancelarCol";
-            btnCancelCol.HeaderText = "Acción";
-            btnCancelCol.Text = "Cancelar Solicitud";
-            btnCancelCol.UseColumnTextForButtonValue = true;
-            btnCancelCol.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dataGridView1.Columns.Add(btnCancelCol);
-
-            dataGridView1.CellFormatting += DataGridView1_CellFormatting; 
-            dataGridView1.CellContentClick += DataGridView1_CellContentClick; 
-
-            this.Load += ViajesListaPasajero_Load;
-
-        }
-
+        // --- Carga Inicial ---
         private async void ViajesListaPasajero_Load(object sender, EventArgs e)
         {
-            await GetAllSolicitudesAndLoad();
+            await CargarMisViajesAsync();
+            ActualizarEstadoBotones(); // Establece estado inicial
         }
 
-        private async Task GetAllSolicitudesAndLoad()
+        // --- Cargar Datos ---
+        private async Task CargarMisViajesAsync()
         {
+            string? token = SessionManager.JwtToken; // Asume que así obtienes el token
+            if (string.IsNullOrEmpty(token))
+            {
+                MessageBox.Show("Error de sesión. No se encontró el token.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Deshabilitar botones si no hay token
+                btnVerDetalles.Enabled = false;
+                btnCancelarSolicitud.Enabled = false;
+                return;
+            }
+
             try
             {
-                string? token = SessionManager.JwtToken;
-                if (string.IsNullOrEmpty(token)) throw new UnauthorizedAccessException("Sesión inválida.");
+                dgvMisViajes.DataSource = null; // Limpiar grilla
 
-                // Llamar al API para obtener las SOLICITUDES del pasajero
-                var solicitudes = await SolicitudViajeApiClient.GetSolicitudesPorPasajeroAsync(_usuario.IdUsuario, token);
-                var listaSolicitudes = solicitudes.ToList();
+                // 1. Obtener TODAS las solicitudes del pasajero
+                var todasMisSolicitudes = await SolicitudViajeApiClient.GetSolicitudesPorPasajeroAsync(_pasajeroLogueado.IdUsuario, token);
 
-                this.Invoke((MethodInvoker)delegate {
-                    dataGridView1.DataSource = null;
-                    dataGridView1.DataSource = listaSolicitudes;
-                });
-            }
-            catch (UnauthorizedAccessException authEx)
-            {
-                this.BeginInvoke((MethodInvoker)delegate {
-                    MessageBox.Show($"Error de autorización: {authEx.Message}", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    SessionManager.CerrarSesion();
-                    this.Close();
-                });
+                // 2. Filtrar solo las APROBADAS para mostrar (incluye pasadas y futuras)
+                _misViajesConfirmados = todasMisSolicitudes?.Where(s => s.Estado == EstadoSolicitud.Aprobada.ToString()).ToList()
+                                        ?? new List<SolicitudViajeDTO>();
+
+                dgvMisViajes.DataSource = _misViajesConfirmados;
+
+                // 3. Configurar Columnas (ajusta si los nombres en tu DTO son diferentes)
+                if (dgvMisViajes.DataSource != null && _misViajesConfirmados.Any())
+                {
+                    // Ocultar columnas no relevantes para el pasajero en esta vista
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdSolicitud)].Visible = false;
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdViaje)].Visible = false;
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdPasajero)].Visible = false;
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.SolicitudFecha)].Visible = false;
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.NombrePasajero)].Visible = false;
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.ApellidoPasajero)].Visible = false;
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.Estado)].Visible = false; 
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdConductor)].Visible = false;
+
+                    // Columnas a mostrar y renombrar
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.FechaHoraViaje)].HeaderText = "Fecha y Hora";
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.OrigenViajeNombre)].HeaderText = "Origen";
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.DestinoViajeNombre)].HeaderText = "Destino";
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.NombreConductor)].HeaderText = "Conductor"; 
+                    dgvMisViajes.Columns[nameof(SolicitudViajeDTO.ApellidoConductor)].HeaderText = "Apellido Cond.";
+                    if (dgvMisViajes.Columns.Contains(nameof(SolicitudViajeDTO.EstadoDelViaje)))
+                    {
+                        dgvMisViajes.Columns[nameof(SolicitudViajeDTO.EstadoDelViaje)].HeaderText = "Estado del Viaje";
+                        dgvMisViajes.Columns[nameof(SolicitudViajeDTO.EstadoDelViaje)].Visible = true;
+                    }
+
+                    dgvMisViajes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                }
             }
             catch (Exception ex)
             {
-                this.BeginInvoke((MethodInvoker)delegate {
-                    MessageBox.Show($"Error al cargar tus solicitudes de viaje: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                });
+                MessageBox.Show($"Error al cargar mis viajes confirmados: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnVerDetalles.Enabled = false;
+                btnCancelarSolicitud.Enabled = false;
             }
         }
 
-        private void DataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+       
+        private void dgvMisViajes_SelectionChanged(object sender, EventArgs e)
         {
-            if (e.ColumnIndex == dataGridView1.Columns["CancelarCol"]?.Index && e.RowIndex >= 0)
+            ActualizarEstadoBotones();
+        }
+
+        private void ActualizarEstadoBotones()
+        {
+            bool haySeleccion = dgvMisViajes.SelectedRows.Count > 0;
+            bool esCancelable = false; 
+
+            if (haySeleccion)
             {
-                var solicitud = dataGridView1.Rows[e.RowIndex].DataBoundItem as SolicitudViajeDTO;
-                var cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex] as DataGridViewButtonCell;
+                var selectedRow = dgvMisViajes.SelectedRows[0];
+                var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
 
-                if (solicitud != null && cell != null)
-                {
-                    // Habilitar solo si está Pendiente o Aprobada
-                    bool habilitado = solicitud.Estado == Domain.Model.EstadoSolicitud.Pendiente.ToString() ||
-                                       solicitud.Estado == Domain.Model.EstadoSolicitud.Aprobada.ToString();
+                // Cancelar se habilita si la solicitud está Aprobada Y el viaje es futuro
+                esCancelable = (solicitud != null &&
+                                solicitud.Estado == EstadoSolicitud.Aprobada.ToString() && // Ya filtrado, pero por seguridad
+                                solicitud.FechaHoraViaje.HasValue &&
+                                solicitud.FechaHoraViaje.Value > DateTime.Now);
+            }
 
-                   
-                    if (!habilitado)
-                    {
-                        
-                        cell.FlatStyle = FlatStyle.Flat;
-                        cell.Style.ForeColor = Color.Gray;
-                        cell.Style.BackColor = Color.LightGray; 
-                    }
-                    else
-                    {
-                        cell.FlatStyle = FlatStyle.Standard;
-                        cell.Style.ForeColor = dataGridView1.DefaultCellStyle.ForeColor;
-                        cell.Style.BackColor = dataGridView1.DefaultCellStyle.BackColor;
-                    }
-                }
+            btnVerDetalles.Enabled = haySeleccion;
+            btnCancelarSolicitud.Enabled = esCancelable;
+            // btnCalificarConductor.Enabled = ... (Lógica que hicimos antes, si tienes el botón)
+        }
+
+        
+        private void btnVerDetalles_Click(object sender, EventArgs e)
+        {
+            if (dgvMisViajes.SelectedRows.Count == 0) return;
+            var selectedRow = dgvMisViajes.SelectedRows[0];
+            var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
+            if (solicitud == null) return;
+
+            string detalles = $"Viaje ID: {solicitud.IdViaje}\n" +
+                              $"Fecha: {solicitud.FechaHoraViaje:dd/MM/yyyy HH:mm}\n" +
+                              $"Origen: {solicitud.OrigenViajeNombre}\n" +
+                              $"Destino: {solicitud.DestinoViajeNombre}\n" +
+                              $"Estado Solicitud: {solicitud.Estado}\n" + // Será "Aprobada"
+                              $"Estado del Viaje: {solicitud.EstadoDelViaje?.ToString() ?? "N/A"}\n" + // Muestra estado del viaje
+                              $"Conductor: {solicitud.NombreConductor} {solicitud.ApellidoConductor}\n"; // Si tienes los datos
+
+            MessageBox.Show(detalles, "Detalles del Viaje Confirmado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+       
+        private async void btnCancelarSolicitud_Click(object sender, EventArgs e)
+        {
+            if (dgvMisViajes.SelectedRows.Count == 0) return;
+            var selectedRow = dgvMisViajes.SelectedRows[0];
+            var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
+            if (solicitud == null || solicitud.Estado != EstadoSolicitud.Aprobada.ToString() || !(solicitud.FechaHoraViaje > DateTime.Now)) return;
+            //validamos q la solicitud este aprobada porq aca estamos mostrando los viajes ya confirmados, tambien se puede cancelar una solicitud pendiente pero eso lo manejamos en el form de las solicitudes de usuario
+            DialogResult confirm = MessageBox.Show("¿Está seguro de cancelar su lugar en este viaje?",
+                                               "Confirmar Cancelación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (confirm == DialogResult.No) return;
+
+            try
+            {
+                string? token = SessionManager.JwtToken;
+                if (string.IsNullOrEmpty(token)) { MessageBox.Show("Error de sesión."); return; }
+
+                await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(solicitud.IdSolicitud, token);
+
+                MessageBox.Show("Su participación en este viaje ha sido cancelada.", "Cancelación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await CargarMisViajesAsync(); // actualizamos la lista de viajes 
+                ActualizarEstadoBotones();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cancelar la solicitud:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private async void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void btnCalificarConductor_Click(object sender, EventArgs e) 
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == dataGridView1.Columns["CancelarCol"]?.Index)
+            
+            if (dgvMisViajes.SelectedRows.Count == 0)
             {
-                var solicitud = dataGridView1.Rows[e.RowIndex].DataBoundItem as SolicitudViajeDTO;
-                if (solicitud == null) return;
+                MessageBox.Show("Debe seleccionar un viaje para poder calificar al conductor.", "Selección Requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-                // Verificar si la solicitud es cancelable
-                if (solicitud.Estado != Domain.Model.EstadoSolicitud.Pendiente.ToString() &&
-                    solicitud.Estado != Domain.Model.EstadoSolicitud.Aprobada.ToString())
+            var selectedRow = dgvMisViajes.SelectedRows[0];
+            var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
+
+            if (solicitud == null || !solicitud.EstadoDelViaje.HasValue || solicitud.EstadoDelViaje.Value != EstadoViaje.Realizado)
+            {
+                MessageBox.Show("Solo puedes calificar viajes que ya se han realizado.", "Acción no Válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int idViaje = solicitud.IdViaje;
+            int idConductorACalificar = solicitud.IdConductor ?? 0;
+            int idPasajeroQueCalifica = _pasajeroLogueado.IdUsuario; // ID del usuario logueado
+
+            if (idConductorACalificar == 0)
+            {
+                MessageBox.Show("No se pudo obtener la información del conductor para calificar.", "Error de Datos", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                using (FormCalificar formCalificar = new FormCalificar(
+                    idPasajeroQueCalifica,      
+                    idConductorACalificar,   
+                    idViaje,
+                    RolCalificado.Conductor
+                ))
                 {
-                    MessageBox.Show("Esta solicitud ya no puede ser cancelada.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-
-                DialogResult confirm = MessageBox.Show($"¿Está seguro de cancelar su solicitud (ID: {solicitud.IdSolicitud}) para el viaje ID: {solicitud.IdViaje}?",
-                                                     "Confirmar Cancelación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (confirm == DialogResult.Yes)
-                {
-                    try
+                    // 5. Mostrar el formulario y esperar confirmación (DialogResult.OK)
+                    if (formCalificar.ShowDialog() == DialogResult.OK)
                     {
+                        // 6. Obtener los datos ingresados por el usuario
+                        CalificacionInputDTO calificacionInput = formCalificar.CalificacionIngresada;
+
+                        // 7. Obtener el token de sesión
                         string? token = SessionManager.JwtToken;
-                        if (string.IsNullOrEmpty(token)) throw new UnauthorizedAccessException("Sesión inválida.");
+                        if (string.IsNullOrEmpty(token))
+                        {
+                            MessageBox.Show("Error de sesión. No se encontró el token.", "Error");
+                            return;
+                        }
 
-                        await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(solicitud.IdSolicitud, token);
+                        // 8. Llamar al API Client para enviar la calificación del conductor
+                        await CalificacionApiClient.CalificarConductorAsync(idViaje, calificacionInput, token);
 
-                        MessageBox.Show("Solicitud cancelada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        await GetAllSolicitudesAndLoad(); // Recargar la grilla
+                        MessageBox.Show("Calificación enviada con éxito.", "Calificación Guardada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        // 9. Opcional: Actualizar UI (ej: deshabilitar botón para este viaje)
+                        // Podrías necesitar recargar los datos o marcar la solicitud/viaje como "ya calificado"
+                        ActualizarEstadoBotones();
                     }
-                    catch (UnauthorizedAccessException authEx) { MessageBox.Show($"Error de autorización: {authEx.Message}", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
-                    catch (InvalidOperationException opEx) { MessageBox.Show($"Error: {opEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); } // Ej: ya estaba cancelada/rechazada
-                    catch (Exception ex) { MessageBox.Show($"Error al cancelar la solicitud: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                    // Si el usuario cierra el FormCalificar sin confirmar (DialogResult != OK), no se hace nada.
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al enviar la calificación:\n{ex.Message}", "Error Inesperado", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        private void btnVolver_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        
+
+        // --- Agrega aquí el btnCalificarConductor_Click si lo necesitas ---
+        // private void btnCalificarConductor_Click(object sender, EventArgs e) { ... }
     }
-} 
+}
