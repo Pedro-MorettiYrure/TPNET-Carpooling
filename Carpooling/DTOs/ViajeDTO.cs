@@ -14,7 +14,7 @@ namespace DTOs
         public int CantLugares { get; set; }
         public EstadoViaje Estado { get; set; }
         public string? Comentario { get; set; }
-        public decimal Precio { get; set; } // prefiero decimal para dinero
+        public decimal Precio { get; set; } 
         public string OrigenCodPostal { get; set; }
         public string DestinoCodPostal { get; set; }
         public string NombreOrigen { get; set; }

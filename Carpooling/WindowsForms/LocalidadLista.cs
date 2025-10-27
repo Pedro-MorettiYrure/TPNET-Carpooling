@@ -18,7 +18,6 @@ namespace WindowsForms
 
         private void ConfigureDataGridView()
         {
-            // Configurar DGV
             dgvLocalidad.AutoGenerateColumns = false;
             dgvLocalidad.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvLocalidad.MultiSelect = false;

@@ -10,23 +10,22 @@ namespace API.Auth.Blazor
 
         private static SessionData? _currentSession;
 
-        public int ExpirationTime = 30; //minutos
+        public int ExpirationTime = 30; 
 
         public event Action? OnChange;
 
         private class SessionData
         {
             public string? Token { get; set; }
-            //public UsuarioDTO? UsuarioActual { get; set; }
             public DateTime Expiration { get; set; }
         }
 
-        public void IniciarSesion(UsuarioDTO usuario)   //SACAR
+        public void IniciarSesion(UsuarioDTO usuario)   
         {
             UsuarioActual = usuario;
             NotifyStateChanged();
         }
-        public void CerrarSesion()  //SACAR
+        public void CerrarSesion()  
         {
             UsuarioActual = null;
             NotifyStateChanged();
@@ -119,28 +118,5 @@ namespace API.Auth.Blazor
 
         public void NotifyStateChanged() => OnChange?.Invoke();
     }
-        
-        //public Task<bool> HasPermissionAsync(string permission)
-        //{
-        //    try
-        //    {
-        //        var token = _currentSession?.Token;
-        //        if (string.IsNullOrEmpty(token))
-        //            return Task.FromResult(false);
-
-        //        var handler = new JwtSecurityTokenHandler();
-        //        var jsonToken = handler.ReadJwtToken(token);
-
-        //        var permissionClaims = jsonToken.Claims
-        //            .Where(c => c.Type == "permission")
-        //            .Select(c => c.Value);
-
-        //        return Task.FromResult(permissionClaims.Contains(permission));
-        //    }
-        //    catch
-        //    {
-        //        return Task.FromResult(false);
-        //    }
-        //}
-
+       
 }

@@ -9,13 +9,11 @@ namespace Application.Services
     {
         private readonly UsuarioRepository _repo;
 
-        // Recibe el repositorio por constructor
         public UsuarioService(UsuarioRepository repo)
         {
             _repo = repo;
         }
 
-        // Registrar usuario usando el método de fábrica
         public UsuarioDTO Registrar(UsuarioDTO dto, string contraseña)
         {
             var usuario = Usuario.Crear(dto.Nombre, dto.Apellido, dto.Email, contraseña, dto.Telefono);
@@ -87,8 +85,6 @@ namespace Application.Services
         }
 
 
-
-        // Método para convertir al usuario a conductor
         public bool ConvertirAConductor(int idUsuario, ConductorUpgradeDTO dto)
         {
             var usuario = _repo.GetById(idUsuario);

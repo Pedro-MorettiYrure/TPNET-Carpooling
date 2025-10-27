@@ -13,7 +13,6 @@
 
 <h3>Mis Viajes Publicados</h3>
 
-@* Mensaje de error general *@
 @if (!string.IsNullOrEmpty(errorMensaje))
 {
     <div class="alert alert-danger" role="alert">
@@ -21,7 +20,7 @@
     </div>
 }
 
-@if (puedeAcceder) // Si el usuario tiene permisos
+@if (puedeAcceder) 
 {
     <div class="mb-3">
         <button class="btn btn-success" @onclick="AgregarViaje">
@@ -29,16 +28,16 @@
         </button>
     </div>
 
-    @if (viajes == null) // Si aún está cargando
+    @if (viajes == null) 
     {
         <p><em>Cargando viajes...</em></p>
     }
-    else if (viajes.Count == 0) // Si no tiene viajes
+    else if (viajes.Count == 0) 
     {
         <p>Aún no has publicado ningún viaje.</p>
         //
     }
-    else // Si hay viajes, muestra la tabla
+    else 
     {
         <table class="table table-striped">
             <thead>
@@ -53,17 +52,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var viaje in viajes) // Itera sobre la lista de viajes
+                @foreach (var viaje in viajes) 
                 {
                     <tr>
                         <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@viaje.NombreOrigen</td> @* Muestra el nombre del origen si está disponible *@
-                        <td>@viaje.NombreDestino</td> @* Muestra el nombre del destino si está disponible *@
+                        <td>@viaje.NombreOrigen</td>
+                        <td>@viaje.NombreDestino</td> 
                         <td>@viaje.CantLugares</td>
-                        <td>@viaje.Precio.ToString("C")</td> @* Formato de moneda *@
+                        <td>@viaje.Precio.ToString("C")</td> 
                         <td>@viaje.Estado</td>
                         <td>
-                            @* --- Lógica Condicional para Botones --- *@
                             @switch (viaje.Estado)
                             {
                                 case EstadoViaje.Pendiente: // Si el viaje está pendiente
@@ -82,7 +80,6 @@
                                     <span class="text-muted">Cancelado</span>
                                     break;
                             }
-                            @* --- Fin Lógica Condicional --- *@
                         </td>
                     </tr>
                 }
@@ -90,10 +87,10 @@
         </table>
     }
 }
-else // Si el usuario no tiene permisos
+else 
 {
     <p><em>Verificando permisos...</em></p>
-    @if (!puedeAcceder && SesionUsuario.EstaLogueado) // Muestra si está logueado pero no es conductor/admin
+    @if (!puedeAcceder && SesionUsuario.EstaLogueado) 
     {
         <div class="alert alert-warning mt-3">No tienes permiso para acceder a esta sección. Debes ser conductor.</div>
         //
@@ -101,109 +98,103 @@ else // Si el usuario no tiene permisos
 }
 
 @code {
-    private List<ViajeDTO>? viajes; // Lista para almacenar los viajes cargados
-    private bool puedeAcceder = false; // Flag para controlar acceso
-    private bool procesandoAccion = false; // Flag para deshabilitar botones durante llamadas API
-    private string? errorMensaje; // Para mostrar errores generales
+    private List<ViajeDTO>? viajes;
+    private bool puedeAcceder = false;
+    private bool procesandoAccion = false;
+    private string? errorMensaje;
 
-    string? token; // Variable para almacenar el token JWT
+    string? token; 
 
-    // Método que se ejecuta al inicializar el componente
     protected override async Task OnInitializedAsync()
     {
-        await SesionUsuario.IsAuthenticatedAsync(); // Asegura estado de sesión actualizado
-        // Verifica si está logueado y es Conductor O Administrador
+        await SesionUsuario.IsAuthenticatedAsync(); 
         if (SesionUsuario.EstaLogueado &&
             (SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor ||
-             SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.Administrador)) //
+             SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.Administrador)) 
         {
-            puedeAcceder = true; // Permite acceso
-            token = await SesionUsuario.GetTokenAsync(); // Obtiene el token
-            await CargarViajes(); // Carga la lista de viajes
+            puedeAcceder = true;
+            token = await SesionUsuario.GetTokenAsync(); 
+            await CargarViajes(); 
         }
         else if (SesionUsuario.EstaLogueado)
         {
-            // Logueado pero no tiene el rol correcto
             puedeAcceder = false;
         }
         else
         {
-            // No está logueado
-            Navigation.NavigateTo("/login"); // Redirige a login
+            Navigation.NavigateTo("/login"); 
         }
     }
 
     // Método asíncrono para cargar los viajes desde la API
     private async Task CargarViajes()
     {
-        errorMensaje = null; // Limpia errores previos
-        if (!puedeAcceder || token == null) return; // Si no tiene acceso o token, no hace nada
+        errorMensaje = null; 
+        if (!puedeAcceder || token == null) return; 
 
         try
         {
-            await SesionUsuario.CheckTokenExpirationAsync(); // Revisa si el token ha expirado
-            token = await SesionUsuario.GetTokenAsync(); // Obtiene el token actualizado
+            await SesionUsuario.CheckTokenExpirationAsync(); 
+            token = await SesionUsuario.GetTokenAsync(); 
             if (token == null)
             {
                 throw new InvalidOperationException("La sesión ha expirado. Por favor, inicie sesión de nuevo.");
             }
 
-            var idUsuario = SesionUsuario.UsuarioActual!.IdUsuario; // Obtiene el ID del usuario (seguro porque EstaLogueado es true)
-            var viajesList = await ViajeApiClient.GetByConductorAsync(idUsuario, token); // Llama a la API
-            viajes = viajesList.OrderByDescending(v => v.FechaHora).ToList(); // Ordena los viajes por fecha más reciente
+            var idUsuario = SesionUsuario.UsuarioActual!.IdUsuario; 
+            var viajesList = await ViajeApiClient.GetByConductorAsync(idUsuario, token);
+            viajes = viajesList.OrderByDescending(v => v.FechaHora).ToList(); 
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar viajes: {ex.Message}");
-            errorMensaje = $"No se pudieron cargar los viajes: {ex.Message}"; // Guarda el mensaje de error
-            viajes = new List<ViajeDTO>(); // Asigna lista vacía en caso de error
+            errorMensaje = $"No se pudieron cargar los viajes: {ex.Message}"; 
+            viajes = new List<ViajeDTO>(); 
         }
-        StateHasChanged(); // Notifica a Blazor para que actualice la interfaz gráfica
+        StateHasChanged(); 
     }
 
     // Navega a la página para agregar un nuevo viaje
     private void AgregarViaje()
     {
-        Navigation.NavigateTo("/viaje/nuevo"); //
+        Navigation.NavigateTo("/viaje/nuevo"); 
     }
 
     // Navega a la página para editar un viaje existente
     private void EditarViaje(int idViaje)
     {
-        Navigation.NavigateTo($"/viaje/editar/{idViaje}"); //
+        Navigation.NavigateTo($"/viaje/editar/{idViaje}"); 
     }
 
     // Método asíncrono para cancelar un viaje
     private async Task CancelarViaje(int idViaje)
     {
-        if (procesandoAccion) return; // Evita ejecuciones múltiples si ya se está procesando
-        procesandoAccion = true; // Marca que una acción está en curso
-        errorMensaje = null; // Limpia errores
-        await Task.Delay(1); // Pequeño delay para que la UI muestre el botón deshabilitado
+        if (procesandoAccion) return; 
+        procesandoAccion = true; 
+        errorMensaje = null; 
+        await Task.Delay(1); 
 
         try
         {
-            await SesionUsuario.CheckTokenExpirationAsync(); // Revisa token
-            token = await SesionUsuario.GetTokenAsync(); // Obtiene token
+            await SesionUsuario.CheckTokenExpirationAsync(); 
+            token = await SesionUsuario.GetTokenAsync(); 
             if (token == null) throw new InvalidOperationException("Sesión expirada.");
 
-            // Muestra un diálogo de confirmación usando JavaScript
             bool confirmado = await JSRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de que desea cancelar este viaje?");
-            if (!confirmado) return; // Si el usuario cancela, no hace nada
+            if (!confirmado) return; 
 
-            // Llama a la API para cancelar (eliminar lógicamente) el viaje
-            await ViajeApiClient.DeleteAsync(idViaje, token); //
-            await CargarViajes(); // Vuelve a cargar la lista para reflejar el cambio de estado
+            await ViajeApiClient.DeleteAsync(idViaje, token); 
+            await CargarViajes(); 
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cancelar el viaje {idViaje}: {ex.Message}");
-            errorMensaje = $"Error al cancelar viaje: {ex.Message}"; // Guarda el error
+            errorMensaje = $"Error al cancelar viaje: {ex.Message}"; 
         }
         finally
         {
-            procesandoAccion = false; // Marca que la acción terminó
-            StateHasChanged(); // Actualiza la UI
+            procesandoAccion = false; 
+            StateHasChanged(); 
         }
     }
 
@@ -221,9 +212,8 @@ else // Si el usuario no tiene permisos
             token = await SesionUsuario.GetTokenAsync(); //
             if (token == null) throw new InvalidOperationException("Sesión expirada.");
 
-            // Llama a la API para cambiar el estado a EnCurso
             await ViajeApiClient.IniciarViajeAsync(idViaje, token); //
-            await CargarViajes(); // Recarga la lista
+            await CargarViajes();
         }
         catch (Exception ex)
         {
@@ -254,11 +244,9 @@ else // Si el usuario no tiene permisos
             // Llama a la API para cambiar el estado a Realizado
             var response = await ViajeApiClient.FinalizarViajeAsync(idViaje, token); //
 
-            if (response != null) // Verifica si la respuesta fue exitosa
+            if (response != null) 
             {
-                await CargarViajes(); // Recarga la lista para mostrar el nuevo estado y el botón de calificar
-                // Opcional: Mostrar mensaje de éxito si response.mensaje existe
-                // errorMensaje = response.mensaje; // Podrías usar errorMensaje para feedback positivo temporalmente
+                await CargarViajes(); 
             }
             else
             {
@@ -280,9 +268,7 @@ else // Si el usuario no tiene permisos
     // Método para navegar a la página de calificación (a implementar)
     private void IrACalificarPasajeros(int idViaje)
     {
-        // Navega a una URL específica para calificar, pasando el ID del viaje
         Navigation.NavigateTo($"/calificar-pasajeros/{idViaje}");
-        // Por ahora, solo muestra un mensaje temporal
         StateHasChanged();
     }
 

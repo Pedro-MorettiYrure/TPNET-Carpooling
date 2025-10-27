@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Domain.Model; // Para TipoUsuario
-using System.Collections.Generic; // Para IEnumerable
-using System;     // Para Exception
-using System.Linq; // Para .Any()
+using Domain.Model; 
+using System.Collections.Generic; 
+using System;    
+using System.Linq; 
 
 namespace WebAPI
 {
@@ -28,7 +28,7 @@ namespace WebAPI
             .WithName("GetAllViajesPublic")
             .Produces<List<ViajeDTO>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
-            .WithOpenApi(); // Sin RequireAuthorization
+            .WithOpenApi(); 
 
 
             // GET todos los viajes DE UN conductor (Solo ESE conductor o Admin)
@@ -70,7 +70,7 @@ namespace WebAPI
             .Produces<ViajeDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
-            .WithOpenApi(); // Sin RequireAuthorization
+            .WithOpenApi(); 
 
             // GET buscar viajes (público)
             app.MapGet("/viajes/buscar", async ([FromQuery] string origen, [FromQuery] string destino, [FromServices] ViajeServices viajeService) =>
@@ -90,16 +90,15 @@ namespace WebAPI
             .Produces<IEnumerable<ViajeDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
-            .WithOpenApi(); // Sin RequireAuthorization
+            .WithOpenApi(); 
 
             // POST crear viaje (Solo Conductor)
-            // *** CORREGIDO: Usamos Policy en el atributo ***
             app.MapPost("/viajes/", [Authorize(Policy = "EsConductor")] ([FromBody] ViajeDTO viajeDTO, ClaimsPrincipal user, [FromServices] ViajeServices viajeService) =>
             {
                 var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (!int.TryParse(idUsuarioClaim, out int idConductorAutenticado))
                 {
-                    return Results.Unauthorized(); // Token inválido
+                    return Results.Unauthorized();
                 }
 
                 viajeDTO.IdConductor = idConductorAutenticado;
@@ -109,8 +108,8 @@ namespace WebAPI
                     var created = viajeService.Add(viajeDTO);
                     return Results.Created($"/viajes/{created.IdViaje}", created);
                 }
-                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } // 400
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("AddViaje")
             .Produces<ViajeDTO>(StatusCodes.Status201Created)
@@ -118,7 +117,6 @@ namespace WebAPI
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
-            // *** CORREGIDO: Usamos la POLÍTICA "EsConductor" ***
             .RequireAuthorization("EsConductor")
             .WithOpenApi();
 
@@ -142,11 +140,11 @@ namespace WebAPI
                 try
                 {
                     var updated = viajeService.Update(viajeDTO);
-                    return updated ? Results.Ok(viajeDTO) : Results.NotFound(); // NotFound si Update falló
+                    return updated ? Results.Ok(viajeDTO) : Results.NotFound(); 
                 }
-                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } // 400
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("UpdateViaje")
             .Produces<ViajeDTO>(StatusCodes.Status200OK)
@@ -201,13 +199,13 @@ namespace WebAPI
                         return Results.Unauthorized();
                     }
 
-                    viajeService.IniciarViaje(idViaje, idConductorAutenticado); // Lanza excepciones si falla
+                    viajeService.IniciarViaje(idViaje, idConductorAutenticado);
                     return Results.Ok("Viaje iniciado.");
                 }
-                catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); } // 404
-                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } // 403
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); } 
+                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("IniciarViaje")
             .Produces(StatusCodes.Status200OK)
@@ -262,19 +260,19 @@ namespace WebAPI
                     var pasajeros = viajeService.GetPasajerosConfirmados(idViaje, idConductorAutenticado);
                     return Results.Ok(pasajeros);
                 }
-                catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); } // 404
-                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } // 403
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409 (ej. viaje no iniciado/realizado)
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); } 
+                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("GetPasajerosConfirmadosViaje")
-            .Produces<IEnumerable<UsuarioDTO>>(StatusCodes.Status200OK) //
+            .Produces<IEnumerable<UsuarioDTO>>(StatusCodes.Status200OK) 
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
-            .RequireAuthorization() // Requiere login (conductor o admin podrían acceder si ajustas la lógica del servicio)
+            .RequireAuthorization() 
             .WithOpenApi();
 
 

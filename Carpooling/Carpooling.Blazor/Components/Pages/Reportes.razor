@@ -7,15 +7,15 @@
 @using API.Auth.Blazor
 @using System.ComponentModel.DataAnnotations
 
-@inject ServicioSesionUsuario SesionUsuario //
-@inject NavigationManager Navigation //
-@inject IJSRuntime JSRuntime // 
+@inject ServicioSesionUsuario SesionUsuario 
+@inject NavigationManager Navigation 
+@inject IJSRuntime JSRuntime  
 
 <PageTitle>Reportes Administrativos</PageTitle>
 
 <h3>Reportes Administrativos</h3>
 
-@if (puedeAcceder) // Verifica si el usuario tiene permiso (es Admin)
+@if (puedeAcceder) 
 {
     // --- Card para Reporte Top Conductores ---
     <div class="card mb-4">
@@ -42,18 +42,18 @@
         <div class="card-body">
             <p>Genera un PDF con el resumen y detalle de viajes en un período seleccionado.</p>
             <EditForm Model="actividadModel" OnValidSubmit="GenerarReporteActividad" FormName="ActividadForm">
-                <DataAnnotationsValidator /> @* Activa las validaciones del modelo *@
+                <DataAnnotationsValidator /> 
                 <div class="row g-3 align-items-end">
                     <div class="col-md-5">
                         <label for="fechaInicio" class="form-label">Fecha Inicio:</label>
                         <InputDate id="fechaInicio" class="form-control" @bind-Value="actividadModel.FechaInicio" />
-                        <ValidationMessage For="@(() => actividadModel.FechaInicio)" /> @* Muestra error si falta fecha inicio *@
+                        <ValidationMessage For="@(() => actividadModel.FechaInicio)" /> 
                     </div>
                     <div class="col-md-5">
                         <label for="fechaFin" class="form-label">Fecha Fin:</label>
                         <InputDate id="fechaFin" class="form-control" @bind-Value="actividadModel.FechaFin" />
-                        <ValidationMessage For="@(() => actividadModel.FechaFin)" /> @* Muestra error si falta fecha fin *@
-                        <ValidationMessage For="@(() => actividadModel.FinValidado)" /> @* Muestra error si el rango es inválido *@
+                        <ValidationMessage For="@(() => actividadModel.FechaFin)" /> 
+                        <ValidationMessage For="@(() => actividadModel.FinValidado)" />
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100" disabled="@generandoReporte2">
@@ -76,7 +76,6 @@
 else
 {
     <p><em>Verificando permisos...</em></p>
-    @* Mostramos el mensaje solo si ya se determinó que no puede acceder Y está logueado *@
     @if (!puedeAcceder && SesionUsuario.EstaLogueado)
     {
         <div class="alert alert-warning mt-3">Acceso denegado. Debes ser Administrador para ver esta sección.</div>
@@ -95,8 +94,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync(); // Verifica si hay sesión activa
-        if (isAuthenticated && SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.Administrador) // Verifica si está logueado Y es Admin
+        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync(); 
+        if (isAuthenticated && SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.Administrador) 
         {
             puedeAcceder = true;
         }
@@ -107,7 +106,7 @@ else
         else
         {
             // No está logueado
-            Navigation.NavigateTo("/login", forceLoad: true); // Redirige a la página de login
+            Navigation.NavigateTo("/login", forceLoad: true); 
             puedeAcceder = false; 
         }
     }
@@ -115,12 +114,11 @@ else
     public class ActividadFechasModel
     {
         [Required(ErrorMessage = "La fecha de inicio es obligatoria.")]
-        public DateTime FechaInicio { get; set; } = DateTime.Today.AddMonths(-1); // Valor por defecto: hace un mes
+        public DateTime FechaInicio { get; set; } = DateTime.Today.AddMonths(-1); 
 
         [Required(ErrorMessage = "La fecha de fin es obligatoria.")]
-        public DateTime FechaFin { get; set; } = DateTime.Today; // Valor por defecto: hoy
+        public DateTime FechaFin { get; set; } = DateTime.Today;
 
-        // Propiedad auxiliar usada solo para la validación de rango entre fechas
         [Validation.DateRange("FechaInicio", ErrorMessage = "La fecha de fin no puede ser anterior a la fecha de inicio.")]
         public DateTime FinValidado => FechaFin;
     }

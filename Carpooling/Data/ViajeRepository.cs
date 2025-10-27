@@ -26,13 +26,9 @@ namespace Data
 
         public bool Update(Viaje viaje)
         {
-            //var viajeExistente = _context.Viajes.Find(viaje.IdViaje); // Find no usa Includes
-            //if (viajeExistente != null)
-            //{
+            
             _context.Viajes.Update(viaje);
-            return _context.SaveChanges() > 0; // Devuelve true si se afectaron filas
-            //}
-            //return false;
+            return _context.SaveChanges() > 0; 
         }
 
         public Vehiculo? GetVehiculo(int idVehiculo)
@@ -40,21 +36,18 @@ namespace Data
             return _context.Vehiculos.FirstOrDefault(v => v.IdVehiculo == idVehiculo);
         }
 
-        // *** MODIFICADO: Get(id) ahora incluye Origen, Destino y Conductor ***
-        public Viaje? Get(int id) // Devuelve nullable
+        public Viaje? Get(int id) 
         {
             return _context.Viajes
                 .Include(v => v.Origen)
                 .Include(v => v.Destino)
                 .Include(v => v.Conductor)
-                .Include(v => v.Vehiculo) // Descomentar si es necesario
-                // .Include(v => v.Solicitudes).ThenInclude(s => s.Pasajero) // Descomentar si es necesario
+                .Include(v => v.Vehiculo) 
                 .FirstOrDefault(v => v.IdViaje == id);
         }
 
         public IEnumerable<Viaje> GetAllByConductor(int idUsuario)
         {
-            // *** MODIFICADO: Incluir Origen y Destino para el DTO ***
             return _context.Viajes
                 .Include(v => v.Origen)
                 .Include(v => v.Destino)
@@ -77,36 +70,35 @@ namespace Data
             var ahora = DateTime.Now;
 
             return _context.Viajes
-                .Include(v => v.Origen)  // Necesario para NombreOrigen
-                .Include(v => v.Destino) // Necesario para NombreDestino
-                .Include(v => v.Conductor) // Opcional, si la búsqueda muestra el nombre
-                .Include(v => v.Vehiculo)  // Opcional, si la búsqueda muestra el auto
+                .Include(v => v.Origen) 
+                .Include(v => v.Destino) 
+                .Include(v => v.Conductor) 
+                .Include(v => v.Vehiculo)  
                 .Where(v => v.OrigenCodPostal == origenCodPostal &&
                              v.DestinoCodPostal == destinoCodPostal &&
                              v.Estado == EstadoViaje.Pendiente &&
                              v.FechaHora > ahora)
-                // La lógica de lugares disponibles debería estar en el servicio de Solicitud (al crear)
-                // O podrías filtrarlo aquí si es un requisito estricto de búsqueda
-                .OrderBy(v => v.FechaHora) // Más próximos primero
+                
+                .OrderBy(v => v.FechaHora)
                 .ToList();
         }
         public IEnumerable<Viaje> GetViajesByDateRange(DateTime fechaInicio, DateTime fechaFin)
         {
             // Aseguramos que incluya la info necesaria para el reporte
             return _context.Viajes
-                .Include(v => v.Origen) // Incluye Localidad Origen
-                .Include(v => v.Destino) // Incluye Localidad Destino
-                .Include(v => v.Conductor) // Incluye Usuario Conductor
-                .Where(v => v.FechaHora >= fechaInicio && v.FechaHora < fechaFin.AddDays(1)) // Filtra por rango de fechas
-                .OrderBy(v => v.FechaHora) // Ordena por fecha
-                .ToList(); //
+                .Include(v => v.Origen) 
+                .Include(v => v.Destino) 
+                .Include(v => v.Conductor) 
+                .Where(v => v.FechaHora >= fechaInicio && v.FechaHora < fechaFin.AddDays(1)) 
+                .OrderBy(v => v.FechaHora) 
+                .ToList(); 
         }
         public Viaje? GetWithPasajerosConfirmados(int idViaje)
         {
             return _context.Viajes
-                .Include(v => v.Conductor) // Necesario para validar conductor
-                .Include(v => v.Solicitudes) // Incluir solicitudes
-                    .ThenInclude(s => s.Pasajero) // Incluir el pasajero de cada solicitud
+                .Include(v => v.Conductor) 
+                .Include(v => v.Solicitudes) 
+                    .ThenInclude(s => s.Pasajero)
                 .FirstOrDefault(v => v.IdViaje == idViaje);
         }
 

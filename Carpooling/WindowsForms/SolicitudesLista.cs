@@ -18,7 +18,7 @@ namespace WindowsForms
         {
             InitializeComponent();
             _idViaje = idViaje;
-            _conductorLogueado = conductorLogueado ?? throw new ArgumentNullException(nameof(conductorLogueado)); // Asegura que no sea null
+            _conductorLogueado = conductorLogueado ?? throw new ArgumentNullException(nameof(conductorLogueado));
             FormGestionarSolicitudes_Load(this, EventArgs.Empty); 
         }
 
@@ -52,7 +52,7 @@ namespace WindowsForms
             {
                 dgvSolicitudes.DataSource = null;
                 dgvSolicitudes.Columns.Clear(); // Limpiar columnas existentes
-                dgvSolicitudes.AutoGenerateColumns = false; // Asegurarse de que no genere columnas automáticamente
+                dgvSolicitudes.AutoGenerateColumns = false; 
 
                 dgvSolicitudes.Columns.Add(new DataGridViewTextBoxColumn
                 {
@@ -70,7 +70,7 @@ namespace WindowsForms
                 {
                     HeaderText = "Fecha Solicitud",
                     DataPropertyName = nameof(SolicitudViajeDTO.SolicitudFecha),
-                    DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" }, // Formato de fecha/hora
+                    DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM/yyyy HH:mm" }, 
                     Width = 120 
                 });
                 dgvSolicitudes.Columns.Add(new DataGridViewTextBoxColumn
@@ -83,13 +83,11 @@ namespace WindowsForms
                 lblInfoViaje.Text = "Cargando...";
                 lblInfoViaje.Visible = true;
 
-                // 3. Obtener los datos
                 var solicitudes = await SolicitudViajeApiClient.GetSolicitudesPorViajeAsync(_idViaje, token);
                 var listaSolicitudes = solicitudes?.OrderBy(s => s.SolicitudFecha).ToList() ?? new List<SolicitudViajeDTO>(); 
 
                 dgvSolicitudes.DataSource = listaSolicitudes;
 
-                // 5. Configurar texto informativo y otros ajustes de UI
                 if (listaSolicitudes.Any())
                 {
                     
@@ -133,7 +131,6 @@ namespace WindowsForms
                     var selectedRow = dgvSolicitudes.SelectedRows[0];
                     if (selectedRow.DataBoundItem is SolicitudViajeDTO solicitud)
                     {
-                        // Comparamos usando el enum para más seguridad
                         esPendiente = solicitud.Estado.ToString() == EstadoSolicitud.Pendiente.ToString();
                     }
                 }
@@ -183,10 +180,8 @@ namespace WindowsForms
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al aceptar la solicitud:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Volver a habilitar botones sólo si falló por error genérico y sigue habiendo selección
                 if (!this.IsDisposed) ActualizarEstadoBotones();
             }
-            // No necesitamos finally para re-habilitar botones si CargarSolicitudesAsync ya lo hace
         }
 
 
@@ -213,7 +208,7 @@ namespace WindowsForms
                     return;
                 }
 
-                await SolicitudViajeApiClient.RechazarSolicitudAsync(solicitud.IdSolicitud, token); // Pasar token
+                await SolicitudViajeApiClient.RechazarSolicitudAsync(solicitud.IdSolicitud, token); 
                 MessageBox.Show($"Solicitud de {solicitud.NombrePasajero} {solicitud.ApellidoPasajero} rechazada.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 await CargarSolicitudesAsync(); // Refrescar

@@ -82,8 +82,8 @@ else
                 {
                     <tr>
                         <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@viaje.OrigenCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
-                        <td>@viaje.DestinoCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
+                        <td>@viaje.OrigenCodPostal</td> 
+                        <td>@viaje.DestinoCodPostal</td>
                         <td>@viaje.CantLugares</td>
                         <td>@viaje.Precio.ToString("C")</td>
                         <td>@viaje.Estado</td>
@@ -182,7 +182,7 @@ else
         catch (Exception ex)
         {
             Console.WriteLine($"Error al cargar viajes: {ex.Message}");
-            viajes = new List<ViajeDTO>(); // Dejar la lista vacía si hay error
+            viajes = new List<ViajeDTO>(); 
         }
     }
 

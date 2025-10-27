@@ -25,8 +25,7 @@ namespace WindowsForms
                 lblInstruccion.Text = "Calificá tu experiencia con el pasajero:";
             }
 
-            // inicializamos el dto por defecto
-            CalificacionIngresada = new CalificacionInputDTO { Puntaje = 5 }; // valor inicial por defecto
+            CalificacionIngresada = new CalificacionInputDTO { Puntaje = 5 }; 
         }
 
         private void btnEnviar_Click(object sender, EventArgs e)
@@ -34,7 +33,6 @@ namespace WindowsForms
             int valoracion = (int)numValoracion.Value;
             string? comentario = txtComentarioCalificacion.Text;
 
-            //validamos long del comentario
             if (comentario != null && comentario.Length > 500)
             {
                 MessageBox.Show("El comentario no puede superar los 500 caracteres.", "Comentario Largo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -44,7 +42,7 @@ namespace WindowsForms
             CalificacionIngresada = new CalificacionInputDTO
             {
                 Puntaje = valoracion,
-                Comentario = string.IsNullOrWhiteSpace(comentario) ? null : comentario.Trim() // Enviar null si está vacío
+                Comentario = string.IsNullOrWhiteSpace(comentario) ? null : comentario.Trim() 
             };
 
             this.DialogResult = DialogResult.OK; 

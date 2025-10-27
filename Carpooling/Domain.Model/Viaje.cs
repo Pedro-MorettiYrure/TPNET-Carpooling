@@ -49,7 +49,7 @@ namespace Domain.Model
             var v = new Viaje();
             v.SetFechaHora(fecha);
             v.SetCantLugares(cantLugares);
-            v.SetPrecio(precio);   // faltaba setear el precio
+            v.SetPrecio(precio);   
             v.SetComentario(comentario);
 
             v.OrigenCodPostal = origenCodPostal;

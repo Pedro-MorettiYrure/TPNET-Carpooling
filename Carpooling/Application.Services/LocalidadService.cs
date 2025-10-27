@@ -11,7 +11,6 @@ namespace Application.Services
     {
         private readonly LocalidadRepository _repo;
         private readonly TPIContext _context;
-        // Recibe el repositorio por constructor
         public LocalidadService(LocalidadRepository repo, TPIContext context)
         {
             _repo = repo;
@@ -20,7 +19,6 @@ namespace Application.Services
 
         public LocalidadDTO Add(LocalidadDTO dto)
         {
-            // Validar que no exista en DB
             if (_repo.Get(dto.CodPostal) != null)
                 throw new ArgumentException($"Ya existe una localidad con el Código Postal '{dto.CodPostal}'.");
 

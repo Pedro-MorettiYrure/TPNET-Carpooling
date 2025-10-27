@@ -17,7 +17,7 @@ namespace Domain.Model
 
         // Relación con Usuario
         public int IdUsuario { get; set; }
-        public Usuario Usuario { get; set; }   // Navigation property
+        public Usuario Usuario { get; set; }   
 
         public Vehiculo() { }
 

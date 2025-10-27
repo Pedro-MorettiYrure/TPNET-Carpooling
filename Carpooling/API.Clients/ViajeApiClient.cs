@@ -7,13 +7,12 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-//using WindowsForms; // NO USAR ESTO
 
 namespace API.Clients
 {
     public class ViajeApiClient
     {
-        private static readonly HttpClient _httpClient; // Renombrado
+        private static readonly HttpClient _httpClient; 
 
         static ViajeApiClient()
         {
@@ -22,8 +21,7 @@ namespace API.Clients
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // GetByConductorAsync necesita token
-        public static async Task<IEnumerable<ViajeDTO>> GetByConductorAsync(int idUsuario, string token) // <-- Recibe token
+        public static async Task<IEnumerable<ViajeDTO>> GetByConductorAsync(int idUsuario, string token)
         {
             try
             {
@@ -36,14 +34,13 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // GetAsync público (asumido)
         public static async Task<ViajeDTO?> GetAsync(string idViaje)
         {
             try
             {
                 HttpResponseMessage response = await _httpClient.GetAsync($"viajes/{idViaje}");
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
-                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener viaje {idViaje}"); // Aún puede haber otros errores
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener viaje {idViaje}"); 
                 return await response.Content.ReadFromJsonAsync<ViajeDTO>();
             }
             catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
@@ -51,7 +48,6 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // BuscarViajesAsync público
         public static async Task<IEnumerable<ViajeDTO>> BuscarViajesAsync(string origenCodPostal, string destinoCodPostal)
         {
             string requestUri = $"viajes/buscar?origen={Uri.EscapeDataString(origenCodPostal)}&destino={Uri.EscapeDataString(destinoCodPostal)}"; // Usar EscapeDataString
@@ -66,28 +62,24 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // AddAsync necesita token
-        public static async Task AddAsync(ViajeDTO viaje, string token) // <-- Recibe token
+        public static async Task AddAsync(ViajeDTO viaje, string token) 
         {
             try
             {
                 JsonContent content = JsonContent.Create(viaje);
                 HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Post, "viajes", token, content);
                 await ApiClientHelper.HandleResponseErrorsAsync(response, "agregar viaje");
-                // Podríamos leer el ViajeDTO creado desde response.Content si la API lo devuelve y este método lo retornara
             }
             catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
             catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
             catch (Exception ex) { throw; }
         }
 
-        // DeleteAsync (Cancelar) necesita token
-        public static async Task DeleteAsync(int idViaje, string token) // <-- Recibe token
+        public static async Task DeleteAsync(int idViaje, string token) 
         {
             try
             {
                 HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Delete, $"viajes/{idViaje}", token);
-                // HandleResponseErrorsAsync ya maneja los errores, incluso si la respuesta esperada es 204
                 await ApiClientHelper.HandleResponseErrorsAsync(response, $"cancelar viaje {idViaje}");
             }
             catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
@@ -95,8 +87,7 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // UpdateAsync necesita token
-        public static async Task UpdateAsync(ViajeDTO viaje, string token) // <-- Recibe token
+        public static async Task UpdateAsync(ViajeDTO viaje, string token)
         {
             try
             {
@@ -109,8 +100,7 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // IniciarViajeAsync necesita token
-        public static async Task IniciarViajeAsync(int idViaje, string token) // <-- Recibe token
+        public static async Task IniciarViajeAsync(int idViaje, string token) 
         {
             try
             {
@@ -122,8 +112,7 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // FinalizarViajeAsync necesita token
-        public static async Task<FinalizarViajeResponse?> FinalizarViajeAsync(int idViaje, string token) // <-- Recibe token
+        public static async Task<FinalizarViajeResponse?> FinalizarViajeAsync(int idViaje, string token)
         {
             try
             {
@@ -136,14 +125,12 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // Clase auxiliar interna
         public class FinalizarViajeResponse
         {
             public string? mensaje { get; set; }
             public List<UsuarioDTO>? pasajeros { get; set; }
         }
-        // *** FALTARÍA APLICAR ESTE PATRÓN A LOS MÉTODOS DE CALIFICACIÓN ***
-        // Si tienes CalificacionApiClient, modifícalo de forma similar.
+
         public static async Task<IEnumerable<UsuarioDTO>> GetPasajerosConfirmadosAsync(int idViaje, string token)
         {
             string requestUri = $"viajes/{idViaje}/pasajeros-confirmados";

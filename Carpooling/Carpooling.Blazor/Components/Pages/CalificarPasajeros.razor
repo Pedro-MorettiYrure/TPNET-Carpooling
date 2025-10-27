@@ -25,7 +25,6 @@
     }
     else
     {
-        @* Iteramos sobre el nuevo ViewModel unificado *@
         @foreach (var vm in pasajerosParaMostrar)
         {
             <div class="card mb-3">
@@ -72,7 +71,6 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-sm">
-                                @* <-- Sacamos el disabled *@
                                 @if (vm.Calificando)
                                 {
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -107,33 +105,29 @@ else
     [Parameter]
     public int IdViaje { get; set; }
 
-    // --- Estado Refactorizado ---
     private ViajeDTO? viajeInfo;
-    private List<PasajeroCalificacionViewModel> pasajerosParaMostrar = new(); // Lista unificada
+    private List<PasajeroCalificacionViewModel> pasajerosParaMostrar = new(); 
     private string? errorCarga;
     private string? token;
 
-    // 1. Modelo de Calificación (sin cambios)
     public class CalificacionModel
     {
         [Range(1, 5, ErrorMessage = "El puntaje debe ser entre 1 y 5.")]
-        public int Puntaje { get; set; } = 5; // Valor inicial válido
+        public int Puntaje { get; set; } = 5; 
 
         [MaxLength(500, ErrorMessage = "El comentario no puede exceder los 500 caracteres.")]
         public string? Comentario { get; set; }
     }
 
-    // 2. Nuevo ViewModel unificado
     public class PasajeroCalificacionViewModel
     {
         public UsuarioDTO Pasajero { get; set; } = new();
-        public CalificacionModel Calificacion { get; set; } = new(); // El modelo para el EditForm
-        public bool Calificando { get; set; } = false; // Estado 'disabled'
-        public string? Error { get; set; } // Mensaje de error
-        public bool YaCalificado { get; set; } = false; // Flag para mostrar/ocultar form
-        public CalificacionDTO? CalificacionExistente { get; set; } // Info de la calificación hecha
+        public CalificacionModel Calificacion { get; set; } = new();
+        public bool Calificando { get; set; } = false; 
+        public string? Error { get; set; } 
+        public bool YaCalificado { get; set; } = false; 
+        public CalificacionDTO? CalificacionExistente { get; set; } 
     }
-    // --- Fin Estado Refactorizado ---
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,7 +155,6 @@ else
             var pasajerosACalificar = (await ViajeApiClient.GetPasajerosConfirmadosAsync(IdViaje, token)).ToList();
             var calificacionesYaHechas = (await CalificacionApiClient.GetCalificacionesDadasAsync(SesionUsuario.UsuarioActual.IdUsuario, token)).ToList();
 
-            // 3. Poblar la nueva lista unificada
             pasajerosParaMostrar.Clear();
             foreach (var p in pasajerosACalificar)
             {
@@ -175,16 +168,13 @@ else
                     vm.YaCalificado = true;
                     vm.CalificacionExistente = califExistente;
                 }
-                // Si califExistente es null, YaCalificado es false (por defecto)
-                // y el modelo Calificacion ya está inicializado con Puntaje = 5.
+                
 
                 pasajerosParaMostrar.Add(vm);
             }
 
-            // Verificamos si realmente quedó alguno pendiente
             if (!pasajerosParaMostrar.Any(p => !p.YaCalificado))
             {
-                // No necesitamos los diccionarios, usamos la lista
             }
         }
         catch (Exception ex)
@@ -194,16 +184,15 @@ else
         StateHasChanged();
     }
 
-    // 4. Actualizar EnviarCalificacion para usar el ViewModel
     private async Task EnviarCalificacion(PasajeroCalificacionViewModel vm)
     {
         if (token == null) return;
 
-        vm.Calificando = true; // Activa spinner
-        vm.Error = null;       // Limpia error
+        vm.Calificando = true; 
+        vm.Error = null;      
         await Task.Delay(1);
 
-        var model = vm.Calificacion; // El modelo con los datos del form
+        var model = vm.Calificacion;
 
         try
         {
@@ -219,23 +208,22 @@ else
 
             var calificacionGuardada = await CalificacionApiClient.CalificarPasajeroAsync(
                 IdViaje,
-                vm.Pasajero.IdUsuario, // El ID del pasajero a calificar
+                vm.Pasajero.IdUsuario, 
                 inputDto,
                 token
             );
 
-            // Actualiza el estado del ViewModel para ocultar el form y mostrar la info
             vm.YaCalificado = true;
             vm.CalificacionExistente = calificacionGuardada;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al calificar pasajero {vm.Pasajero.IdUsuario}: {ex.Message}");
-            vm.Error = $"Error: {ex.Message}"; // Guarda el error
+            vm.Error = $"Error: {ex.Message}"; 
         }
         finally
         {
-            vm.Calificando = false; // Desactiva spinner
+            vm.Calificando = false; 
             StateHasChanged();
         }
     }

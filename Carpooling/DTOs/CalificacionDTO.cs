@@ -11,10 +11,10 @@ namespace DTOs
         public int IdCalificacion { get; set; }
         public int IdViaje { get; set; }
         public int IdCalificador { get; set; }
-        public string? NombreCalificador { get; set; } // Nombre para mostrar
+        public string? NombreCalificador { get; set; } 
         public int IdCalificado { get; set; }
-        public string? NombreCalificado { get; set; } // Nombre para mostrar
-        public string RolCalificado { get; set; } // "Conductor" o "Pasajero"
+        public string? NombreCalificado { get; set; } 
+        public string RolCalificado { get; set; } 
         public int Puntaje { get; set; }
         public string? Comentario { get; set; }
         public DateTime FechaHora { get; set; }

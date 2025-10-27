@@ -3,39 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using API.Clients; // Namespace de tus ApiClients
-using DTOs;       // Namespace de tus DTOs
-using Domain.Model; // Namespace para EstadoSolicitud y EstadoViaje
+using API.Clients; 
+using DTOs;       
+using Domain.Model; 
 
 namespace WindowsForms
 {
     public partial class ViajesListaPasajero : Form
     {
         private readonly UsuarioDTO _pasajeroLogueado;
-        private List<SolicitudViajeDTO> _misViajesConfirmados; // Guarda las solicitudes aprobadas
+        private List<SolicitudViajeDTO> _misViajesConfirmados;
 
         public ViajesListaPasajero(UsuarioDTO pasajeroLogueado)
         {
-            InitializeComponent(); // Asegúrate que esta línea no dé error
+            InitializeComponent(); 
             _pasajeroLogueado = pasajeroLogueado;
             _misViajesConfirmados = new List<SolicitudViajeDTO>();
+            ViajesListaPasajero_Load(this, EventArgs.Empty); 
         }
 
-        // --- Carga Inicial ---
         private async void ViajesListaPasajero_Load(object sender, EventArgs e)
         {
             await CargarMisViajesAsync();
-            ActualizarEstadoBotones(); // Establece estado inicial
+            ActualizarEstadoBotones();
         }
 
-        // --- Cargar Datos ---
         private async Task CargarMisViajesAsync()
         {
-            string? token = SessionManager.JwtToken; // Asume que así obtienes el token
+            string? token = SessionManager.JwtToken; 
             if (string.IsNullOrEmpty(token))
             {
                 MessageBox.Show("Error de sesión. No se encontró el token.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Deshabilitar botones si no hay token
                 btnVerDetalles.Enabled = false;
                 btnCancelarSolicitud.Enabled = false;
                 return;
@@ -43,21 +41,19 @@ namespace WindowsForms
 
             try
             {
-                dgvMisViajes.DataSource = null; // Limpiar grilla
+                dgvMisViajes.DataSource = null;
 
-                // 1. Obtener TODAS las solicitudes del pasajero
+                // Obtener TODAS las solicitudes del pasajero
                 var todasMisSolicitudes = await SolicitudViajeApiClient.GetSolicitudesPorPasajeroAsync(_pasajeroLogueado.IdUsuario, token);
 
-                // 2. Filtrar solo las APROBADAS para mostrar (incluye pasadas y futuras)
+                // Filtrar solo las APROBADAS para mostrar (incluye pasadas y futuras)
                 _misViajesConfirmados = todasMisSolicitudes?.Where(s => s.Estado == EstadoSolicitud.Aprobada).ToList()
                                         ?? new List<SolicitudViajeDTO>();
 
                 dgvMisViajes.DataSource = _misViajesConfirmados;
 
-                // 3. Configurar Columnas (ajusta si los nombres en tu DTO son diferentes)
                 if (dgvMisViajes.DataSource != null && _misViajesConfirmados.Any())
                 {
-                    // Ocultar columnas no relevantes para el pasajero en esta vista
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdSolicitud)].Visible = false;
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdViaje)].Visible = false;
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdPasajero)].Visible = false;
@@ -67,7 +63,6 @@ namespace WindowsForms
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.Estado)].Visible = false; 
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.IdConductor)].Visible = false;
 
-                    // Columnas a mostrar y renombrar
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.FechaHoraViaje)].HeaderText = "Fecha y Hora";
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.OrigenViajeNombre)].HeaderText = "Origen";
                     dgvMisViajes.Columns[nameof(SolicitudViajeDTO.DestinoViajeNombre)].HeaderText = "Destino";
@@ -108,14 +103,13 @@ namespace WindowsForms
 
                 // Cancelar se habilita si la solicitud está Aprobada Y el viaje es futuro
                 esCancelable = (solicitud != null &&
-                                solicitud.Estado == EstadoSolicitud.Aprobada && // Ya filtrado, pero por seguridad
+                                solicitud.Estado == EstadoSolicitud.Aprobada && 
                                 solicitud.FechaHoraViaje.HasValue &&
                                 solicitud.FechaHoraViaje.Value > DateTime.Now);
             }
 
             btnVerDetalles.Enabled = haySeleccion;
             btnCancelarSolicitud.Enabled = esCancelable;
-            // btnCalificarConductor.Enabled = ... (Lógica que hicimos antes, si tienes el botón)
         }
 
         
@@ -130,9 +124,9 @@ namespace WindowsForms
                               $"Fecha: {solicitud.FechaHoraViaje:dd/MM/yyyy HH:mm}\n" +
                               $"Origen: {solicitud.OrigenViajeNombre}\n" +
                               $"Destino: {solicitud.DestinoViajeNombre}\n" +
-                              $"Estado Solicitud: {solicitud.Estado}\n" + // Será "Aprobada"
+                              $"Estado Solicitud: {solicitud.Estado}\n" + 
                               $"Estado del Viaje: {solicitud.EstadoDelViaje?.ToString() ?? "N/A"}\n" + // Muestra estado del viaje
-                              $"Conductor: {solicitud.NombreConductor} {solicitud.ApellidoConductor}\n"; // Si tienes los datos
+                              $"Conductor: {solicitud.NombreConductor} {solicitud.ApellidoConductor}\n"; 
 
             MessageBox.Show(detalles, "Detalles del Viaje Confirmado", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -157,7 +151,7 @@ namespace WindowsForms
                 await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(solicitud.IdSolicitud, token);
 
                 MessageBox.Show("Su participación en este viaje ha sido cancelada.", "Cancelación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await CargarMisViajesAsync(); // actualizamos la lista de viajes 
+                await CargarMisViajesAsync(); 
                 ActualizarEstadoBotones();
             }
             catch (Exception ex)
@@ -186,7 +180,7 @@ namespace WindowsForms
 
             int idViaje = solicitud.IdViaje;
             int idConductorACalificar = solicitud.IdConductor ?? 0;
-            int idPasajeroQueCalifica = _pasajeroLogueado.IdUsuario; // ID del usuario logueado
+            int idPasajeroQueCalifica = _pasajeroLogueado.IdUsuario; 
 
             if (idConductorACalificar == 0)
             {
@@ -203,13 +197,10 @@ namespace WindowsForms
                     RolCalificado.Conductor
                 ))
                 {
-                    // 5. Mostrar el formulario y esperar confirmación (DialogResult.OK)
                     if (formCalificar.ShowDialog() == DialogResult.OK)
                     {
-                        // 6. Obtener los datos ingresados por el usuario
                         CalificacionInputDTO calificacionInput = formCalificar.CalificacionIngresada;
 
-                        // 7. Obtener el token de sesión
                         string? token = SessionManager.JwtToken;
                         if (string.IsNullOrEmpty(token))
                         {
@@ -217,16 +208,12 @@ namespace WindowsForms
                             return;
                         }
 
-                        // 8. Llamar al API Client para enviar la calificación del conductor
                         await CalificacionApiClient.CalificarConductorAsync(idViaje, calificacionInput, token);
 
                         MessageBox.Show("Calificación enviada con éxito.", "Calificación Guardada", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        // 9. Opcional: Actualizar UI (ej: deshabilitar botón para este viaje)
-                        // Podrías necesitar recargar los datos o marcar la solicitud/viaje como "ya calificado"
                         ActualizarEstadoBotones();
                     }
-                    // Si el usuario cierra el FormCalificar sin confirmar (DialogResult != OK), no se hace nada.
                 }
             }
             catch (Exception ex)
@@ -241,8 +228,5 @@ namespace WindowsForms
         }
 
         
-
-        // --- Agrega aquí el btnCalificarConductor_Click si lo necesitas ---
-        // private void btnCalificarConductor_Click(object sender, EventArgs e) { ... }
     }
 }

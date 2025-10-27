@@ -15,7 +15,7 @@
 {
     <EditForm Model="@viajeModel" OnValidSubmit="GuardarViaje" FormName="ViajeForm">
         <DataAnnotationsValidator />
-        <ValidationSummary /> @* Muestra un resumen de todos los errores *@
+        <ValidationSummary />
 
         <div class="row">
             <div class="col-md-6">
@@ -27,7 +27,6 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label class="form-label">Hora (HH:mm):</label>
-                    @* InputTime no existe por defecto, usamos InputText con formato *@
                     <InputText type="time" class="form-control" @bind-Value="horaSalidaString" />
                 </div>
             </div>
@@ -70,7 +69,6 @@
                 {
                     @foreach (var veh in vehiculos)
                     {
-                        @* Guardamos el IdVehiculo, pero mostramos patente y modelo *@
                         <option value="@veh.IdVehiculo">@veh.Patente - @veh.Marca @veh.Modelo</option>
                     }
                 }
@@ -113,7 +111,7 @@ else
 
 @code {
     [Parameter]
-    public int IdViaje { get; set; } // Recibe el ID del viaje desde la URL si estamos editando
+    public int IdViaje { get; set; }
 
     private ViajeDTO viajeModel;
     private List<LocalidadDTO> localidades;
@@ -123,7 +121,6 @@ else
     private bool modoEdicion = false;
     private bool puedeAcceder = false;
 
-    // Propiedad auxiliar para manejar la hora como texto en el input type="time"
     private string horaSalidaString
     {
         get => viajeModel?.FechaHora.ToString("HH:mm") ?? "00:00";
@@ -147,42 +144,39 @@ else
         if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
         {
             puedeAcceder = true;
-            await CargarListasDesplegables(); // Cargamos localidades y vehículos
+            await CargarListasDesplegables(); 
 
-            if (IdViaje > 0) // Si IdViaje tiene valor, estamos editando
+            if (IdViaje > 0)
             {
                 modoEdicion = true;
                 Titulo = "Editar Viaje";
-                // Buscamos el viaje específico por su ID (necesitamos añadir GetAsync(id) a ViajeApiClient si no existe)
-                // Por ahora, asumimos que existe un método GetAsync(int idViaje)
+                
                 try
                 {
-                    // Nota: Tu ViajeApiClient.GetAsync actual recibe string, hay que adaptarlo o crear uno nuevo para int
-                    // Asumiendo que ya tienes o creas ViajeApiClient.GetByIdAsync(int id)
+                    
                     viajeModel = await ViajeApiClient.GetAsync(IdViaje.ToString());
                 }
                 catch (Exception ex)
                 {
                     error = $"No se pudo cargar el viaje: {ex.Message}";
-                    viajeModel = null; // Para que muestre error en la UI
+                    viajeModel = null; 
                 }
             }
-            else // Si no hay IdViaje, estamos creando uno nuevo
+            else 
             {
                 modoEdicion = false;
                 Titulo = "Publicar Nuevo Viaje";
                 viajeModel = new ViajeDTO
                 {
                     IdConductor = SesionUsuario.UsuarioActual.IdUsuario,
-                    FechaHora = DateTime.Now.Date.AddHours(DateTime.Now.Hour + 1) // Fecha de hoy, hora siguiente
+                    FechaHora = DateTime.Now.Date.AddHours(DateTime.Now.Hour + 1) 
                 };
             }
         }
         else
         {
             puedeAcceder = false;
-            // Opcional: Redirigir si no tiene permiso
-            // Navigation.NavigateTo("/");
+           
         }
     }
 
@@ -194,7 +188,6 @@ else
             string token = await SesionUsuario.GetTokenAsync();
 
             var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
-            // Usamos los API clients que ya existen
             localidades = (await LocalidadApiClient.GetAllAsync()).ToList();
             vehiculos = (await VehiculoApiClient.GetByUsuarioAsync(idUsuario, token)).ToList();
         }
@@ -215,7 +208,6 @@ else
 
         error = string.Empty;
 
-        // --- Validaciones Adicionales (similares a tu WinForms) ---
         if (viajeModel.FechaHora < DateTime.Now)
         {
             error = "La fecha y hora no pueden ser anteriores a la actual.";
@@ -241,7 +233,6 @@ else
             error = "La cantidad de lugares debe ser mayor a cero.";
             return;
         }
-        // Validación de capacidad vs vehículo seleccionado (más compleja)
         var vehiculoSeleccionado = vehiculos?.FirstOrDefault(v => v.IdVehiculo == viajeModel.IdVehiculo);
         if (vehiculoSeleccionado != null && viajeModel.CantLugares > vehiculoSeleccionado.CantLugares)
         {
@@ -253,7 +244,6 @@ else
             error = "El precio no puede ser negativo.";
             return;
         }
-        // --- Fin Validaciones ---
 
 
         try
@@ -266,11 +256,10 @@ else
             {
                 await ViajeApiClient.AddAsync(viajeModel, token);
             }
-            Navigation.NavigateTo("/viajes"); // Volvemos a la lista
+            Navigation.NavigateTo("/viajes");
         }
         catch (Exception ex)
         {
-            // Capturamos errores de la API (como licencia vencida)
             error = $"No se pudo guardar el viaje: {ex.Message}";
         }
     }

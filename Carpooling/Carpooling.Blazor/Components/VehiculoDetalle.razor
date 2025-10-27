@@ -77,22 +77,18 @@ else
 
             if (!string.IsNullOrEmpty(Patente))
             {
-                // --- Modo Edición ---
                 Titulo = "Editar Vehículo";
                 modoEdicion = true;
                 Vehiculo = await VehiculoApiClient.GetAsync(Patente, idUsuarioLogueado, token);
             }
             else
             {
-                // --- Modo Creación ---
                 Titulo = "Nuevo Vehículo";
-                // Creamos un vehículo nuevo ASIGNÁNDOLE EL ID CORRECTO
                 Vehiculo = new VehiculoDTO { IdUsuario = idUsuarioLogueado };
             }
         }
         else
         {
-            // Si no tiene permiso, lo sacamos de aquí
             Navigation.NavigateTo("/vehiculos");
         }
     }

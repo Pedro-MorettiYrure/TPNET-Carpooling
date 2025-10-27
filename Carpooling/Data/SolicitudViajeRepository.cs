@@ -1,6 +1,6 @@
 ﻿using Domain.Model;
-using Microsoft.EntityFrameworkCore; // Necesario para Include y ThenInclude
-using System; // Para Exception
+using Microsoft.EntityFrameworkCore;
+using System; 
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,25 +26,23 @@ namespace Data
             _context.SaveChanges();
         }
 
-        // *** MODIFICADO: Asegurar Include de Pasajero ***
         public SolicitudViaje? GetById(int idSolicitud)
         {
             return _context.SolicitudesViaje
-                .Include(s => s.Pasajero) // Incluir Pasajero
-                .Include(s => s.Viaje)    // Incluir Viaje
-                    .ThenInclude(v => v.Conductor) // Incluir Conductor del Viaje
+                .Include(s => s.Pasajero) 
+                .Include(s => s.Viaje)    
+                    .ThenInclude(v => v.Conductor) 
                  .Include(s => s.Viaje)
-                     .ThenInclude(v => v.Origen) // Incluir Origen
+                     .ThenInclude(v => v.Origen)
                  .Include(s => s.Viaje)
-                     .ThenInclude(v => v.Destino) // Incluir Destino
+                     .ThenInclude(v => v.Destino) 
                 .FirstOrDefault(s => s.IdSolicitud == idSolicitud);
         }
 
-        // *** MODIFICADO: Asegurar Include de Pasajero ***
         public IEnumerable<SolicitudViaje> GetAllByViaje(int idViaje)
         {
             return _context.SolicitudesViaje
-                .Include(s => s.Pasajero) // Incluir datos del pasajero
+                .Include(s => s.Pasajero)
                 .Include(s => s.Viaje)    
                     .ThenInclude(v => v.Conductor)
                 .Include(s => s.Viaje)
@@ -56,16 +54,15 @@ namespace Data
                 .ToList();
         }
 
-        // *** MODIFICADO: Asegurar Include de Viaje y sus relaciones ***
         public IEnumerable<SolicitudViaje> GetAllByPasajero(int idPasajero)
         {
             return _context.SolicitudesViaje
-                .Include(s => s.Viaje) // Incluir el Viaje
-                    .ThenInclude(v => v.Origen) // Incluir Localidad Origen del Viaje
+                .Include(s => s.Viaje) 
+                    .ThenInclude(v => v.Origen) 
                 .Include(s => s.Viaje)
-                    .ThenInclude(v => v.Destino) // Incluir Localidad Destino del Viaje
+                    .ThenInclude(v => v.Destino) 
                 .Include(s => s.Viaje)
-                    .ThenInclude(v => v.Conductor) // Incluir Usuario Conductor del Viaje
+                    .ThenInclude(v => v.Conductor) 
                 .Where(s => s.IdPasajero == idPasajero)
                 .OrderByDescending(s => s.SolicitudFecha)
                 .ToList();

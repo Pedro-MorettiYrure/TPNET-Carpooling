@@ -17,10 +17,13 @@ namespace WindowsForms
         {
             InitializeComponent();
             _usuarioLogueado = usuarioLogueado ?? throw new ArgumentNullException(nameof(usuarioLogueado));
+            this.Load += FormBuscarViaje_Load;
+           
         }
 
         private async void FormBuscarViaje_Load(object sender, EventArgs e)
         {
+           
             ConfigureDataGridView();
             await LoadLocalidadesAsync(); // Espera a que carguen las localidades
             btnSolicitarViaje.Enabled = false; // Botón solicitar deshabilitado inicialmente
@@ -59,12 +62,12 @@ namespace WindowsForms
                 var destinoDataSource = new List<LocalidadDTO>(localidades);
 
                 comboBoxOrigen.DataSource = origenDataSource;
-                comboBoxOrigen.DisplayMember = "Nombre"; // Asegúrate que sea "Nombre" o "nombreLoc"
+                comboBoxOrigen.DisplayMember = "Nombre"; 
                 comboBoxOrigen.ValueMember = "CodPostal";
                 comboBoxOrigen.SelectedIndex = -1;
 
                 comboBoxDestino.DataSource = destinoDataSource;
-                comboBoxDestino.DisplayMember = "Nombre"; // Asegúrate que sea "Nombre" o "nombreLoc"
+                comboBoxDestino.DisplayMember = "Nombre"; 
                 comboBoxDestino.ValueMember = "CodPostal";
                 comboBoxDestino.SelectedIndex = -1;
             }
@@ -144,7 +147,7 @@ namespace WindowsForms
                 return;
             }
 
-            btnSolicitarViaje.Enabled = false; // Deshabilitar mientras procesa
+            btnSolicitarViaje.Enabled = false; 
 
             try
             {
@@ -161,14 +164,12 @@ namespace WindowsForms
 
                 MessageBox.Show($"Solicitud enviada (ID {solicitudCreada.IdSolicitud}) para el viaje. Estado: Pendiente.",
                                 "Solicitud Enviada", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                // Opcional: Podrías cerrar este formulario o deshabilitar solicitar para este viaje
             }
             catch (UnauthorizedAccessException authEx) { MessageBox.Show($"Error de autorización: {authEx.Message}", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
             catch (InvalidOperationException opEx) { MessageBox.Show($"No se pudo enviar la solicitud: {opEx.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al enviar la solicitud: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Volver a habilitar si falló por error genérico y hay selección
                 if (!this.IsDisposed && dgvBuscarViaje.SelectedRows.Count > 0) btnSolicitarViaje.Enabled = true;
             }
         }

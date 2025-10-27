@@ -2,8 +2,8 @@
 using API.Clients;
 using System;
 using System.Windows.Forms;
-using System.Linq; // Para .All
-using System.Globalization; // Para NumberStyles
+using System.Linq; 
+using System.Globalization; 
 
 namespace WindowsForms
 {
@@ -14,7 +14,6 @@ namespace WindowsForms
 
         public enum FormMode { Add, Update }
 
-        // Mantenemos la propiedad 'mode' si el designer la usa
         private FormMode mode;
 
         public LocalidadDetalle()
@@ -41,7 +40,6 @@ namespace WindowsForms
             try
             {
                 string? token = SessionManager.JwtToken;
-                // Validar token ANTES de actualizar el DTO
                 if (string.IsNullOrEmpty(token)) throw new UnauthorizedAccessException("Sesión inválida. Se requieren permisos de Administrador.");
 
                 Localidad.Nombre = txtNombre.Text;
@@ -49,14 +47,12 @@ namespace WindowsForms
 
                 if (this.Mode == FormMode.Update)
                 {
-                    // *** CORREGIDO: Pasar el token a UpdateAsync ***
-                    await LocalidadApiClient.UpdateAsync(Localidad, token); // <- Pasar token aquí
+                    await LocalidadApiClient.UpdateAsync(Localidad, token);
                     MessageBox.Show("Localidad actualizada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                else // Mode == FormMode.Add
+                else
                 {
-                    // *** CORREGIDO: Pasar el token a AddAsync ***
-                    await LocalidadApiClient.AddAsync(Localidad, token); // <- Pasar token aquí
+                    await LocalidadApiClient.AddAsync(Localidad, token); 
                     MessageBox.Show("Localidad agregada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
@@ -84,8 +80,8 @@ namespace WindowsForms
 
         private void SetFormMode(FormMode value)
         {
-            mode = value; // Actualizar la variable interna si el designer la necesita
-            Mode = value; // Actualizar la propiedad pública
+            mode = value; 
+            Mode = value; 
 
             txtCodPostal.Enabled = (Mode == FormMode.Add);
             this.Text = (Mode == FormMode.Add) ? "Nueva Localidad" : "Editar Localidad";

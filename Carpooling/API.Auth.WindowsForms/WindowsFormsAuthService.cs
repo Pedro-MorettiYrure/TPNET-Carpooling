@@ -68,7 +68,6 @@ namespace API.Auth.WindowsForms
             _tokenExpiration = default;
             _currentUser = null;
 
-            // AuthenticationStateChanged?.Invoke(false); 
             NotifyStateChanged();
         }
 
@@ -80,31 +79,7 @@ namespace API.Auth.WindowsForms
             }
         }
 
-        /*
-        public async Task<bool> HasPermissionAsync(string permission)
-        {
-            var token = await GetTokenAsync();
-            if (string.IsNullOrEmpty(token))
-                return false;
-
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(token);
-
-                // Buscar claims de "permission" 
-                var permissionClaims = jsonToken.Claims
-                    .Where(c => c.Type == "permission")
-                    .Select(c => c.Value);
-
-                return permissionClaims.Contains(permission);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        */
+        
     }
 }
 

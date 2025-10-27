@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Domain.Model;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using System; // Agregado por si falta
-using System.Collections.Generic; // Agregado por si falta
+using System; 
+using System.Collections.Generic; 
 
 namespace WebAPI
 {
@@ -34,11 +34,11 @@ namespace WebAPI
                     return Results.Created($"/calificaciones/{calificacionDto.IdCalificacion}", calificacionDto);
                 }
                 catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); }
-                catch (UnauthorizedAccessException) { return Results.Forbid(); } // Si no es el conductor del viaje
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // Ej: Ya calificó, viaje no finalizado, pasajero no participó
-                catch (ArgumentOutOfRangeException ex) { return Results.BadRequest(new { error = ex.Message }); } // Puntaje inválido
-                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } // Otros args inválidos
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (UnauthorizedAccessException) { return Results.Forbid(); }
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (ArgumentOutOfRangeException ex) { return Results.BadRequest(new { error = ex.Message }); } 
+                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("CalificarPasajero")
             .Produces<CalificacionDTO>(StatusCodes.Status201Created)
@@ -69,10 +69,10 @@ namespace WebAPI
                 }
                 catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); }
                 catch (UnauthorizedAccessException) { return Results.Forbid(); }
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // Ej: Ya calificó, viaje no finalizado, no participó
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); }
                 catch (ArgumentOutOfRangeException ex) { return Results.BadRequest(new { error = ex.Message }); }
                 catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); }
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("CalificarConductor")
              .Produces<CalificacionDTO>(StatusCodes.Status201Created)

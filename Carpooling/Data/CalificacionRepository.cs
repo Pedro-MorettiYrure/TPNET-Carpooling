@@ -24,8 +24,8 @@ namespace Data
         public IEnumerable<Calificacion> GetCalificacionesRecibidas(int idCalificado, RolCalificado rol)
         {
             return _context.Calificaciones
-                .Include(c => c.Calificador) // Incluir quién calificó
-                .Include(c => c.Viaje)       // Incluir info del viaje
+                .Include(c => c.Calificador) 
+                .Include(c => c.Viaje)      
                 .Where(c => c.IdCalificado == idCalificado && c.RolCalificado == rol)
                 .OrderByDescending(c => c.FechaHora)
                 .ToList();
@@ -35,8 +35,8 @@ namespace Data
         public IEnumerable<Calificacion> GetCalificacionesDadas(int idCalificador)
         {
             return _context.Calificaciones
-               .Include(c => c.Calificado) // Incluir a quién calificó
-               .Include(c => c.Viaje)      // Incluir info del viaje
+               .Include(c => c.Calificado) 
+               .Include(c => c.Viaje)      
                .Where(c => c.IdCalificador == idCalificador)
                .OrderByDescending(c => c.FechaHora)
                .ToList();

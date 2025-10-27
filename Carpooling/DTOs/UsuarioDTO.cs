@@ -20,8 +20,7 @@ namespace DTOs
 
         public DateTime? fechaVencimientoLicencia { get; set; } // Solo para conductores
 
-        // El cliente manda la contraseña en texto plano.
-        // El dominio (Usuario.cs) la va a hashear.
+        
         public string? Contraseña { get; set; }
         public class ConductorUpgradeDTO
         {

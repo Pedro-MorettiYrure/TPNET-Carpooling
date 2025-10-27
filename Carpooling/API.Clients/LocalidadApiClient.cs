@@ -27,11 +27,10 @@ namespace API.Clients
             {
                 HttpResponseMessage response = await _httpClient.GetAsync($"localidades/{codPos}");
                 if (response.StatusCode == HttpStatusCode.NotFound) return null;
-                // Usamos el helper solo para otros errores (ej: 500)
                 await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener localidad {codPos}");
                 return await response.Content.ReadFromJsonAsync<LocalidadDTO>();
             }
-            catch (KeyNotFoundException) { return null; } // Si el helper lanza KeyNotFound por 404
+            catch (KeyNotFoundException) { return null; } 
             catch (HttpRequestException ex) { throw new Exception($"Error de conexión: {ex.Message}", ex); }
             catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
             catch (Exception ex) { throw; }
