@@ -1,0 +1,240 @@
+﻿@page "/reportes"
+@* *@
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients 
+@using API.Auth.Blazor
+@using System.ComponentModel.DataAnnotations
+
+@inject ServicioSesionUsuario SesionUsuario //
+@inject NavigationManager Navigation //
+@inject IJSRuntime JSRuntime // 
+
+<PageTitle>Reportes Administrativos</PageTitle>
+
+<h3>Reportes Administrativos</h3>
+
+@if (puedeAcceder) // Verifica si el usuario tiene permiso (es Admin)
+{
+    // --- Card para Reporte Top Conductores ---
+    <div class="card mb-4">
+        <div class="card-header">Reporte: Conductores Mejor Calificados</div>
+        <div class="card-body">
+            <p>Genera un PDF con los conductores ordenados por su calificación promedio (recibida como conductor).</p>
+            <button class="btn btn-primary" @onclick="GenerarReporteTopConductores" disabled="@generandoReporte1">
+                @if (generandoReporte1)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                Generar Reporte Top Conductores
+            </button>
+            @if (!string.IsNullOrEmpty(errorReporte1))
+            {
+                <div class="text-danger mt-2">@errorReporte1</div>
+            }
+        </div>
+    </div>
+
+    // --- Card para Reporte Actividad de Viajes ---
+    <div class="card">
+        <div class="card-header">Reporte: Actividad de Viajes por Fecha</div>
+        <div class="card-body">
+            <p>Genera un PDF con el resumen y detalle de viajes en un período seleccionado.</p>
+            <EditForm Model="actividadModel" OnValidSubmit="GenerarReporteActividad" FormName="ActividadForm">
+                <DataAnnotationsValidator /> @* Activa las validaciones del modelo *@
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="fechaInicio" class="form-label">Fecha Inicio:</label>
+                        <InputDate id="fechaInicio" class="form-control" @bind-Value="actividadModel.FechaInicio" />
+                        <ValidationMessage For="@(() => actividadModel.FechaInicio)" /> @* Muestra error si falta fecha inicio *@
+                    </div>
+                    <div class="col-md-5">
+                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+                        <InputDate id="fechaFin" class="form-control" @bind-Value="actividadModel.FechaFin" />
+                        <ValidationMessage For="@(() => actividadModel.FechaFin)" /> @* Muestra error si falta fecha fin *@
+                        <ValidationMessage For="@(() => actividadModel.FinValidado)" /> @* Muestra error si el rango es inválido *@
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100" disabled="@generandoReporte2">
+                            @if (generandoReporte2)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            }
+                            Generar
+                        </button>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(errorReporte2))
+                {
+                    <div class="text-danger mt-2">@errorReporte2</div>
+                }
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <p><em>Verificando permisos...</em></p>
+    @* Mostramos el mensaje solo si ya se determinó que no puede acceder Y está logueado *@
+    @if (!puedeAcceder && SesionUsuario.EstaLogueado)
+    {
+        <div class="alert alert-warning mt-3">Acceso denegado. Debes ser Administrador para ver esta sección.</div>
+    }
+}
+
+
+@code {
+    private bool puedeAcceder = false; 
+    private bool generandoReporte1 = false; 
+    private bool generandoReporte2 = false;
+    private string? errorReporte1;
+    private string? errorReporte2; 
+
+    private ActividadFechasModel actividadModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync(); // Verifica si hay sesión activa
+        if (isAuthenticated && SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.Administrador) // Verifica si está logueado Y es Admin
+        {
+            puedeAcceder = true;
+        }
+        else if (isAuthenticated)
+        {
+            puedeAcceder = false;
+        }
+        else
+        {
+            // No está logueado
+            Navigation.NavigateTo("/login", forceLoad: true); // Redirige a la página de login
+            puedeAcceder = false; 
+        }
+    }
+
+    public class ActividadFechasModel
+    {
+        [Required(ErrorMessage = "La fecha de inicio es obligatoria.")]
+        public DateTime FechaInicio { get; set; } = DateTime.Today.AddMonths(-1); // Valor por defecto: hace un mes
+
+        [Required(ErrorMessage = "La fecha de fin es obligatoria.")]
+        public DateTime FechaFin { get; set; } = DateTime.Today; // Valor por defecto: hoy
+
+        // Propiedad auxiliar usada solo para la validación de rango entre fechas
+        [Validation.DateRange("FechaInicio", ErrorMessage = "La fecha de fin no puede ser anterior a la fecha de inicio.")]
+        public DateTime FinValidado => FechaFin;
+    }
+
+
+    private async Task GenerarReporteTopConductores()
+    {
+        generandoReporte1 = true; 
+        errorReporte1 = null; 
+        await Task.Delay(50); 
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            string? token = await SesionUsuario.GetTokenAsync();
+            if (token == null)
+            {
+                errorReporte1 = "Error de sesión. Vuelva a iniciar sesión.";
+                return;
+            }
+
+            byte[] pdfData = await ReportApiClient.GetTopConductoresPdfAsync(token);
+            await DownloadFileFromBytes("top_conductores_calificados.pdf", pdfData);
+        }
+        catch (Exception ex)
+        {
+            errorReporte1 = $"Error al generar reporte: {ex.Message}"; 
+        }
+        finally
+        {
+            generandoReporte1 = false; 
+            StateHasChanged(); 
+        }
+    }
+
+    private async Task GenerarReporteActividad()
+    {
+        generandoReporte2 = true; 
+        errorReporte2 = null; 
+        await Task.Delay(50);
+
+        if (actividadModel.FechaInicio > actividadModel.FechaFin)
+        {
+            errorReporte2 = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+            generandoReporte2 = false;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync(); 
+            string? token = await SesionUsuario.GetTokenAsync();
+            if (token == null)
+            {
+                errorReporte2 = "Error de sesión. Vuelva a iniciar sesión.";
+                return; 
+            }
+
+            string fileName = $"actividad_viajes_{actividadModel.FechaInicio:yyyyMMdd}_{actividadModel.FechaFin:yyyyMMdd}.pdf";
+            byte[] pdfData = await ReportApiClient.GetActividadViajesPdfAsync(actividadModel.FechaInicio, actividadModel.FechaFin, token);
+            await DownloadFileFromBytes(fileName, pdfData);
+        }
+        catch (Exception ex)
+        {
+            errorReporte2 = $"Error al generar reporte: {ex.Message}"; 
+        }
+        finally
+        {
+            generandoReporte2 = false; 
+            StateHasChanged();
+        }
+    }
+
+    private async Task DownloadFileFromBytes(string fileName, byte[] fileData)
+    {
+        var base64Data = Convert.ToBase64String(fileData);
+        await JSRuntime.InvokeVoidAsync("downloadFileFromBase64", fileName, base64Data);
+    }
+
+    
+    public class Validation
+    {
+        public class DateRangeAttribute : ValidationAttribute
+        {
+            private readonly string _comparisonProperty; 
+
+            public DateRangeAttribute(string comparisonProperty)
+            {
+                _comparisonProperty = comparisonProperty;
+            }
+
+            // Lógica de validación
+            protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+            {
+                ErrorMessage = ErrorMessageString; 
+                if (value == null) return ValidationResult.Success;
+
+                var currentValue = (DateTime)value;
+
+                var property = validationContext.ObjectType.GetProperty(_comparisonProperty);
+
+                if (property == null)
+                    throw new ArgumentException($"Property with name {_comparisonProperty} not found");
+
+                var comparisonValue = (DateTime?)property.GetValue(validationContext.ObjectInstance);
+
+                if (comparisonValue == null) return ValidationResult.Success; 
+
+                if (currentValue.Date < comparisonValue.Value.Date)
+                    return new ValidationResult(ErrorMessage);
+
+                return ValidationResult.Success; 
+            }
+        }
+    }
+}
