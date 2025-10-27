@@ -73,7 +73,7 @@ builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ViajeServices>();
 builder.Services.AddScoped<SolicitudViajeService>();
 builder.Services.AddScoped<CalificacionService>(); // Asegúrate que esté
-
+builder.Services.AddScoped<ReportService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -142,5 +142,6 @@ app.MapVehiculosEndpoints();
 app.MapViajesEndpoints();
 app.MapSolicitudViajeEndpoints();
 app.MapCalificacionesEndpoints();
+app.MapReportEndpoints();
 
 app.Run();

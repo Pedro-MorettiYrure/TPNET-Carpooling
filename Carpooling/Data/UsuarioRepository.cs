@@ -34,5 +34,9 @@ namespace Data
         {
             return _context.Usuarios.FirstOrDefault(u => u.IdUsuario == id);
         }
+        public IEnumerable<Usuario> GetAll()
+        {
+            return _context.Usuarios.ToList();
+        }
     }
 }
