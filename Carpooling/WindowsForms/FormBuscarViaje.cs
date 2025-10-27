@@ -17,10 +17,13 @@ namespace WindowsForms
         {
             InitializeComponent();
             _usuarioLogueado = usuarioLogueado ?? throw new ArgumentNullException(nameof(usuarioLogueado));
+            this.Load += FormBuscarViaje_Load;
+           
         }
 
         private async void FormBuscarViaje_Load(object sender, EventArgs e)
         {
+           
             ConfigureDataGridView();
             await LoadLocalidadesAsync(); // Espera a que carguen las localidades
             btnSolicitarViaje.Enabled = false; // Botón solicitar deshabilitado inicialmente
