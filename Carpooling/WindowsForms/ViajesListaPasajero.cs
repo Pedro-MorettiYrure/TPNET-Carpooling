@@ -49,7 +49,7 @@ namespace WindowsForms
                 var todasMisSolicitudes = await SolicitudViajeApiClient.GetSolicitudesPorPasajeroAsync(_pasajeroLogueado.IdUsuario, token);
 
                 // 2. Filtrar solo las APROBADAS para mostrar (incluye pasadas y futuras)
-                _misViajesConfirmados = todasMisSolicitudes?.Where(s => s.Estado == EstadoSolicitud.Aprobada.ToString()).ToList()
+                _misViajesConfirmados = todasMisSolicitudes?.Where(s => s.Estado == EstadoSolicitud.Aprobada).ToList()
                                         ?? new List<SolicitudViajeDTO>();
 
                 dgvMisViajes.DataSource = _misViajesConfirmados;
@@ -108,7 +108,7 @@ namespace WindowsForms
 
                 // Cancelar se habilita si la solicitud está Aprobada Y el viaje es futuro
                 esCancelable = (solicitud != null &&
-                                solicitud.Estado == EstadoSolicitud.Aprobada.ToString() && // Ya filtrado, pero por seguridad
+                                solicitud.Estado == EstadoSolicitud.Aprobada && // Ya filtrado, pero por seguridad
                                 solicitud.FechaHoraViaje.HasValue &&
                                 solicitud.FechaHoraViaje.Value > DateTime.Now);
             }
@@ -143,7 +143,7 @@ namespace WindowsForms
             if (dgvMisViajes.SelectedRows.Count == 0) return;
             var selectedRow = dgvMisViajes.SelectedRows[0];
             var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
-            if (solicitud == null || solicitud.Estado != EstadoSolicitud.Aprobada.ToString() || !(solicitud.FechaHoraViaje > DateTime.Now)) return;
+            if (solicitud == null || solicitud.Estado != EstadoSolicitud.Aprobada || !(solicitud.FechaHoraViaje > DateTime.Now)) return;
             //validamos q la solicitud este aprobada porq aca estamos mostrando los viajes ya confirmados, tambien se puede cancelar una solicitud pendiente pero eso lo manejamos en el form de las solicitudes de usuario
             DialogResult confirm = MessageBox.Show("¿Está seguro de cancelar su lugar en este viaje?",
                                                "Confirmar Cancelación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);

@@ -33,6 +33,7 @@
             btnRechazarSolicitud = new Button();
             btnVolver = new Button();
             lblInfoViaje = new Label();
+            labelSolicitud = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvSolicitudes).BeginInit();
             SuspendLayout();
             // 
@@ -48,9 +49,12 @@
             // 
             // dgvSolicitudes
             // 
+            dgvSolicitudes.AllowUserToAddRows = false;
+            dgvSolicitudes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvSolicitudes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvSolicitudes.Location = new Point(14, 27);
             dgvSolicitudes.Name = "dgvSolicitudes";
+            dgvSolicitudes.ReadOnly = true;
             dgvSolicitudes.Size = new Size(658, 375);
             dgvSolicitudes.TabIndex = 1;
             // 
@@ -82,11 +86,21 @@
             lblInfoViaje.Size = new Size(0, 15);
             lblInfoViaje.TabIndex = 4;
             // 
+            // labelSolicitud
+            // 
+            labelSolicitud.AutoSize = true;
+            labelSolicitud.Location = new Point(16, 7);
+            labelSolicitud.Name = "labelSolicitud";
+            labelSolicitud.Size = new Size(132, 15);
+            labelSolicitud.TabIndex = 5;
+            labelSolicitud.Text = "Solicitudes para el viaje ";
+            // 
             // SolicitudesLista
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(684, 461);
+            Controls.Add(labelSolicitud);
             Controls.Add(lblInfoViaje);
             Controls.Add(btnVolver);
             Controls.Add(btnRechazarSolicitud);
@@ -106,5 +120,6 @@
         private Button btnRechazarSolicitud;
         private Button btnVolver;
         private Label lblInfoViaje;
+        private Label labelSolicitud;
     }
 }
