@@ -167,7 +167,7 @@ namespace Application.Services
             {
                 IdSolicitud = solicitud.IdSolicitud,
                 SolicitudFecha = solicitud.SolicitudFecha,
-                Estado = solicitud.Estado.ToString(),
+                Estado = solicitud.Estado,
                 IdViaje = solicitud.IdViaje,
                 IdPasajero = solicitud.IdPasajero
             };

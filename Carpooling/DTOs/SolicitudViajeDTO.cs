@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DTOs
@@ -11,7 +12,9 @@ namespace DTOs
     {
         public int IdSolicitud { get; set; }
         public DateTime SolicitudFecha { get; set; }
-        public string Estado { get; set; } = string.Empty; // Estado de la SOLICITUD
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public EstadoSolicitud Estado { get; set; } // Estado de la SOLICITUD
         public int IdViaje { get; set; }
         public int IdPasajero { get; set; }
 
