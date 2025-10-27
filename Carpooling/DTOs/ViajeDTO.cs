@@ -22,6 +22,8 @@ namespace DTOs
 
         public int IdVehiculo { get; set; }
 
+        public string? Patente { get; set; }
+
         // información sobre el conductor
         public int IdConductor { get; set; }
 

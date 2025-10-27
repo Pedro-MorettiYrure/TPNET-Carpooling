@@ -108,6 +108,8 @@ namespace Application.Services
                 Estado = l.Estado,
                 OrigenCodPostal = l.OrigenCodPostal,
                 DestinoCodPostal = l.DestinoCodPostal,
+                NombreOrigen = l.Origen.nombreLoc,
+                NombreDestino = l.Destino.nombreLoc,
                 IdConductor = l.IdConductor
             };
         }
@@ -124,6 +126,8 @@ namespace Application.Services
                 Estado = l.Estado,
                 OrigenCodPostal = l.OrigenCodPostal,
                 DestinoCodPostal = l.DestinoCodPostal,
+                NombreOrigen = l.Origen.nombreLoc,
+                NombreDestino = l.Destino.nombreLoc,
                 IdConductor = l.IdConductor
             }).ToList();
         }
@@ -140,6 +144,8 @@ namespace Application.Services
                 Estado = l.Estado,
                 OrigenCodPostal = l.OrigenCodPostal,
                 DestinoCodPostal = l.DestinoCodPostal,
+                NombreOrigen = l.Origen.nombreLoc,
+                NombreDestino = l.Destino.nombreLoc,
                 IdConductor = l.IdConductor,
                 IdVehiculo = l.IdVehiculo
             }).ToList();
@@ -218,6 +224,7 @@ namespace Application.Services
                 DestinoCodPostal = v.DestinoCodPostal,
                 IdConductor = v.IdConductor,
                 IdVehiculo = v.IdVehiculo,
+                Patente = v.Vehiculo.Patente,
                 NombreOrigen = v.Origen.nombreLoc,
                 NombreDestino = v.Destino.nombreLoc
             }).ToList();

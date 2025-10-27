@@ -47,7 +47,7 @@ namespace Data
                 .Include(v => v.Origen)
                 .Include(v => v.Destino)
                 .Include(v => v.Conductor)
-                // .Include(v => v.Vehiculo) // Descomentar si es necesario
+                .Include(v => v.Vehiculo) // Descomentar si es necesario
                 // .Include(v => v.Solicitudes).ThenInclude(s => s.Pasajero) // Descomentar si es necesario
                 .FirstOrDefault(v => v.IdViaje == id);
         }

@@ -45,6 +45,12 @@ namespace Data
         {
             return _context.SolicitudesViaje
                 .Include(s => s.Pasajero) // Incluir datos del pasajero
+                .Include(s => s.Viaje)    
+                    .ThenInclude(v => v.Conductor)
+                .Include(s => s.Viaje)
+                     .ThenInclude(v => v.Origen) 
+                 .Include(s => s.Viaje)
+                     .ThenInclude(v => v.Destino)
                 .Where(s => s.IdViaje == idViaje)
                 .OrderBy(s => s.SolicitudFecha)
                 .ToList();

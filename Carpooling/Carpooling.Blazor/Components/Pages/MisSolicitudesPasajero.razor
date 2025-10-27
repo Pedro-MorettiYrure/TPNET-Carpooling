@@ -44,6 +44,7 @@
                     <th>Estado Viaje</th>
                     <th>Conductor</th>
                     <th>Fecha de Viaje</th>
+                    <th>Patente Vehiculo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -59,11 +60,16 @@
                         <td>@viaje.Estado</td>
                         <td>@sol.NombreConductor @sol.ApellidoConductor</td>
                         <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@viaje.Patente</td>
                         <td>
                             @* --- Lógica Condicional para Botones --- *@
                             @if (sol.Estado == EstadoSolicitud.Pendiente)
                             {
-                                    <button class="btn btn-success btn-sm me-1" @onclick="() => CancelarSolicitud(sol.IdViaje)" disabled="@procesandoAccion">Cancelar Solicitud</button>                               
+                                <button class="btn btn-success btn-sm me-1" @onclick="() => CancelarSolicitud(sol.IdSolicitud)" disabled="@procesandoAccion">Cancelar Solicitud</button>
+                            }
+                            else if (sol.Estado == EstadoSolicitud.Aprobada)
+                            {
+
                             }
                             @* --- Fin Lógica Condicional --- *@
                         </td>
@@ -151,7 +157,7 @@ else // Si el usuario no tiene permisos
                 ViajeDTO v = await ViajeApiClient.GetAsync(sol.IdViaje.ToString());
                 viajes.Add(v);
             }
-             
+
         }
         catch (Exception ex)
         {
@@ -159,13 +165,14 @@ else // Si el usuario no tiene permisos
             errorMensaje = $"No se pudieron cargar los viajes: {ex.Message}"; // Guarda el mensaje de error
             viajes = new List<ViajeDTO>(); // Asigna lista vacía en caso de error
         }
-        StateHasChanged(); // Notifica a Blazor para que actualice la interfaz gráfica
+        InvokeAsync(StateHasChanged); // Notifica a Blazor para que actualice la interfaz gráfica
     }
 
     // Método asíncrono para cancelar un viaje
-    private async Task CancelarSolicitud(int idViaje)
+    private async Task CancelarSolicitud(int idSoli)
     {
-        @* if (procesandoAccion) return; // Evita ejecuciones múltiples si ya se está procesando
+
+        if (procesandoAccion) return; // Evita ejecuciones múltiples si ya se está procesando
         procesandoAccion = true; // Marca que una acción está en curso
         errorMensaje = null; // Limpia errores
         await Task.Delay(1); // Pequeño delay para que la UI muestre el botón deshabilitado
@@ -180,23 +187,24 @@ else // Si el usuario no tiene permisos
             bool confirmado = await JSRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de que desea cancelar este viaje?");
             if (!confirmado) return; // Si el usuario cancela, no hace nada
 
-            // Llama a la API para cancelar (eliminar lógicamente) el viaje
-            await ViajeApiClient.DeleteAsync(idViaje, token); //
+            // Llama a la API para cancelar (eliminar lógicamente)
+            await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(idSoli, token); //
             await CargarViajes(); // Vuelve a cargar la lista para reflejar el cambio de estado
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al cancelar el viaje {idViaje}: {ex.Message}");
+            Console.WriteLine($"Error al cancelar la solicitud {idSoli}: {ex.Message}");
             errorMensaje = $"Error al cancelar viaje: {ex.Message}"; // Guarda el error
         }
         finally
         {
             procesandoAccion = false; // Marca que la acción terminó
-            StateHasChanged(); // Actualiza la UI
-        } *@
+            await CargarSolicitudes();
+            await InvokeAsync(StateHasChanged); // Actualiza la UI
+        }
     }
 
-    
+
 
     // Método para navegar a la página de calificación (a implementar)
     private void IrACalificarPasajeros(int idViaje)
@@ -204,6 +212,6 @@ else // Si el usuario no tiene permisos
         // Navega a una URL específica para calificar, pasando el ID del viaje
         Navigation.NavigateTo($"/calificar-pasajeros/{idViaje}");
         // Por ahora, solo muestra un mensaje temporal
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 }

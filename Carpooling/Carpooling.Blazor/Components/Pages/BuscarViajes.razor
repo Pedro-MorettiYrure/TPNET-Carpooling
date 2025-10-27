@@ -70,7 +70,7 @@ else
                 <th>Destino</th>
                 <th>Lugares Disp.</th>
                 <th>Precio</th>
-                <th>Estado</th>
+                <th>Estado Viaje</th>
                 <th>Comentarios</th>
                 <th>Acciones</th>
             </tr>
@@ -78,7 +78,8 @@ else
         <tbody>
             @foreach (var viaje in viajes)
             {
-                @if (viaje.Estado == EstadoViaje.Pendiente){
+                @if (viaje.Estado == EstadoViaje.Pendiente || viaje.Estado == EstadoViaje.Cancelado)
+                {
                     <tr>
                         <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@viaje.OrigenCodPostal</td> @* Idealmente, aquí buscarías el nombre de la localidad *@
@@ -88,13 +89,15 @@ else
                         <td>@viaje.Estado</td>
                         <td>@viaje.Comentario</td>
                         <td>
-                            @if (solicitudes.Where(s => s.IdViaje == viaje.IdViaje).Count() != 0)
-                            {
-                                <button class="btn btn-primary btn-sm" disabled="true">Ya solicitado</button>
-                            }   
-                            else
-                            {
-                                <button class="btn btn-primary btn-sm" @onclick="() => SolicitarViajeAsync(viaje.IdViaje)">Solicitar</button>
+                            @{var soli = solicitudes.Where(s => s.IdViaje == viaje.IdViaje).FirstOrDefault() ;
+                                @if (soli == null || soli.Estado == EstadoSolicitud.Cancelada)
+                                {
+                                    <button class="btn btn-primary btn-sm" @onclick="() => SolicitarViajeAsync(viaje.IdViaje)">Solicitar</button>
+                                }   
+                                else
+                                {
+                                    <button class="btn btn-primary btn-sm" disabled="true">Ya solicitado</button>
+                                }
                             }
                         </td>
                     </tr>
@@ -149,6 +152,7 @@ else
             solicitudes = res.ToList();
         }
         else { solicitudes = new List<SolicitudViajeDTO>(); }
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task CargarLocalidades()
@@ -210,5 +214,11 @@ else
         {
             error = $"No se pudo guardar el viaje: {ex.Message}";   
         }
+        finally
+        {
+            await CargarSolicitudes();
+            await InvokeAsync(StateHasChanged);
+        }
+        
     }
 }
