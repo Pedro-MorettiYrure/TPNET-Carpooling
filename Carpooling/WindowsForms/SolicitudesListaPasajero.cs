@@ -19,15 +19,17 @@ namespace WindowsForms
             InitializeComponent(); 
             _pasajeroLogueado = pasajeroLogueado;
             _misSolicitudes = new List<SolicitudViajeDTO>();
+            this.Load += FormMisSolicitudes_Load;
+            this.Load += dgvMisSolicitudes_SelectionChanged;
         }
 
         private async void FormMisSolicitudes_Load(object sender, EventArgs e)
         {
-            await CargarMisSolicitudesAsync();
+            await GetSolicitudesPorPasajerosAsync();
             ActualizarEstadoBotones(); 
         }
 
-        private async Task CargarMisSolicitudesAsync()
+        private async Task GetSolicitudesPorPasajerosAsync()
         {
             string? token = SessionManager.JwtToken; 
             if (string.IsNullOrEmpty(token))
@@ -110,6 +112,8 @@ namespace WindowsForms
             var selectedRow = dgvMisSolicitudes.SelectedRows[0];
             var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
 
+            
+
             if (solicitud == null ||
                 !(solicitud.Estado == EstadoSolicitud.Pendiente || solicitud.Estado == EstadoSolicitud.Aprobada) ||
                 !(solicitud.FechaHoraViaje > DateTime.Now))
@@ -129,7 +133,7 @@ namespace WindowsForms
                 await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(solicitud.IdSolicitud, token);
 
                 MessageBox.Show("Solicitud cancelada con éxito.", "Cancelación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await CargarMisSolicitudesAsync(); 
+                await GetSolicitudesPorPasajerosAsync(); 
                 ActualizarEstadoBotones();
             }
             catch (Exception ex)

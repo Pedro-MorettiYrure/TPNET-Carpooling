@@ -80,7 +80,7 @@ namespace WindowsForms
                     Width = 100 
                 });
 
-                lblInfoViaje.Text = "Cargando...";
+                ///lblInfoViaje.Text = "Cargando...";
                 lblInfoViaje.Visible = true;
 
                 var solicitudes = await SolicitudViajeApiClient.GetSolicitudesPorViajeAsync(_idViaje, token);

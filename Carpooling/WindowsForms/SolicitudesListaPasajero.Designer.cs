@@ -41,6 +41,7 @@
             dgvMisSolicitudes.Name = "dgvMisSolicitudes";
             dgvMisSolicitudes.Size = new Size(656, 342);
             dgvMisSolicitudes.TabIndex = 0;
+            dgvMisSolicitudes.SelectionChanged += dgvMisSolicitudes_SelectionChanged;
             // 
             // btnCancelarSolicitud
             // 

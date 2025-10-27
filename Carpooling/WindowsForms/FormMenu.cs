@@ -83,9 +83,9 @@ namespace WindowsForms
             if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor) 
             {
                 DialogResult eleccion = MessageBox.Show(
-                    "¿Desea ver sus viajes como conductor o como pasajero?",
+                    "¿Desea ver sus viajes como conductor o como pasajero? (Si: Conductor, No: Pasajero",
                     "Seleccionar Vista de Mis Viajes",
-                    MessageBoxButtons.YesNo, // Yes = Conductor, No = Pasajero
+                    MessageBoxButtons.YesNo, 
                     MessageBoxIcon.Question);
 
                 if (eleccion == DialogResult.Yes) // como conductor
@@ -126,6 +126,19 @@ namespace WindowsForms
         {
             SolicitudesListaPasajero formSolicitudesPasajero = new SolicitudesListaPasajero(_usuarioLogueado);
             formSolicitudesPasajero.ShowDialog();
+        }
+
+        private void btnCerrarSesion_Click(object sender, EventArgs e)
+        {
+            if (SessionManager.EstaLogueado) 
+            {
+                SessionManager.CerrarSesion();
+                MessageBox.Show("Sesión cerrada.", "Cerrar Sesión", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            this.Close();
+
+            Application.OpenForms["FormLogin"]?.Show(); 
         }
 
     }
