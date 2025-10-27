@@ -8,7 +8,7 @@ namespace WindowsForms
 {
     public partial class FormMenu : Form
     {
-        private readonly UsuarioDTO _usuarioLogueado; // <-- usuario logueado
+        private readonly UsuarioDTO _usuarioLogueado;
 
         public FormMenu(UsuarioDTO usuarioLogueado)
         {
@@ -47,6 +47,7 @@ namespace WindowsForms
                     btnVehiculoLista.Visible = true;
                     btnViajeLista.Visible = true;
                     btnBuscarViaje.Visible = true;
+                    btnMisSolicitudes.Visible = true;
                     break;
             }
         }
@@ -66,7 +67,6 @@ namespace WindowsForms
 
         private void btnVehiculoLista_Click(object sender, EventArgs e)
         {
-            // Le pasamos el usuario logueado al constructor
             VehiculosLista appVehiculo = new VehiculosLista(_usuarioLogueado);
             appVehiculo.ShowDialog();
         }
