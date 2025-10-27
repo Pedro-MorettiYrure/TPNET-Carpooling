@@ -3,6 +3,7 @@
 
 @using DTOs
 @using API.Clients
+@using API.Auth.Blazor
 @inject ServicioSesionUsuario SesionUsuario
 @inject NavigationManager Navigation
 
@@ -65,6 +66,7 @@ else
 @code {
     private List<VehiculoDTO> vehiculos;
     private bool puedeAcceder = false;
+    string token;
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,8 +87,10 @@ else
     {
         try
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
             var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
-            var vehiculosList = await VehiculoApiClient.GetByUsuarioAsync(idUsuario);
+            var vehiculosList = await VehiculoApiClient.GetByUsuarioAsync(idUsuario, token);
             vehiculos = vehiculosList.ToList();
         }
         catch (Exception ex)
@@ -111,8 +115,10 @@ else
         // Aquí podrías agregar una confirmación (ej. un pop-up)
         try
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
             var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
-            await VehiculoApiClient.DeleteAsync(patente, idUsuario);
+            await VehiculoApiClient.DeleteAsync(patente, idUsuario, token);
             // Recargamos la lista para que el vehículo eliminado desaparezca
             await CargarVehiculos();
         }

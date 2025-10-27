@@ -7,11 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddSingleton<IAuthService, ServicioSesionUsuario>(); 
+builder.Services.AddSingleton<ServicioSesionUsuario>(); 
 var app = builder.Build();
 
 // Configurar AuthServiceProvider para ApiClients
-var authService = app.Services.GetRequiredService<IAuthService>();
+var authService = app.Services.GetRequiredService<ServicioSesionUsuario>();
 AuthServiceProvider.Register(authService); 
 
 // Configure the HTTP request pipeline.

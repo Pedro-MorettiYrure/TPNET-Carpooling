@@ -3,6 +3,7 @@
 @using DTOs
 @using API.Clients
 @using System.ComponentModel.DataAnnotations
+@using API.Auth.Blazor
 @inject ServicioSesionUsuario SesionUsuario
 @inject NavigationManager Navigation
 
@@ -74,16 +75,18 @@ else
     private string mensaje;
     private bool exito;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         // Cargamos los datos del usuario logueado en el modelo del formulario
-        if (SesionUsuario.EstaLogueado)
+        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync();
+        if (!isAuthenticated)
         {
-            usuarioModel = SesionUsuario.UsuarioActual;
+            Navigation.NavigateTo("/login");
+            return;
         }
         else
         {
-            Navigation.NavigateTo("/login"); // Si no está logueado, lo mandamos al login
+            usuarioModel = await SesionUsuario.GetUsuarioAsync();
         }
     }
 
@@ -94,7 +97,9 @@ else
 
         try
         {
-            bool resultado = await UsuarioApiClient.ActualizarUsuarioAsync(usuarioModel);
+            string token = await SesionUsuario.GetTokenAsync();
+
+            bool resultado = await UsuarioApiClient.ActualizarUsuarioAsync(usuarioModel, token);
             if (resultado)
             {
                 exito = true;

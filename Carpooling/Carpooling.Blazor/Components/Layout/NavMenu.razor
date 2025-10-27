@@ -1,4 +1,7 @@
-﻿@inject ServicioSesionUsuario SesionUsuario
+﻿@using API.Clients
+@using DTOs
+@using API.Auth.Blazor
+@inject ServicioSesionUsuario SesionUsuario
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -19,7 +22,7 @@
             </NavLink>
         </div>
 
-        @if (SesionUsuario.EstaLogueado)
+        @if (SesionUsuario.UsuarioActual!=null)
         {
             @switch (SesionUsuario.UsuarioActual.TipoUsuario)
             {
@@ -54,6 +57,7 @@
                         </NavLink>
                     </div>
                     break;
+                
             }
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="editar-perfil">
@@ -83,14 +87,31 @@
 </div>
 
 @code {
-    protected override void OnInitialized()
+    //UsuarioDTO? user;
+    //bool aut;
+    protected override async void OnInitialized()
     {
         SesionUsuario.OnChange += StateHasChanged;
+        // aut = await SesionUsuario.IsAuthenticatedAsync();
+        // if (aut)
+        // {
+        //     //var user = SesionUsuario.GetUsuarioAsync;
+            
+        // }
+        await base.OnInitializedAsync();
     }
+
+    // private void OnAuthenticationStateChanged(bool authenticated)
+    // {
+    //     InvokeAsync(async () =>
+    //     {
+    //         aut = await SesionUsuario.IsAuthenticatedAsync();
+    //     });
+    // }
 
     private void CerrarSesion()
     {
-        SesionUsuario.CerrarSesion();
+        SesionUsuario.LogoutAsync();
         Navigation.NavigateTo("/");
     }
 

@@ -1,6 +1,7 @@
 ﻿@page "/convertir-a-conductor"
 @rendermode InteractiveServer
 
+@using API.Auth.Blazor
 @using DTOs
 @using API.Clients
 @using System.ComponentModel.DataAnnotations
@@ -48,8 +49,22 @@ else
 @code {
     private UsuarioDTO.ConductorUpgradeDTO conductorModel = new() { fechaVencimientoLicencia = DateTime.Now.AddYears(1) };
 
-    private string mensaje;
+    private string? mensaje;
     private bool exito;
+    string? token;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verificar autenticación antes de cargar datos
+        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        token = await SesionUsuario.GetTokenAsync();
+
+    }
 
     private async Task ManejarSolicitud()
     {
@@ -58,16 +73,22 @@ else
 
         try
         {
-            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
-            bool resultado = await UsuarioApiClient.ConvertirAConductorAsync(idUsuario, conductorModel);
+            await SesionUsuario.CheckTokenExpirationAsync();
+            string? token = await SesionUsuario.GetTokenAsync();
 
-            if (resultado)
+            var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
+            string newToken = await UsuarioApiClient.ConvertirAConductorAsync(idUsuario, conductorModel, token);
+            if (newToken != null)
             {
+                SesionUsuario.SetToken(newToken);
+                token = newToken;
+
                 exito = true;
                 mensaje = "¡Felicidades! Tus datos se guardaron correctamente. Ahora sos conductor.";
 
                 // Actualizamos el usuario en la sesión para que el menú cambie inmediatamente
-                var usuarioActualizado = await UsuarioApiClient.GetByEmailAsync(SesionUsuario.UsuarioActual.Email);
+                var usuarioActualizado = await UsuarioApiClient.GetByEmailAsync(SesionUsuario.UsuarioActual.Email, token);
+
                 SesionUsuario.IniciarSesion(usuarioActualizado);
 
                 // Esperamos 2 segundos para que el usuario lea el mensaje y luego lo redirigimos

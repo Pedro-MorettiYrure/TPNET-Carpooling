@@ -2,7 +2,8 @@
 @using DTOs
 @using API.Clients
 @using Carpooling.Blazor.Components
-@inject IAuthService SesionUsuario
+@using API.Auth.Blazor
+@inject ServicioSesionUsuario SesionUsuario
 @inject NavigationManager Navigation
 
 
@@ -18,7 +19,7 @@
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
-                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Contraseña" />
+                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Contrasena" />
             </div>
             @if (!string.IsNullOrEmpty(error))
             {
@@ -31,23 +32,30 @@
 
 @code {
     private LoginModel loginModel = new();
-    private string error;
+    private string? error;
 
     private async Task ManejarLogin()
     {
         try
         {
-            bool loginExitoso = await SesionUsuario.LoginAsync(loginModel.Email, loginModel.Contraseña);
-
-            if (loginExitoso)
+            if (loginModel.Email == null || loginModel.Contrasena == null)
             {
-                UsuarioDTO usuario = await UsuarioApiClient.GetByEmailAsync(loginModel.Email);
-                SesionUsuario.IniciarSesion(usuario);
-                Navigation.NavigateTo("/"); // Redirige al inicio
+                error = "No deje campos vacios";
             }
             else
             {
-                error = "Email o contraseña incorrectos.";
+                bool loginExitoso = await SesionUsuario.LoginAsync(loginModel.Email, loginModel.Contrasena);
+
+                if (loginExitoso)
+                {
+                    // UsuarioDTO usuario = await UsuarioApiClient.GetByEmailAsync(loginModel.Email);
+                    // SesionUsuario.IniciarSesion(usuario);
+                    Navigation.NavigateTo("/"); // Redirige al inicio
+                }
+                else
+                {
+                    error = "Email o contraseña incorrectos.";
+                }
             }
         }
         catch (Exception)
@@ -58,7 +66,7 @@
 
     public class LoginModel
     {
-        public string Email { get; set; }
-        public string Contraseña { get; set; }
+        public string? Email { get; set; }
+        public string? Contrasena { get; set; }
     }
 }

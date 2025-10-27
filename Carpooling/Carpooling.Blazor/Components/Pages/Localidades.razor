@@ -3,6 +3,7 @@
 
 @using DTOs
 @using API.Clients
+@using API.Auth.Blazor
 @inject ServicioSesionUsuario SesionUsuario
 @inject NavigationManager Navigation
 
@@ -67,6 +68,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        SesionUsuario.IsAuthenticatedAsync();
         // Verificamos si el usuario es Administrador
         if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.Administrador)
         {
@@ -113,7 +115,9 @@ else
 
         try
         {
-            await LocalidadApiClient.DeleteAsync(codPostal);
+            await SesionUsuario.CheckTokenExpirationAsync();
+            string token = await SesionUsuario.GetTokenAsync();
+            await LocalidadApiClient.DeleteAsync(codPostal, token);
             await CargarLocalidades(); // Recargamos la lista
         }
         catch (Exception ex)

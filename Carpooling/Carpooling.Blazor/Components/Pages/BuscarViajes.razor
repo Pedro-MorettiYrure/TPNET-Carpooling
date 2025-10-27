@@ -4,6 +4,7 @@
 @using DTOs
 @using API.Clients
 @using Domain.Model
+@using API.Auth.Blazor
 @inject ServicioSesionUsuario SesionUsuario
 
 @inject NavigationManager Navigation
@@ -87,9 +88,14 @@ else
                         <td>@viaje.Estado</td>
                         <td>@viaje.Comentario</td>
                         <td>
-
-                            <button class="btn btn-primary btn-sm" @onclick="() => SolicitarViajeAsync(viaje.IdViaje)">Solicitar</button>
-
+                            @if (solicitudes.Where(s => s.IdViaje == viaje.IdViaje).Count() != 0)
+                            {
+                                <button class="btn btn-primary btn-sm" disabled="true">Ya solicitado</button>
+                            }   
+                            else
+                            {
+                                <button class="btn btn-primary btn-sm" @onclick="() => SolicitarViajeAsync(viaje.IdViaje)">Solicitar</button>
+                            }
                         </td>
                     </tr>
                 }
@@ -108,14 +114,41 @@ else
     private LocalidadDTO? destino;
     private List<ViajeDTO>? viajes;
     private List<LocalidadDTO>? localidades;
+    private List<SolicitudViajeDTO> solicitudes;
+
+    UsuarioDTO? usuario;
+    string? token;
+
     private bool puedeAcceder = false;
     private string? error;
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarLocalidades();
-        //await CargarViajes();
 
+        //await CargarViajes();
+        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync();
+        if (isAuthenticated)
+        {
+            usuario = await SesionUsuario.GetUsuarioAsync();
+
+            token = await SesionUsuario.GetTokenAsync();
+        }
+
+        await CargarLocalidades();
+        await CargarSolicitudes();
+    }
+
+    private async Task CargarSolicitudes()
+    {
+        var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync();
+        if (isAuthenticated)
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+            var res = await SolicitudViajeApiClient.GetSolicitudesPorPasajeroAsync(SesionUsuario.UsuarioActual.IdUsuario, token);
+            solicitudes = res.ToList();
+        }
+        else { solicitudes = new List<SolicitudViajeDTO>(); }
     }
 
     private async Task CargarLocalidades()
@@ -153,17 +186,25 @@ else
     {
         try
         {
-            var usuario = SesionUsuario.UsuarioActual;
+            var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync();
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
 
             SolicitudViajeDTO sol = new SolicitudViajeDTO()
                 {
                     SolicitudFecha = DateTime.Now,
                     IdViaje = idViaje,
-                    IdPasajero = usuario.IdUsuario,
-                    NombrePasajero = usuario.Nombre,    //revisar si dejar o sacar
-                    ApellidoPasajero = usuario.Apellido
+                    IdPasajero = SesionUsuario.UsuarioActual.IdUsuario,
+                    NombrePasajero = SesionUsuario.UsuarioActual.Nombre,    //revisar si dejar o sacar
+                    ApellidoPasajero = SesionUsuario.UsuarioActual.Apellido
                 };
-            await SolicitudViajeApiClient.CrearSolicitudAsync(sol);
+
+            await SolicitudViajeApiClient.CrearSolicitudAsync(sol, token);
         }
         catch (Exception ex)
         {
