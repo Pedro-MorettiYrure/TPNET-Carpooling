@@ -17,7 +17,7 @@ namespace API.Auth.Blazor
         private class SessionData
         {
             public string? Token { get; set; }
-            public UsuarioDTO? UsuarioActual { get; set; }
+            //public UsuarioDTO? UsuarioActual { get; set; }
             public DateTime Expiration { get; set; }
         }
 
@@ -40,11 +40,10 @@ namespace API.Auth.Blazor
             {
                 UsuarioDTO user = await UsuarioApiClient.GetByEmailAsync(email, token);
 
-
+                UsuarioActual = user;
                 _currentSession = new SessionData
                 {
                     Token = token,
-                    UsuarioActual = user,
                     Expiration = DateTime.UtcNow.AddMinutes(ExpirationTime)
                 };
 
@@ -58,6 +57,7 @@ namespace API.Auth.Blazor
         public Task LogoutAsync()
         {
             _currentSession = null;
+            UsuarioActual = null;
             NotifyStateChanged();
             return Task.CompletedTask;
         }
@@ -98,11 +98,16 @@ namespace API.Auth.Blazor
             }
         }
 
+        public void SetToken(string newToken)
+        {
+            _currentSession.Token = newToken;
+        }
+
         public Task<UsuarioDTO?> GetUsuarioAsync()
         {
             try
             {
-                return Task.FromResult(_currentSession?.UsuarioActual);
+                return Task.FromResult(UsuarioActual);
             }
             catch
             {
@@ -112,7 +117,7 @@ namespace API.Auth.Blazor
 
         public bool EstaLogueado => UsuarioActual != null;
 
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        public void NotifyStateChanged() => OnChange?.Invoke();
     }
         
         //public Task<bool> HasPermissionAsync(string permission)

@@ -5,6 +5,7 @@
 @using DTOs
 @using API.Clients
 @using System.ComponentModel.DataAnnotations
+@using API.Auth.Blazor
 @inject NavigationManager Navigation
 @inject ServicioSesionUsuario SesionUsuario
 
@@ -94,15 +95,18 @@ else
         error = string.Empty;
         var dto = new LocalidadDTO { CodPostal = localidadModel.CodPostal, Nombre = localidadModel.Nombre };
 
+        await SesionUsuario.CheckTokenExpirationAsync();
+        string token = await SesionUsuario.GetTokenAsync();
+
         try
         {
             if (modoEdicion)
             {
-                await LocalidadApiClient.UpdateAsync(dto);
+                await LocalidadApiClient.UpdateAsync(dto, token);
             }
             else
             {
-                await LocalidadApiClient.AddAsync(dto);
+                await LocalidadApiClient.AddAsync(dto, token);
             }
             Navigation.NavigateTo("/localidades"); // Volvemos a la lista
         }

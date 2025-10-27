@@ -4,6 +4,7 @@
 @using DTOs
 @using API.Clients
 @using Domain.Model 
+@using API.Auth.Blazor
 @inject ServicioSesionUsuario SesionUsuario
 @inject NavigationManager Navigation
 
@@ -75,12 +76,16 @@ else
     private List<ViajeDTO>? viajes;
     private bool puedeAcceder = false;
 
+    string token;
+
     protected override async Task OnInitializedAsync()
     {
+
         if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
         {
             puedeAcceder = true;
             await CargarViajes();
+            token = await SesionUsuario.GetTokenAsync();
         }
         else
         {
@@ -92,9 +97,12 @@ else
     {
         try
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+            
             var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
             // Usamos el cliente de API que ya tenías para traer los viajes del conductor
-            var viajesList = await ViajeApiClient.GetByConductorAsync(idUsuario);
+            var viajesList = await ViajeApiClient.GetByConductorAsync(idUsuario, token);
             viajes = viajesList.ToList();
         }
         catch (Exception ex)
@@ -122,8 +130,12 @@ else
 
         try
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+
+
             // Llamamos al método Delete de la API.
-            await ViajeApiClient.DeleteAsync(idViaje);
+            await ViajeApiClient.DeleteAsync(idViaje, token);
             // Recargamos la lista para que se actualice el estado del viaje cancelado
             await CargarViajes();
         }

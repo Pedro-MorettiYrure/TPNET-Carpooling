@@ -5,6 +5,7 @@
 @using DTOs
 @using API.Clients
 @using System.ComponentModel.DataAnnotations
+@using API.Auth.Blazor
 @inject NavigationManager Navigation
 @inject ServicioSesionUsuario SesionUsuario
 
@@ -141,6 +142,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await SesionUsuario.IsAuthenticatedAsync();
+
         if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
         {
             puedeAcceder = true;
@@ -187,10 +190,13 @@ else
     {
         try
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            string token = await SesionUsuario.GetTokenAsync();
+
             var idUsuario = SesionUsuario.UsuarioActual.IdUsuario;
             // Usamos los API clients que ya existen
             localidades = (await LocalidadApiClient.GetAllAsync()).ToList();
-            vehiculos = (await VehiculoApiClient.GetByUsuarioAsync(idUsuario)).ToList();
+            vehiculos = (await VehiculoApiClient.GetByUsuarioAsync(idUsuario, token)).ToList();
         }
         catch (Exception ex)
         {
@@ -202,6 +208,11 @@ else
 
     private async Task GuardarViaje()
     {
+        await SesionUsuario.CheckTokenExpirationAsync();
+
+        string token = await SesionUsuario.GetTokenAsync();
+
+
         error = string.Empty;
 
         // --- Validaciones Adicionales (similares a tu WinForms) ---
@@ -249,11 +260,11 @@ else
         {
             if (modoEdicion)
             {
-                await ViajeApiClient.UpdateAsync(viajeModel);
+                await ViajeApiClient.UpdateAsync(viajeModel, token);
             }
             else
             {
-                await ViajeApiClient.AddAsync(viajeModel);
+                await ViajeApiClient.AddAsync(viajeModel, token);
             }
             Navigation.NavigateTo("/viajes"); // Volvemos a la lista
         }

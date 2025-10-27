@@ -4,6 +4,7 @@
 
 @using DTOs
 @using API.Clients
+@using API.Auth.Blazor
 @inject NavigationManager Navigation
 @inject ServicioSesionUsuario SesionUsuario
 
@@ -62,12 +63,15 @@ else
     private string Titulo = "";
     private bool modoEdicion = false;
     private bool puedeAcceder = false;
+    string token;
 
     protected override async Task OnInitializedAsync()
     {
         // Verificamos que el usuario esté logueado y sea conductor
         if (SesionUsuario.EstaLogueado && SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor)
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
             puedeAcceder = true;
             var idUsuarioLogueado = SesionUsuario.UsuarioActual.IdUsuario;
 
@@ -76,7 +80,7 @@ else
                 // --- Modo Edición ---
                 Titulo = "Editar Vehículo";
                 modoEdicion = true;
-                Vehiculo = await VehiculoApiClient.GetAsync(Patente, idUsuarioLogueado);
+                Vehiculo = await VehiculoApiClient.GetAsync(Patente, idUsuarioLogueado, token);
             }
             else
             {
@@ -97,13 +101,14 @@ else
     {
         try
         {
+            await SesionUsuario.CheckTokenExpirationAsync();
             if (modoEdicion)
             {
-                await VehiculoApiClient.UpdateAsync(Vehiculo);
+                await VehiculoApiClient.UpdateAsync(Vehiculo, token);
             }
             else
             {
-                await VehiculoApiClient.AddAsync(Vehiculo);
+                await VehiculoApiClient.AddAsync(Vehiculo, token);
             }
             Navigation.NavigateTo("/vehiculos");
         }
