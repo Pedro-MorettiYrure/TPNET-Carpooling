@@ -158,7 +158,6 @@ namespace Application.Services
             throw new InvalidOperationException($"La solicitud ya se encuentra en estado '{solicitud.Estado}' y no puede ser cancelada.");
         }
 
-        // *** MODIFICADO: MapToDTO para incluir info del viaje ***
         private SolicitudViajeDTO MapToDTO(SolicitudViaje solicitud, bool includePasajeroInfo = false, bool includeViajeInfo = false)
         {
             if (solicitud == null) throw new ArgumentNullException(nameof(solicitud));
@@ -167,7 +166,7 @@ namespace Application.Services
             {
                 IdSolicitud = solicitud.IdSolicitud,
                 SolicitudFecha = solicitud.SolicitudFecha,
-                Estado = solicitud.Estado.ToString(),
+                Estado = solicitud.Estado,
                 IdViaje = solicitud.IdViaje,
                 IdPasajero = solicitud.IdPasajero
             };

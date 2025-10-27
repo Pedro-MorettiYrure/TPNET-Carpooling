@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TPIContext))]
-    partial class TPIContextModelSnapshot : ModelSnapshot
+    [Migration("20251027120807_CorregirRelacionViajeSolicitud")]
+    partial class CorregirRelacionViajeSolicitud
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,11 +113,16 @@ namespace Data.Migrations
                     b.Property<DateTime>("SolicitudFecha")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("ViajeIdViaje")
+                        .HasColumnType("int");
+
                     b.HasKey("IdSolicitud");
 
                     b.HasIndex("IdPasajero");
 
                     b.HasIndex("IdViaje");
+
+                    b.HasIndex("ViajeIdViaje");
 
                     b.ToTable("SolicitudesViaje", (string)null);
                 });
@@ -292,10 +300,14 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Model.Viaje", "Viaje")
-                        .WithMany("Solicitudes")
+                        .WithMany()
                         .HasForeignKey("IdViaje")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("Domain.Model.Viaje", null)
+                        .WithMany("Solicitudes")
+                        .HasForeignKey("ViajeIdViaje");
 
                     b.Navigation("Pasajero");
 

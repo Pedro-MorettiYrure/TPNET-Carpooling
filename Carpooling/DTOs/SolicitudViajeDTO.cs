@@ -11,7 +11,7 @@ namespace DTOs
     {
         public int IdSolicitud { get; set; }
         public DateTime SolicitudFecha { get; set; }
-        public string Estado { get; set; } = string.Empty; // Estado de la SOLICITUD
+        public EstadoSolicitud? Estado { get; set; } // Estado de la SOLICITUD
         public int IdViaje { get; set; }
         public int IdPasajero { get; set; }
 

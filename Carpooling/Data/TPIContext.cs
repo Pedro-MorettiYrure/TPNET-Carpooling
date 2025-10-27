@@ -121,17 +121,18 @@ namespace Data
                 entity.Property(e => e.SolicitudFecha).IsRequired();
                 entity.Property(e => e.Estado).IsRequired();
 
-                entity.HasOne(e => e.Viaje)
-                      .WithMany()
-                      .HasForeignKey(s => s.IdViaje)
+                // Asegura que la relación con Viaje use IdViaje y la colección Solicitudes
+                entity.HasOne(s => s.Viaje)
+                      .WithMany(v => v.Solicitudes) // <-- Usa la propiedad de colección en Viaje
+                      .HasForeignKey(s => s.IdViaje) // <-- Usa la clave foránea correcta
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction); 
+                      .OnDelete(DeleteBehavior.Cascade); // Cascade parece más lógico aquí
 
                 entity.HasOne(s => s.Pasajero)
-                      .WithMany()
+                      .WithMany() // Asume que Usuario no tiene colección específica
                       .HasForeignKey(s => s.IdPasajero)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction); 
+                      .OnDelete(DeleteBehavior.NoAction); // Mantén NoAction si es necesario
             });
             // ---------------- Calificaciones ----------------
 
