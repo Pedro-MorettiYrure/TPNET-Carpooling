@@ -110,7 +110,10 @@ namespace Application.Services
                 DestinoCodPostal = l.DestinoCodPostal,
                 NombreOrigen = l.Origen.nombreLoc,
                 NombreDestino = l.Destino.nombreLoc,
-                IdConductor = l.IdConductor
+                IdConductor = l.IdConductor,
+                NombreConductor = l.Conductor.Nombre,
+                ApellidoConductor = l.Conductor.Apellido,
+                EmailConductor = l.Conductor.Email
             };
         }
 

@@ -26,8 +26,12 @@ namespace DTOs
 
         // información sobre el conductor
         public int IdConductor { get; set; }
+        public string? NombreConductor { get; set; }
+        public string? ApellidoConductor { get; set; }
+
+        public string? EmailConductor { get; set; }
 
 
-        
+
     }
 }

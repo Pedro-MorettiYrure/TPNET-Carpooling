@@ -1,0 +1,241 @@
+﻿@page "/calificar-conductor/{IdViaje:int}"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@using API.Auth.Blazor
+@using Domain.Model
+@using System.ComponentModel.DataAnnotations
+
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Calificar al Conductor del Viaje @IdViaje</PageTitle>
+
+<h3>Calificar al Conductor del Viaje @IdViaje</h3>
+
+@if (viajeInfo != null && conductorMD != null)
+{
+    <p>Viaje de <strong>@viajeInfo.NombreOrigen</strong> a <strong>@viajeInfo.NombreDestino</strong> el @viajeInfo.FechaHora.ToString("dd/MM/yyyy HH:mm").</p>
+
+    @if (conductorMD.YaCalificado)
+    {
+        <div class="alert alert-info">Ya calificaste al Conductor de este viaje.</div>
+    }
+    else
+    {
+
+        <div class="card mb-3">
+            <div class="card-header @(conductorMD.YaCalificado ? "bg-light text-muted" : "")">
+                Pasajero: <strong>@conductorMD.Conductor.Nombre @conductorMD.Conductor.Apellido</strong> (@conductorMD.Conductor.Email)
+            </div>
+            <div class="card-body">
+                @if (conductorMD.YaCalificado && conductorMD.CalificacionExistente != null)
+                {
+                    <p class="mb-0">
+                        Ya calificaste a este pasajero con <strong>@conductorMD.CalificacionExistente.Puntaje estrellas</strong>
+                        @if (!string.IsNullOrEmpty(conductorMD.CalificacionExistente.Comentario))
+                        {
+                            <span> y comentaste: "@conductorMD.CalificacionExistente.Comentario"</span>
+                        }
+                        el @conductorMD.CalificacionExistente.FechaHora.ToString("dd/MM/yyyy").
+                    </p>
+                }
+                else
+                {
+                    // El Model es la propiedad 'Calificacion' del ViewModel
+                    <EditForm Model="conductorMD.Calificacion" OnValidSubmit="() => EnviarCalificacion(conductorMD)" FormName={`calif-${conductor.Pasajero.IdUsuario}`}>
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">Puntaje (1-5):</label>
+                            <InputRadioGroup @bind-Value="conductorMD.Calificacion.Puntaje">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    var puntajeActualLoop = i;
+                                    <div class="form-check form-check-inline">
+                                        <InputRadio class="form-check-input" id={`puntaje-${vm.Pasajero.IdUsuario}-${i}`}
+                                        Value="puntajeActualLoop" />
+                                        <label class="form-check-label" for={`puntaje-${vm.Pasajero.IdUsuario}-${i}`}>@i ★</label>
+                                    </div>
+                                }
+                            </InputRadioGroup>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Comentario (Opcional):</label>
+                            <InputTextArea class="form-control" @bind-Value="conductorMD.Calificacion.Comentario" rows="2" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            @* <-- Sacamos el disabled *@
+                            @if (conductorMD.Calificando)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            }
+                            Calificar
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(conductorMD.Error))
+                        {
+                            <div class="text-danger mt-2">@conductorMD.Error</div>
+                        }
+                    </EditForm>
+                }
+            </div>
+        </div>
+
+    }
+    <button class="btn btn-secondary mt-3" @onclick="VolverAMisSolicitudes">Volver a Mis Solicitudes</button>
+}
+else if (errorCarga != null)
+{
+    <div class="alert alert-danger">@errorCarga</div>
+    <button class="btn btn-secondary mt-3" @onclick="VolverAMisSolicitudes">Volver a Mis Solicitudes</button>
+}
+else
+{
+    <p><em>Cargando pasajeros del viaje...</em></p>
+}
+
+
+@code {
+    [Parameter]
+    public int IdViaje { get; set; }
+
+    // --- Estado Refactorizado ---
+    private ViajeDTO? viajeInfo;
+    private ConductorCalificacionViewModel conductorMD = new(); // Lista unificada
+    private string? errorCarga;
+    private string? token;
+
+    // 1. Modelo de Calificación (sin cambios)
+    public class CalificacionModel
+    {
+        [Range(1, 5, ErrorMessage = "El puntaje debe ser entre 1 y 5.")]
+        public int Puntaje { get; set; } = 5; // Valor inicial válido
+
+        [MaxLength(500, ErrorMessage = "El comentario no puede exceder los 500 caracteres.")]
+        public string? Comentario { get; set; }
+    }
+
+    // 2. Nuevo ViewModel unificado
+    public class ConductorCalificacionViewModel
+    {
+        public UsuarioDTO Conductor { get; set; } = new();
+        public CalificacionModel Calificacion { get; set; } = new(); // El modelo para el EditForm
+        public bool Calificando { get; set; } = false; // Estado 'disabled'
+        public string? Error { get; set; } // Mensaje de error
+        public bool YaCalificado { get; set; } = false; // Flag para mostrar/ocultar form
+        public CalificacionDTO? CalificacionExistente { get; set; } // Info de la calificación hecha
+    }
+    // --- Fin Estado Refactorizado ---
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SesionUsuario.IsAuthenticatedAsync();
+        if (!SesionUsuario.EstaLogueado || SesionUsuario.UsuarioActual == null || !(SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.Pasajero || SesionUsuario.UsuarioActual.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor))
+        {
+            errorCarga = "Acceso denegado. Debes ser conductor para calificar.";
+            return;
+        }
+
+        token = await SesionUsuario.GetTokenAsync();
+        if (token == null)
+        {
+            errorCarga = "Error de sesión. Por favor, inicie sesión nuevamente.";
+            return;
+        }
+
+        try
+        {
+            viajeInfo = await ViajeApiClient.GetAsync(IdViaje.ToString());
+            if (viajeInfo == null) throw new KeyNotFoundException($"Viaje con ID {IdViaje} no encontrado.");
+            //if (viajeInfo.IdConductor != SesionUsuario.UsuarioActual.IdUsuario) throw new UnauthorizedAccessException("No tienes permiso para calificar pasajeros de este viaje.");
+            if (viajeInfo.Estado != EstadoViaje.Realizado) throw new InvalidOperationException("Solo puedes calificar conductores de viajes que ya han sido marcados como 'Realizado'.");
+
+            conductorMD.Conductor = new()
+                {
+                    IdUsuario = viajeInfo.IdConductor,
+                    Nombre = viajeInfo.NombreConductor,
+                    Apellido = viajeInfo.ApellidoConductor,
+                    Email = viajeInfo.EmailConductor
+                };
+            var calificacionesYaHechas = (await CalificacionApiClient.GetCalificacionesDadasAsync(SesionUsuario.UsuarioActual.IdUsuario, token)).ToList();
+
+            // 3. Poblar la nueva lista unificada
+
+            var vm = new ConductorCalificacionViewModel { Conductor = conductorMD.Conductor };
+
+            var califExistente = calificacionesYaHechas
+                    .FirstOrDefault(c => c.IdViaje == IdViaje && c.IdCalificado == conductorMD.Conductor.IdUsuario);
+
+            if (califExistente != null)
+            {
+                conductorMD.YaCalificado = true;
+                conductorMD.CalificacionExistente = califExistente;
+            }
+            // Si califExistente es null, YaCalificado es false (por defecto)
+            // y el modelo Calificacion ya está inicializado con Puntaje = 5.
+
+
+        }
+        catch (Exception ex)
+        {
+            errorCarga = $"Error al cargar datos para calificación: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+
+    // 4. Actualizar EnviarCalificacion para usar el ViewModel
+    private async Task EnviarCalificacion(ConductorCalificacionViewModel vm)
+    {
+        if (token == null) return;
+
+        vm.Calificando = true; // Activa spinner
+        vm.Error = null;       // Limpia error
+        await Task.Delay(1);
+
+        var model = vm.Calificacion; // El modelo con los datos del form
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+            if (token == null) throw new InvalidOperationException("Sesión expirada.");
+
+            var inputDto = new CalificacionInputDTO
+                {
+                    Puntaje = model.Puntaje,
+                    Comentario = model.Comentario
+                };
+
+            var calificacionGuardada = await CalificacionApiClient.CalificarConductorAsync(
+                IdViaje,
+                inputDto,
+                token
+            );
+
+            // Actualiza el estado del ViewModel para ocultar el form y mostrar la info
+            vm.YaCalificado = true;
+            vm.CalificacionExistente = calificacionGuardada;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al calificar pasajero {vm.Conductor.IdUsuario}: {ex.Message}");
+            vm.Error = $"Error: {ex.Message}"; // Guarda el error
+        }
+        finally
+        {
+            vm.Calificando = false; // Desactiva spinner
+            StateHasChanged();
+        }
+    }
+
+    private void VolverAMisSolicitudes()
+    {
+        Navigation.NavigateTo("/solicitudes");
+    }
+}

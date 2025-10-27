@@ -65,11 +65,11 @@
                             @* --- Lógica Condicional para Botones --- *@
                             @if (sol.Estado == EstadoSolicitud.Pendiente)
                             {
-                                <button class="btn btn-success btn-sm me-1" @onclick="() => CancelarSolicitud(sol.IdSolicitud)" disabled="@procesandoAccion">Cancelar Solicitud</button>
+                                <button class="btn btn-danger btn-sm me-1" @onclick="() => CancelarSolicitud(sol.IdSolicitud)" disabled="@procesandoAccion">Cancelar Solicitud</button>
                             }
-                            else if (sol.Estado == EstadoSolicitud.Aprobada)
+                            else if (sol.Estado == EstadoSolicitud.Aprobada && viaje.Estado == EstadoViaje.Realizado)
                             {
-
+                                <button class="btn btn-success btn-sm me-1" @onclick="() => IrCalificarConductor(sol.IdViaje)" disabled="@procesandoAccion">Calificar Conductor</button>
                             }
                             @* --- Fin Lógica Condicional --- *@
                         </td>
@@ -207,11 +207,11 @@ else // Si el usuario no tiene permisos
 
 
     // Método para navegar a la página de calificación (a implementar)
-    private void IrACalificarPasajeros(int idViaje)
+    private void IrCalificarConductor(int idViaje)
     {
         // Navega a una URL específica para calificar, pasando el ID del viaje
-        Navigation.NavigateTo($"/calificar-pasajeros/{idViaje}");
-        // Por ahora, solo muestra un mensaje temporal
-        InvokeAsync(StateHasChanged);
+        Navigation.NavigateTo($"/calificar-conductor/{idViaje}");
+        
+        //InvokeAsync(StateHasChanged);
     }
 }
