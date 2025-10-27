@@ -90,5 +90,16 @@ namespace Data
                 .OrderBy(v => v.FechaHora) // Más próximos primero
                 .ToList();
         }
+        public IEnumerable<Viaje> GetViajesByDateRange(DateTime fechaInicio, DateTime fechaFin)
+        {
+            // Aseguramos que incluya la info necesaria para el reporte
+            return _context.Viajes
+                .Include(v => v.Origen) // Incluye Localidad Origen
+                .Include(v => v.Destino) // Incluye Localidad Destino
+                .Include(v => v.Conductor) // Incluye Usuario Conductor
+                .Where(v => v.FechaHora >= fechaInicio && v.FechaHora < fechaFin.AddDays(1)) // Filtra por rango de fechas
+                .OrderBy(v => v.FechaHora) // Ordena por fecha
+                .ToList(); //
+        }
     }
 }
