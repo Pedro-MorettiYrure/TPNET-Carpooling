@@ -67,18 +67,19 @@
                             @switch (viaje.Estado)
                             {
                                 case EstadoViaje.Pendiente: // Si el viaje está pendiente
-                                                            <button class="btn btn-success btn-sm me-1" @onclick="() => IniciarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Iniciar</button>
-                                                            <button class="btn btn-primary btn-sm me-1" @onclick="() => EditarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Editar</button>
-                                                            <button class="btn btn-danger btn-sm" @onclick="() => CancelarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Cancelar</button>
+                                    <button class="btn btn-success btn-sm m-1" @onclick="() => IniciarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Iniciar</button>
+                                    <button class="btn btn-secondary btn-sm m-1" @onclick="() => EditarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Editar</button>
+                                    <button class="btn btn-secondary btn-sm m-1" @onclick="() => VerSolicitudes(viaje.IdViaje)" disabled="@procesandoAccion">Ver Solicitudes</button>
+                                    <button class="btn btn-danger btn-sm m-1" @onclick="() => CancelarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Cancelar</button>
                                     break;
                                 case EstadoViaje.EnCurso: // Si el viaje está en curso
-                                                          <button class="btn btn-warning btn-sm" @onclick="() => FinalizarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Finalizar</button>
+                                    <button class="btn btn-warning btn-sm" @onclick="() => FinalizarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Finalizar</button>
                                     break;
                                 case EstadoViaje.Realizado: // Si el viaje ya se realizó
-                                                            <button class="btn btn-info btn-sm" @onclick="() => IrACalificarPasajeros(viaje.IdViaje)">Calificar Pasajeros</button>
+                                    <button class="btn btn-info btn-sm" @onclick="() => IrACalificarPasajeros(viaje.IdViaje)">Calificar Pasajeros</button>
                                     break;
                                 case EstadoViaje.Cancelado: // Si el viaje fue cancelado
-                                                            <span class="text-muted">Cancelado</span>
+                                    <span class="text-muted">Cancelado</span>
                                     break;
                             }
                             @* --- Fin Lógica Condicional --- *@
@@ -256,8 +257,8 @@ else // Si el usuario no tiene permisos
             if (response != null) // Verifica si la respuesta fue exitosa
             {
                 await CargarViajes(); // Recarga la lista para mostrar el nuevo estado y el botón de calificar
-                                      // Opcional: Mostrar mensaje de éxito si response.mensaje existe
-                                      // errorMensaje = response.mensaje; // Podrías usar errorMensaje para feedback positivo temporalmente
+                // Opcional: Mostrar mensaje de éxito si response.mensaje existe
+                // errorMensaje = response.mensaje; // Podrías usar errorMensaje para feedback positivo temporalmente
             }
             else
             {
@@ -282,6 +283,12 @@ else // Si el usuario no tiene permisos
         // Navega a una URL específica para calificar, pasando el ID del viaje
         Navigation.NavigateTo($"/calificar-pasajeros/{idViaje}");
         // Por ahora, solo muestra un mensaje temporal
+        StateHasChanged();
+    }
+
+    private void VerSolicitudes(int idViaje)
+    {
+        Navigation.NavigateTo($"/viajes/solicitudes/{idViaje}");
         StateHasChanged();
     }
 }

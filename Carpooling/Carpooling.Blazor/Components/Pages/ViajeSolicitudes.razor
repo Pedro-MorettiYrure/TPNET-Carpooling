@@ -1,0 +1,282 @@
+﻿@page "/viajes/solicitudes/{IdViaje:int}"
+@rendermode InteractiveServer
+
+@using DTOs
+@using API.Clients
+@using Domain.Model
+@using API.Auth.Blazor
+@inject ServicioSesionUsuario SesionUsuario
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Solicitudes de Viaje </PageTitle>
+
+@* Mensaje de error general *@
+@if (!string.IsNullOrEmpty(errorMensaje))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMensaje
+    </div>
+}
+
+
+
+@if (puedeAcceder) // Si el usuario tiene permisos
+{
+    @if (viaje == null)
+    {
+        <i>Cargando viaje...</i>
+    }
+    else
+    { 
+
+        <h3>Solicitudes del Viaje: @viaje.IdViaje </h3>
+
+        <p><i>Origen:</i> @viaje.NombreOrigen</p>
+        <br />
+        <p><i>Destino:</i> @viaje.NombreDestino</p>
+        <br />
+        <p><i>Fecha:</i> @viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</p>
+
+        @if (solicitudes == null) // Si aún está cargando
+        {
+            <p><em>Cargando solicitudes...</em></p>
+        }
+        else if (solicitudes.Count == 0) // Si no tiene viajes
+        {
+            <p>No tienes solicitudes.</p>
+            //
+        }
+        else // Si hay viajes, muestra la tabla
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+
+                        <th>Solicitada</th>
+                        <th>Pasajero</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var sol in solicitudes) // Itera sobre la lista de viajes
+                    {
+
+                        <tr>
+
+                            <td>@sol.SolicitudFecha.ToString("dd/MM/yyyy HH:mm")</td>
+
+                            <td>@sol.NombrePasajero @sol.ApellidoPasajero</td>
+                            <td>@sol.Estado</td>
+                            <td>
+                                @* --- Lógica Condicional para Botones --- *@
+                                @if (sol.Estado == EstadoSolicitud.Pendiente)
+                                {
+                                    <button class="btn btn-success btn-sm me-1 " @onclick="() => AprobarSolicitud(sol.IdSolicitud)" disabled="@procesandoAccion">Aprobar</button>
+                                    <button class="btn btn-danger btn-sm me-1" @onclick="() => RechazarSolicitud(sol.IdSolicitud)" disabled="@procesandoAccion">Rechazar</button>
+                                }
+                                else if (sol.Estado == EstadoSolicitud.Aprobada)
+                                {
+                                    <button class="btn btn-success btn-sm me-1" disabled>Aprobado</button>
+                                }
+                                else if (sol.Estado == EstadoSolicitud.Rechazada)
+                                {
+                                    <button class="btn btn-danger btn-sm me-1" disabled>Rechazado</button>
+                                }
+                                @* --- Fin Lógica Condicional --- *@
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        }
+    }
+
+    <button type="button" class="btn btn-secondary m-2" @onclick="Volver">Volver</button>
+
+}
+else // Si el usuario no tiene permisos
+{
+    <p><em>Verificando permisos...</em></p>
+    @if (!puedeAcceder && SesionUsuario.EstaLogueado)
+    {
+        <div class="alert alert-warning mt-3">No tienes permiso para acceder a esta sección.</div>
+        //
+    }
+}
+
+@code {
+    [Parameter]
+    public int IdViaje { get; set; }
+
+    private List<SolicitudViajeDTO>? solicitudes;
+    private ViajeDTO viaje;
+    private bool puedeAcceder = false; // Flag para controlar acceso
+    private bool procesandoAccion = false; // Flag para deshabilitar botones durante llamadas API
+    private string? errorMensaje; // Para mostrar errores generales
+
+    string? token;
+
+    // Método que se ejecuta al inicializar el componente
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (SesionUsuario.EstaLogueado &&
+            (SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.PasajeroConductor ||
+             SesionUsuario.UsuarioActual?.TipoUsuario == Domain.Model.TipoUsuario.Pasajero)) //
+        {
+            puedeAcceder = true; // Permite acceso
+            await CargarViaje();
+            await CargarSolicitudes(); // Carga la lista de viajes
+
+        }
+        else if (SesionUsuario.EstaLogueado)
+        {
+            // Logueado pero no tiene el rol correcto
+            puedeAcceder = false;
+        }
+        else
+        {
+            // No está logueado
+            Navigation.NavigateTo("/login"); // Redirige a login
+        }
+    }
+
+    private async Task CargarSolicitudes()
+    {
+        try
+        {
+            var isAuthenticated = await SesionUsuario.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                await SesionUsuario.CheckTokenExpirationAsync();
+                token = await SesionUsuario.GetTokenAsync();
+                var res = await SolicitudViajeApiClient.GetSolicitudesPorViajeAsync(IdViaje, token);
+                solicitudes = res.Where(s => s.Estado != EstadoSolicitud.Cancelada).ToList();
+            }
+            else { Navigation.NavigateTo("/login"); }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar las solicitudes: {ex.Message}");
+            errorMensaje = $"No se pudieron cargar las solicitudes: {ex.Message}"; // Guarda el mensaje de error
+            solicitudes = new List<SolicitudViajeDTO>(); // Asigna lista vacía en caso de error
+        }
+        await InvokeAsync(StateHasChanged);
+
+    }
+
+    private async Task AprobarSolicitud(int idSol)
+    {
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+            if (token == null)
+            {
+                throw new InvalidOperationException("La sesión ha expirado. Por favor, inicie sesión de nuevo.");
+            }
+            await SolicitudViajeApiClient.AceptarSolicitudAsync(idSol, token);
+            await Task.Delay(1);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar viajes: {ex.Message}");
+            errorMensaje = $"No se pudieron cargar los viajes: {ex.Message}"; // Guarda el mensaje de error
+        }
+        await CargarSolicitudes();
+    }
+
+    private async Task RechazarSolicitud(int idSol)
+    {
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+            if (token == null)
+            {
+                throw new InvalidOperationException("La sesión ha expirado. Por favor, inicie sesión de nuevo.");
+            }
+            await SolicitudViajeApiClient.RechazarSolicitudAsync(idSol, token);
+            await Task.Delay(1);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar viajes: {ex.Message}");
+            errorMensaje = $"No se pudieron cargar los viajes: {ex.Message}"; // Guarda el mensaje de error
+        }
+        await CargarSolicitudes();
+    }
+
+
+    // Método asíncrono para cargar los viajes desde la API
+    private async Task CargarViaje()
+    {
+
+        if (!puedeAcceder) return; // Si no tiene acceso o token, no hace nada
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            token = await SesionUsuario.GetTokenAsync();
+            if (token == null)
+            {
+                throw new InvalidOperationException("La sesión ha expirado. Por favor, inicie sesión de nuevo.");
+            }
+            viaje = await ViajeApiClient.GetAsync(IdViaje.ToString());
+            //StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar viajes: {ex.Message}");
+            errorMensaje = $"No se pudieron cargar los viajes: {ex.Message}"; // Guarda el mensaje de error
+        }
+        InvokeAsync(StateHasChanged); // Notifica a Blazor para que actualice la interfaz gráfica
+    }
+
+    private void Volver()
+    {
+        Navigation.NavigateTo("/viajes");
+    }
+    // Método asíncrono para cancelar un viaje
+    @* private async Task CancelarSolicitud(int idSoli)
+    {
+
+        if (procesandoAccion) return; // Evita ejecuciones múltiples si ya se está procesando
+        procesandoAccion = true; // Marca que una acción está en curso
+        errorMensaje = null; // Limpia errores
+        await Task.Delay(1); // Pequeño delay para que la UI muestre el botón deshabilitado
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync(); // Revisa token
+            token = await SesionUsuario.GetTokenAsync(); // Obtiene token
+            if (token == null) throw new InvalidOperationException("Sesión expirada.");
+
+            // Muestra un diálogo de confirmación usando JavaScript
+            bool confirmado = await JSRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de que desea cancelar este viaje?");
+            if (!confirmado) return; // Si el usuario cancela, no hace nada
+
+            // Llama a la API para cancelar (eliminar lógicamente)
+            await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(idSoli, token); //
+            await CargarViajes(); // Vuelve a cargar la lista para reflejar el cambio de estado
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cancelar la solicitud {idSoli}: {ex.Message}");
+            errorMensaje = $"Error al cancelar viaje: {ex.Message}"; // Guarda el error
+        }
+        finally
+        {
+            procesandoAccion = false; // Marca que la acción terminó
+            await CargarSolicitudes();
+            await InvokeAsync(StateHasChanged); // Actualiza la UI
+        }
+    } *@
+
+
+}
