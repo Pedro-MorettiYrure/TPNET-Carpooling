@@ -1,0 +1,247 @@
+﻿// Carpooling.Blazor/Components/Pages/CalificarPasajeros.razor
+@page "/calificar-pasajeros/{IdViaje:int}" // Ruta que espera el ID del viaje
+@rendermode InteractiveServer
+
+@using DTOs // Para UsuarioDTO, CalificacionDTO, etc.
+@using API.Clients // Para ViajeApiClient, CalificacionApiClient
+@using API.Auth.Blazor // Para ServicioSesionUsuario
+@using Domain.Model // Para EstadoViaje
+@using System.ComponentModel.DataAnnotations // Para validaciones del formulario
+
+@inject ServicioSesionUsuario SesionUsuario // Servicio de sesión
+@inject NavigationManager Navigation // Para navegar entre páginas
+@inject IJSRuntime JSRuntime // Para interactuar con JavaScript (si es necesario)
+
+<PageTitle>Calificar Pasajeros del Viaje @IdViaje</PageTitle>
+
+<h3>Calificar Pasajeros del Viaje @IdViaje</h3>
+
+@* Muestra información del viaje si se cargó correctamente *@
+@if (viajeInfo != null && pasajerosACalificar != null)
+{
+    <p>Viaje de <strong>@viajeInfo.NombreOrigen</strong> a <strong>@viajeInfo.NombreDestino</strong> el @viajeInfo.FechaHora.ToString("dd/MM/yyyy HH:mm").</p>
+
+    @* Mensaje si no hay pasajeros o ya están todos calificados *@
+    @if (!pasajerosACalificar.Any() || !calificacionesPendientes.Any()) //
+    {
+        <div class="alert alert-info">No hay pasajeros pendientes de calificar en este viaje.</div>
+    }
+    else
+    {
+        @* Itera sobre cada pasajero que participó en el viaje *@
+        @foreach (var pasajero in pasajerosACalificar)
+        {
+            // Busca si ya existe una calificación dada por el conductor actual a este pasajero para este viaje específico
+            var calificacionExistente = calificacionesYaHechas?
+                .FirstOrDefault(c => c.IdViaje == IdViaje && c.IdCalificado == pasajero.IdUsuario);
+
+            <div class="card mb-3">
+                @* Cabecera del card, cambia estilo si ya está calificado *@
+                <div class="card-header @(calificacionExistente != null ? "bg-light text-muted" : "")">
+                    Pasajero: <strong>@pasajero.Nombre @pasajero.Apellido</strong> (@pasajero.Email)
+                </div>
+                <div class="card-body">
+                    @if (calificacionExistente != null) // Si ya fue calificado, muestra la información
+                    {
+                        <p class="mb-0">
+                            Ya calificaste a este pasajero con <strong>@calificacionExistente.Puntaje estrellas</strong>
+                            @if (!string.IsNullOrEmpty(calificacionExistente.Comentario)) // Muestra comentario si existe
+                            {
+                                <span> y comentaste: "@calificacionExistente.Comentario"</span>
+                            }
+                            el @calificacionExistente.FechaHora.ToString("dd/MM/yyyy"). // Muestra fecha
+                        </p>
+                    }
+                    else if (calificacionesPendientes.ContainsKey(pasajero.IdUsuario)) // Si está pendiente de calificar, muestra el formulario
+                    {
+                        // Formulario individual para cada pasajero pendiente
+                        <EditForm Model="calificacionesPendientes[pasajero.IdUsuario]" OnValidSubmit="() => EnviarCalificacion(pasajero.IdUsuario)" FormName={`calif-${pasajero.IdUsuario}`}>
+                            <DataAnnotationsValidator /> @* Habilita validaciones DataAnnotations *@
+
+                            @* --- SECCIÓN CORREGIDA CON InputRadioGroup --- *@
+                            <div class="mb-3">
+                                <label class="form-label">Puntaje (1-5):</label>
+                                <InputRadioGroup @bind-Value="calificacionesPendientes[pasajero.IdUsuario].Puntaje"> @* @bind-Value va en el grupo *@
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        var puntajeActual = i;
+                                        <div class="form-check form-check-inline">
+                                            @* InputRadio solo necesita su Value específico *@
+                                            <InputRadio class="form-check-input" id={`puntaje-${pasajero.IdUsuario}-${i}`}
+                                                        Value="puntajeActual" />
+                                            <label class="form-check-label" for={`puntaje-${pasajero.IdUsuario}-${i}`}>@i ★</label>
+                                        </div>
+                                    }
+                                </InputRadioGroup>
+                                <ValidationMessage For="@(() => calificacionesPendientes[pasajero.IdUsuario].Puntaje)" /> @* Muestra error si el puntaje no es válido *@
+                            </div>
+                            @* --- FIN SECCIÓN CORREGIDA --- *@
+
+                            <div class="mb-3">
+                                <label class="form-label">Comentario (Opcional):</label>
+                                <InputTextArea class="form-control" @bind-Value="calificacionesPendientes[pasajero.IdUsuario].Comentario" rows="2" />
+                                <ValidationMessage For="@(() => calificacionesPendientes[pasajero.IdUsuario].Comentario)" /> @* Muestra error si el comentario excede el largo *@
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm" disabled="calificando[pasajero.IdUsuario]"> @* Deshabilita mientras se envía *@
+                                 @if (calificando[pasajero.IdUsuario]) { <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> } @* Muestra spinner *@
+                                Calificar
+                            </button>
+                            @* Muestra error específico si falla el envío para este pasajero *@
+                            @if (!string.IsNullOrEmpty(errorCalificacion.GetValueOrDefault(pasajero.IdUsuario)))
+                            {
+                                <div class="text-danger mt-2">@errorCalificacion[pasajero.IdUsuario]</div>
+                            }
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        }
+    }
+    <button class="btn btn-secondary mt-3" @onclick="VolverAMisViajes">Volver a Mis Viajes</button>
+}
+@* Mensaje si hubo error al cargar los datos iniciales *@
+else if (errorCarga != null)
+{
+     <div class="alert alert-danger">@errorCarga</div>
+     <button class="btn btn-secondary mt-3" @onclick="VolverAMisViajes">Volver a Mis Viajes</button>
+}
+@* Mensaje mientras se cargan los datos *@
+else
+{
+    <p><em>Cargando pasajeros del viaje...</em></p>
+}
+
+
+@code {
+    [Parameter]
+    public int IdViaje { get; set; } // Parámetro recibido de la URL
+
+    // Variables para almacenar datos y estado
+    private ViajeDTO? viajeInfo;
+    private List<UsuarioDTO>? pasajerosACalificar;
+    private List<CalificacionDTO>? calificacionesYaHechas;
+    // Diccionarios para manejar el estado de cada formulario de calificación individualmente
+    private Dictionary<int, CalificacionModel> calificacionesPendientes = new();
+    private Dictionary<int, bool> calificando = new();
+    private Dictionary<int, string?> errorCalificacion = new();
+    private string? errorCarga; // Error general al cargar la página
+    private string? token; // Token JWT del conductor
+
+    // Modelo interno para los datos del formulario de calificación con validaciones
+    public class CalificacionModel
+    {
+        [Range(1, 5, ErrorMessage = "El puntaje debe ser entre 1 y 5.")] // Validación: puntaje obligatorio entre 1 y 5
+        public int Puntaje { get; set; } = 0; // Inicializa en 0 para forzar selección
+
+        [MaxLength(500, ErrorMessage = "El comentario no puede exceder los 500 caracteres.")] // Validación: largo máximo comentario
+        public string? Comentario { get; set; }
+    }
+
+    // Método que se ejecuta al iniciar el componente
+    protected override async Task OnInitializedAsync()
+    {
+        await SesionUsuario.IsAuthenticatedAsync(); // Asegura estado de sesión
+        // Verifica si el usuario está logueado y es conductor
+        if (!SesionUsuario.EstaLogueado || SesionUsuario.UsuarioActual == null || SesionUsuario.UsuarioActual.TipoUsuario != Domain.Model.TipoUsuario.PasajeroConductor) //
+        {
+            errorCarga = "Acceso denegado. Debes ser conductor para calificar.";
+            return; // Termina la ejecución si no tiene permisos
+        }
+
+        token = await SesionUsuario.GetTokenAsync(); // Obtiene token
+        if (token == null) {
+            errorCarga = "Error de sesión. Por favor, inicie sesión nuevamente.";
+            return; // Termina si no hay token
+        }
+
+        try
+        {
+            // 1. Obtener info básica del viaje
+            viajeInfo = await ViajeApiClient.GetAsync(IdViaje.ToString()); // Llama a la API
+            if (viajeInfo == null) throw new KeyNotFoundException($"Viaje con ID {IdViaje} no encontrado.");
+            // Valida que el usuario logueado sea el conductor del viaje
+            if (viajeInfo.IdConductor != SesionUsuario.UsuarioActual.IdUsuario) throw new UnauthorizedAccessException("No tienes permiso para calificar pasajeros de este viaje.");
+            // Valida que el viaje esté realmente finalizado
+            if (viajeInfo.Estado != EstadoViaje.Realizado) throw new InvalidOperationException("Solo puedes calificar pasajeros de viajes que ya han sido marcados como 'Realizado'."); //
+
+            // 2. *** CAMBIO CLAVE ***
+            //    Obtener la lista de pasajeros APROBADOS usando el NUEVO endpoint
+            //    que no intenta cambiar el estado del viaje.
+            pasajerosACalificar = (await ViajeApiClient.GetPasajerosConfirmadosAsync(IdViaje, token)).ToList(); // Usa el nuevo método
+
+            // 3. Obtener las calificaciones que este conductor ya realizó (para filtrar a quién mostrarle el form)
+            calificacionesYaHechas = (await CalificacionApiClient.GetCalificacionesDadasAsync(SesionUsuario.UsuarioActual.IdUsuario, token)).ToList(); //
+
+            // 4. Prepara los diccionarios para manejar el estado de cada formulario
+            foreach (var p in pasajerosACalificar)
+            {
+                // Verifica si ya existe una calificación para este pasajero EN ESTE viaje
+                 var califExistente = calificacionesYaHechas
+                    .FirstOrDefault(c => c.IdViaje == IdViaje && c.IdCalificado == p.IdUsuario);
+                if (califExistente == null) // Si no existe, crea la entrada para el formulario
+                {
+                    calificacionesPendientes[p.IdUsuario] = new CalificacionModel(); // Modelo vacío para el formulario
+                    calificando[p.IdUsuario] = false; // Flag para spinner
+                    errorCalificacion[p.IdUsuario] = null; // Sin error inicial
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorCarga = $"Error al cargar datos para calificación: {ex.Message}"; // Guarda error general
+            pasajerosACalificar = null; // Evita que se intente renderizar la lista
+        }
+    }
+
+    // Método llamado al enviar el formulario de calificación de un pasajero
+    private async Task EnviarCalificacion(int idPasajeroCalificado)
+    {
+        // Verifica si existe un modelo pendiente para este pasajero y si hay token
+        if (!calificacionesPendientes.ContainsKey(idPasajeroCalificado) || token == null) return;
+
+        calificando[idPasajeroCalificado] = true; // Activa spinner para este pasajero
+        errorCalificacion[idPasajeroCalificado] = null; // Limpia error previo
+        await Task.Delay(1); // Da tiempo a la UI para mostrar el spinner
+
+        var model = calificacionesPendientes[idPasajeroCalificado]; // Obtiene el modelo con los datos del form
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync(); // Revisa token
+            token = await SesionUsuario.GetTokenAsync(); // Obtiene token actualizado
+             if (token == null) throw new InvalidOperationException("Sesión expirada.");
+
+            // Crea el DTO para enviar a la API
+            var inputDto = new CalificacionInputDTO //
+            {
+                Puntaje = model.Puntaje,
+                Comentario = model.Comentario
+            };
+
+            // Llama a la API para guardar la calificación del pasajero
+            var calificacionGuardada = await CalificacionApiClient.CalificarPasajeroAsync(IdViaje, idPasajeroCalificado, inputDto, token); //
+
+            // Si la llamada a la API fue exitosa:
+            if (calificacionesYaHechas == null) calificacionesYaHechas = new List<CalificacionDTO>();
+            calificacionesYaHechas.Add(calificacionGuardada); // Agrega la nueva calificación a la lista local
+            calificacionesPendientes.Remove(idPasajeroCalificado); // Elimina el modelo pendiente (ocultará el formulario)
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al calificar pasajero {idPasajeroCalificado}: {ex.Message}");
+            errorCalificacion[idPasajeroCalificado] = $"Error: {ex.Message}"; // Guarda el error específico
+        }
+        finally
+        {
+            calificando[idPasajeroCalificado] = false; // Desactiva spinner
+            StateHasChanged(); // Actualiza la UI para mostrar la calificación guardada o el error
+        }
+    }
+
+    // Navega de vuelta a la lista de viajes del conductor
+    private void VolverAMisViajes()
+    {
+        Navigation.NavigateTo("/viajes"); //
+    }
+}

@@ -93,6 +93,45 @@ namespace API.Clients
             catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
             catch (Exception ex) { throw; }
         }
+        public static async Task<IEnumerable<CalificacionDTO>> GetCalificacionesDadasAsync(int idUsuarioCalificador, string token)
+        {
+            // Define la ruta del endpoint correspondiente en tu API
+            string requestUri = $"usuarios/{idUsuarioCalificador}/calificaciones-dadas";
+
+            try
+            {
+                // Usa el helper para enviar una solicitud GET autenticada
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(
+                    _httpClient,
+                    HttpMethod.Get,
+                    requestUri,
+                    token);
+
+                // Usa el helper para verificar si hubo errores en la respuesta
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener calificaciones dadas por el usuario {idUsuarioCalificador}");
+
+                // Lee la respuesta como una colección de CalificacionDTO
+                // Devuelve una lista vacía si la deserialización falla o devuelve null
+                return await response.Content.ReadFromJsonAsync<IEnumerable<CalificacionDTO>>() ?? Enumerable.Empty<CalificacionDTO>();
+            }
+            // Captura excepciones comunes de red y lanza excepciones más descriptivas
+            catch (HttpRequestException ex) { throw new Exception($"Error de red al obtener calificaciones dadas: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout al obtener calificaciones dadas: {ex.Message}", ex); }
+            catch (Exception ex) { throw; } // Relanza cualquier otra excepción (incluyendo las de HandleResponseErrorsAsync)
+        }
+        public static async Task<IEnumerable<UsuarioDTO>> GetPasajerosConfirmadosAsync(int idViaje, string token)
+        {
+            string requestUri = $"viajes/{idViaje}/pasajeros-confirmados";
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, requestUri, token); //
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener pasajeros confirmados del viaje {idViaje}"); //
+                return await response.Content.ReadFromJsonAsync<IEnumerable<UsuarioDTO>>() ?? Enumerable.Empty<UsuarioDTO>(); //
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
+        }
 
     }
 }

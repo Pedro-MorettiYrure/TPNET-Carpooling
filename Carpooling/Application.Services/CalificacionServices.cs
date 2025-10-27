@@ -109,6 +109,12 @@ namespace Application.Services
                 FechaHora = c.FechaHora
             };
         }
+        public IEnumerable<CalificacionDTO> GetCalificacionesDadas(int idUsuarioCalificador)
+        {
+            return _califRepo.GetCalificacionesDadas(idUsuarioCalificador)
+                             .Select(MapToDTO) // Reutiliza mapeo a DTO
+                             .ToList();
+        }
     }
 
     

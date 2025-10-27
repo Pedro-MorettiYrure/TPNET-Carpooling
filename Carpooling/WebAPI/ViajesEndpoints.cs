@@ -247,6 +247,37 @@ namespace WebAPI
             .ProducesProblem(StatusCodes.Status500InternalServerError)
             .RequireAuthorization()
             .WithOpenApi();
+
+            app.MapGet("/viajes/{idViaje}/pasajeros-confirmados", [Authorize] (int idViaje, ClaimsPrincipal user, [FromServices] ViajeServices viajeService) =>
+            {
+                try
+                {
+                    var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!int.TryParse(idUsuarioClaim, out int idConductorAutenticado))
+                    {
+                        return Results.Unauthorized();
+                    }
+
+                    // El servicio valida internamente si es el conductor correcto y el estado del viaje
+                    var pasajeros = viajeService.GetPasajerosConfirmados(idViaje, idConductorAutenticado);
+                    return Results.Ok(pasajeros);
+                }
+                catch (KeyNotFoundException ex) { return Results.NotFound(new { error = ex.Message }); } // 404
+                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } // 403
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409 (ej. viaje no iniciado/realizado)
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+            })
+            .WithName("GetPasajerosConfirmadosViaje")
+            .Produces<IEnumerable<UsuarioDTO>>(StatusCodes.Status200OK) //
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .RequireAuthorization() // Requiere login (conductor o admin podrían acceder si ajustas la lógica del servicio)
+            .WithOpenApi();
+
+
         }
     }
 }

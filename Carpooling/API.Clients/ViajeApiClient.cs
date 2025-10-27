@@ -144,5 +144,18 @@ namespace API.Clients
         }
         // *** FALTARÍA APLICAR ESTE PATRÓN A LOS MÉTODOS DE CALIFICACIÓN ***
         // Si tienes CalificacionApiClient, modifícalo de forma similar.
+        public static async Task<IEnumerable<UsuarioDTO>> GetPasajerosConfirmadosAsync(int idViaje, string token)
+        {
+            string requestUri = $"viajes/{idViaje}/pasajeros-confirmados";
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, requestUri, token); //
+                await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener pasajeros confirmados del viaje {idViaje}"); //
+                return await response.Content.ReadFromJsonAsync<IEnumerable<UsuarioDTO>>() ?? Enumerable.Empty<UsuarioDTO>(); //
+            }
+            catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
+            catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
+        }
     }
 }

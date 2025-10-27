@@ -101,5 +101,15 @@ namespace Data
                 .OrderBy(v => v.FechaHora) // Ordena por fecha
                 .ToList(); //
         }
+        public Viaje? GetWithPasajerosConfirmados(int idViaje)
+        {
+            return _context.Viajes
+                .Include(v => v.Conductor) // Necesario para validar conductor
+                .Include(v => v.Solicitudes) // Incluir solicitudes
+                    .ThenInclude(s => s.Pasajero) // Incluir el pasajero de cada solicitud
+                .FirstOrDefault(v => v.IdViaje == idViaje);
+        }
+
+
     }
 }

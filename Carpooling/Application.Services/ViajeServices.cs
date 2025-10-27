@@ -259,5 +259,34 @@ namespace Application.Services
             }
             return Enumerable.Empty<UsuarioDTO>(); // Devuelve lista vacía si falla el update
         }
+
+        public IEnumerable<UsuarioDTO> GetPasajerosConfirmados(int idViaje, int idUsuarioConductor)
+        {
+            // Usamos el nuevo método del repo que incluye las solicitudes y pasajeros
+            var viaje = _viajeRepo.GetWithPasajerosConfirmados(idViaje);
+
+            if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
+            // Validar que quien pide la lista sea el conductor
+            if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor del viaje puede ver los pasajeros confirmados.");
+            // Permitir obtener pasajeros incluso si ya está Realizado (para calificar) o EnCurso
+            if (viaje.Estado != EstadoViaje.EnCurso && viaje.Estado != EstadoViaje.Realizado) //
+            {
+                throw new InvalidOperationException($"El viaje debe estar En Curso o Realizado para ver sus pasajeros (estado actual: {viaje.Estado}).");
+            }
+
+
+            // Filtrar las solicitudes aprobadas y mapear los pasajeros a DTO
+            return viaje.Solicitudes
+                        .Where(s => s.Estado == EstadoSolicitud.Aprobada && s.Pasajero != null) //
+                        .Select(s => new UsuarioDTO //
+                        {
+                            IdUsuario = s.Pasajero!.IdUsuario, //
+                            Nombre = s.Pasajero.Nombre, //
+                            Apellido = s.Pasajero.Apellido, //
+                            Email = s.Pasajero.Email //
+                                                     // Agrega otros campos si los necesitas en la página de calificación
+                        })
+                        .ToList();
+        }
     }
 }
