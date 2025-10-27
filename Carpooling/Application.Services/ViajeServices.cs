@@ -287,6 +287,12 @@ namespace Application.Services
                                                      // Agrega otros campos si los necesitas en la página de calificación
                         })
                         .ToList();
+            var solicitudesAprobadas = viaje.Solicitudes
+                               .Where(s => s.Estado == EstadoSolicitud.Aprobada && s.Pasajero != null)
+                               .ToList(); // Materializa la lista filtrada
+
+            // Agrega logs aquí (usando ILogger si lo tienes inyectado)
+            Console.WriteLine($"Viaje ID {idViaje}: Total Solicitudes={viaje.Solicitudes.Count}, Aprobadas={solicitudesAprobadas.Count}");
         }
     }
 }
