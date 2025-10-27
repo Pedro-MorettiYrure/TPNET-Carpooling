@@ -96,8 +96,8 @@ namespace WindowsForms
                 var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
 
                 esCancelable = (solicitud != null &&
-                                (solicitud.Estado == EstadoSolicitud.Pendiente.ToString() ||
-                                 solicitud.Estado == EstadoSolicitud.Aprobada.ToString()) &&
+                                (solicitud.Estado == EstadoSolicitud.Pendiente ||
+                                 solicitud.Estado == EstadoSolicitud.Aprobada  ) &&
                                 solicitud.FechaHoraViaje.HasValue &&
                                 solicitud.FechaHoraViaje.Value > DateTime.Now);
             }
@@ -111,7 +111,7 @@ namespace WindowsForms
             var solicitud = selectedRow.DataBoundItem as SolicitudViajeDTO;
 
             if (solicitud == null ||
-                !(solicitud.Estado == EstadoSolicitud.Pendiente.ToString() || solicitud.Estado == EstadoSolicitud.Aprobada.ToString()) ||
+                !(solicitud.Estado == EstadoSolicitud.Pendiente || solicitud.Estado == EstadoSolicitud.Aprobada) ||
                 !(solicitud.FechaHoraViaje > DateTime.Now))
             {
                 return; //esta validacion la hacemos por seguridad xq ya validamos en el boton
