@@ -3,12 +3,12 @@ using DTOs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims; // Necesario
-using Microsoft.AspNetCore.Authorization; // Necesario
-using Domain.Model; // Necesario
-using System;       // Necesario
-using System.Collections.Generic; // Necesario
-using System.Linq; // Necesario
+using System.Security.Claims; 
+using Microsoft.AspNetCore.Authorization; 
+using Domain.Model;
+using System;      
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebAPI
 {
@@ -77,7 +77,6 @@ namespace WebAPI
             {
                 try
                 {
-                    // Usamos GetSolicitudById, que ahora (después de nuestras correcciones) DEBERÍA incluir la info del viaje
                     var solicitud = service.GetSolicitudById(idSolicitud);
                     if (solicitud == null) return Results.NotFound();
 
@@ -110,14 +109,14 @@ namespace WebAPI
                     var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!int.TryParse(idUsuarioClaim, out int idPasajeroAutenticado)) return Results.Unauthorized();
 
-                    dto.IdPasajero = idPasajeroAutenticado; // Forzar el ID del pasajero al del token
+                    dto.IdPasajero = idPasajeroAutenticado; 
 
                     var createdDto = service.CrearSolicitud(dto.IdViaje, dto.IdPasajero);
                     return Results.Created($"/solicitudes/{createdDto.IdSolicitud}", createdDto);
                 }
-                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } // 400
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("CrearSolicitudViaje")
             .Produces<SolicitudViajeDTO>(StatusCodes.Status201Created)
@@ -126,7 +125,7 @@ namespace WebAPI
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status500InternalServerError)
-            .RequireAuthorization("EsPasajero") // Usar Política
+            .RequireAuthorization("EsPasajero")
             .WithOpenApi();
 
 
@@ -138,15 +137,14 @@ namespace WebAPI
                     var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!int.TryParse(idUsuarioClaim, out int idConductorAutenticado)) return Results.Unauthorized();
 
-                    // El servicio valida internamente si idConductorAutenticado es el conductor
-                    service.AceptarSolicitud(idSolicitud, idConductorAutenticado); // Lanza excepción si falla
+                    service.AceptarSolicitud(idSolicitud, idConductorAutenticado); 
 
                     return Results.Ok("Solicitud aceptada.");
                 }
-                catch (ArgumentException ex) { return Results.NotFound(new { error = ex.Message }); } // 404 (Solicitud no existe)
-                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } // 403 (No es el conductor)
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409 (Viaje lleno, estado incorrecto)
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException ex) { return Results.NotFound(new { error = ex.Message }); } 
+                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); }
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("AceptarSolicitud")
             .Produces(StatusCodes.Status200OK)
@@ -166,13 +164,13 @@ namespace WebAPI
                     var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!int.TryParse(idUsuarioClaim, out int idConductorAutenticado)) return Results.Unauthorized();
 
-                    service.RechazarSolicitud(idSolicitud, idConductorAutenticado); // Lanza excepción si falla
+                    service.RechazarSolicitud(idSolicitud, idConductorAutenticado);
                     return Results.Ok("Solicitud rechazada.");
                 }
-                catch (ArgumentException ex) { return Results.NotFound(new { error = ex.Message }); } // 404
-                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } // 403
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException ex) { return Results.NotFound(new { error = ex.Message }); } 
+                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("RechazarSolicitud")
             .Produces(StatusCodes.Status200OK)
@@ -192,13 +190,13 @@ namespace WebAPI
                     var idUsuarioClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (!int.TryParse(idUsuarioClaim, out int idPasajeroAutenticado)) return Results.Unauthorized();
 
-                    service.CancelarSolicitud(idSolicitud, idPasajeroAutenticado); // Lanza excepción si falla
+                    service.CancelarSolicitud(idSolicitud, idPasajeroAutenticado);
                     return Results.Ok("Solicitud cancelada.");
                 }
-                catch (ArgumentException ex) { return Results.NotFound(new { error = ex.Message }); } // 404
-                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } // 403 (No es el pasajero dueño)
-                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } // 409
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException ex) { return Results.NotFound(new { error = ex.Message }); }
+                catch (UnauthorizedAccessException ex) { return Results.Forbid(); } 
+                catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("CancelarSolicitud")
             .Produces(StatusCodes.Status200OK)

@@ -10,8 +10,8 @@ using System.Security.Claims;
 using System.Text;
 using static DTOs.UsuarioDTO;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http; // Para StatusCodes
-using System; // Para Guid
+using Microsoft.AspNetCore.Http;
+using System; 
 
 namespace WebAPI
 {
@@ -19,7 +19,7 @@ namespace WebAPI
     {
         public static void MapUsuariosEndpoints(this WebApplication app)
         {
-            // Endpoint POST /usuarios para registrar (Sin cambios)
+            // Endpoint POST /usuarios para registrar
             app.MapPost("/usuarios", (UsuarioDTO dto, UsuarioService usuarioService) =>
             {
                 try
@@ -46,7 +46,7 @@ namespace WebAPI
             .WithOpenApi();
 
 
-            // Endpoint Login para devolver Token (Ahora usa el helper)
+            // Endpoint Login para devolver Token
             app.MapPost("/usuarios/login", (UsuarioDTO loginDto, UsuarioService usuarioService, IConfiguration config, ILogger<Program> logger) =>
             {
                 if (string.IsNullOrEmpty(loginDto.Email) || string.IsNullOrEmpty(loginDto.Contraseña))
@@ -69,7 +69,7 @@ namespace WebAPI
 
                 try
                 {
-                    // *** 3. Generar el Token JWT usando el helper ***
+                    // Genera el Token JWT usando el helper
                     var jwtToken = GenerateJwtToken(usuario, config);
                     return Results.Ok(new { token = jwtToken });
                 }
@@ -106,13 +106,13 @@ namespace WebAPI
             .RequireAuthorization()
             .WithOpenApi();
 
-            // *** MODIFICADO: Endpoint para convertir a conductor AHORA DEVUELVE UN TOKEN ***
+            //Endpoint para convertir a conductor
             app.MapPut("/usuarios/{idUsuario}/convertir-a-conductor", [Authorize(Policy = "EsPasajero")] (int idUsuario, [FromBody] ConductorUpgradeDTO dto, UsuarioService usuarioService, IConfiguration config, ILogger<Program> logger, ClaimsPrincipal user) =>
             {
                 var currentUserIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (!int.TryParse(currentUserIdClaim, out int currentUserId) || (currentUserId != idUsuario && !user.IsInRole(TipoUsuario.Administrador.ToString())))
                 {
-                    return Results.Forbid(); // No es el usuario correcto ni admin
+                    return Results.Forbid();
                 }
 
                 // Solo un Pasajero puede convertirse
@@ -123,11 +123,10 @@ namespace WebAPI
 
                 try
                 {
-                    // 1. Intentar convertir al usuario
                     bool ok = usuarioService.ConvertirAConductor(idUsuario, dto);
                     if (!ok) return Results.NotFound(new { error = "Usuario no encontrado o no es pasajero." });
 
-                    // 2. Si fue exitoso, obtener los datos actualizados del usuario
+                    // Si fue exitoso, obtener los datos actualizados del usuario
                     // Usamos el email del token actual para obtener el usuario actualizado
                     UsuarioDTO? usuarioActualizado = usuarioService.GetByEmail(user.FindFirstValue(ClaimTypes.Email)!);
                     if (usuarioActualizado == null)
@@ -135,29 +134,29 @@ namespace WebAPI
                         return Results.Problem("Error: No se pudieron obtener los datos actualizados del usuario.");
                     }
 
-                    // 3. Generar un NUEVO token con el rol "PasajeroConductor"
+                    // Generar un NUEVO token con el rol "PasajeroConductor"
                     var nuevoToken = GenerateJwtToken(usuarioActualizado, config);
 
-                    // 4. Devolver el nuevo token
+                    // Devolver el nuevo token
                     return Results.Ok(new { token = nuevoToken, mensaje = "Usuario actualizado a Conductor." });
                 }
-                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } // 400
-                catch (InvalidOperationException opEx) { return Results.Conflict(new { error = opEx.Message }); } // 409
+                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } 
+                catch (InvalidOperationException opEx) { return Results.Conflict(new { error = opEx.Message }); } 
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error al convertir a conductor o generar token para {idUsuario}", idUsuario);
-                    return Results.Problem($"Error inesperado: {ex.Message}"); // 500
+                    return Results.Problem($"Error inesperado: {ex.Message}"); 
                 }
             })
              .WithName("ConvertirAConductor")
-             .Produces<object>(StatusCodes.Status200OK) // Devuelve { token, mensaje }
+             .Produces<object>(StatusCodes.Status200OK)
              .Produces(StatusCodes.Status400BadRequest)
              .Produces(StatusCodes.Status401Unauthorized)
              .Produces(StatusCodes.Status403Forbidden)
              .Produces(StatusCodes.Status404NotFound)
              .Produces(StatusCodes.Status409Conflict)
              .ProducesProblem(StatusCodes.Status500InternalServerError)
-             .RequireAuthorization("EsPasajero") // Usar la política que definimos en Program.cs
+             .RequireAuthorization("EsPasajero") 
              .WithOpenApi();
 
             // Endpoint PUT /usuarios/{idUsuario} para actualizar
@@ -169,8 +168,7 @@ namespace WebAPI
                     return Results.Forbid();
                 }
 
-                dto.IdUsuario = idUsuario; // Forzar el ID de la ruta
-                // No permitir cambiar el email de esta forma
+                dto.IdUsuario = idUsuario; 
                 dto.Email = user.FindFirstValue(ClaimTypes.Email)!;
 
                 try
@@ -178,8 +176,7 @@ namespace WebAPI
                     bool ok = usuarioService.Actualizar(idUsuario, dto);
                     if (!ok) return Results.NotFound(new { error = "Usuario no encontrado." });
 
-                    // Idealmente, este también devolvería un token nuevo si se cambió el Nombre/Apellido
-                    // Por ahora, solo confirmamos
+                    
                     return Results.Ok("Usuario actualizado.");
                 }
                 catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); }
@@ -197,7 +194,7 @@ namespace WebAPI
         }
 
 
-        // *** NUEVO HELPER PRIVADO para generar el token (movido desde /login) ***
+        // HELPER PRIVADO para generar el token 
         private static string GenerateJwtToken(UsuarioDTO usuario, IConfiguration config)
         {
             var secretKey = config["Jwt:SecretKey"];
@@ -223,10 +220,10 @@ namespace WebAPI
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()), // ID del Usuario
+                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()), 
                 new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
                 new Claim(ClaimTypes.Name, $"{usuario.Nombre} {usuario.Apellido}"),
-                new Claim(ClaimTypes.Role, usuario.TipoUsuario.ToString()), // Rol actualizado
+                new Claim(ClaimTypes.Role, usuario.TipoUsuario.ToString()), 
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

@@ -34,12 +34,12 @@ namespace Data
                 entity.HasMany(u => u.CalificacionesRecibidas)
                       .WithOne(c => c.Calificado)
                       .HasForeignKey(c => c.IdCalificado)
-                      .OnDelete(DeleteBehavior.Restrict); // Evita borrar usuario si tiene calificaciones
+                      .OnDelete(DeleteBehavior.Restrict); 
 
                 entity.HasMany(u => u.CalificacionesDadas)
                       .WithOne(c => c.Calificador)
                       .HasForeignKey(c => c.IdCalificador)
-                      .OnDelete(DeleteBehavior.Restrict); // Evita borrar usuario si dio calificaciones
+                      .OnDelete(DeleteBehavior.Restrict); 
 
 
             });
@@ -109,7 +109,7 @@ namespace Data
                      .OnDelete(DeleteBehavior.NoAction);
                 entity.HasMany(v => v.Solicitudes)         
                        .WithOne(s => s.Viaje)                
-                       .HasForeignKey(s => s.IdViaje)        // Clave foránea en SolicitudViaje
+                       .HasForeignKey(s => s.IdViaje)        
                        .OnDelete(DeleteBehavior.Cascade);            
             });
 
@@ -121,18 +121,17 @@ namespace Data
                 entity.Property(e => e.SolicitudFecha).IsRequired();
                 entity.Property(e => e.Estado).IsRequired();
 
-                // Asegura que la relación con Viaje use IdViaje y la colección Solicitudes
                 entity.HasOne(s => s.Viaje)
-                      .WithMany(v => v.Solicitudes) // <-- Usa la propiedad de colección en Viaje
-                      .HasForeignKey(s => s.IdViaje) // <-- Usa la clave foránea correcta
+                      .WithMany(v => v.Solicitudes) 
+                      .HasForeignKey(s => s.IdViaje) 
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Cascade); // Cascade parece más lógico aquí
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(s => s.Pasajero)
-                      .WithMany() // Asume que Usuario no tiene colección específica
+                      .WithMany() 
                       .HasForeignKey(s => s.IdPasajero)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction); // Mantén NoAction si es necesario
+                      .OnDelete(DeleteBehavior.NoAction); 
             });
             // ---------------- Calificaciones ----------------
 
@@ -141,18 +140,17 @@ namespace Data
                 entity.ToTable("Calificaciones");
                 entity.HasKey(c => c.IdCalificacion);
                 entity.Property(c => c.Puntaje).IsRequired();
-                entity.Property(c => c.Comentario).HasMaxLength(500); // Límite para comentarios
+                entity.Property(c => c.Comentario).HasMaxLength(500); 
                 entity.Property(c => c.FechaHora).IsRequired();
                 entity.Property(c => c.RolCalificado).IsRequired();
 
                 // Relación con Viaje
                 entity.HasOne(c => c.Viaje)
-                      .WithMany() // Un viaje puede tener muchas calificaciones
+                      .WithMany() 
                       .HasForeignKey(c => c.IdViaje)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); // No borrar viaje si tiene calificaciones? O Cascade?
+                      .OnDelete(DeleteBehavior.Restrict); 
 
-                // Las relaciones con Calificador y Calificado ya están definidas en Usuario
             });
         }
 

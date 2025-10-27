@@ -52,7 +52,6 @@ namespace API.Clients
         {
             try
             {
-                // Idealmente, la API debería validar que el token corresponda a idPasajero
                 HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, $"solicitudes/pasajero/{idPasajero}", token);
                 await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener solicitudes del pasajero {idPasajero}");
                 return await response.Content.ReadFromJsonAsync<IEnumerable<SolicitudViajeDTO>>() ?? Enumerable.Empty<SolicitudViajeDTO>();
@@ -71,13 +70,12 @@ namespace API.Clients
                 await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener solicitud {idSolicitud}");
                 return await response.Content.ReadFromJsonAsync<SolicitudViajeDTO>();
             }
-            catch (KeyNotFoundException) { return null; } // Si el helper lanza KeyNotFound por 404
+            catch (KeyNotFoundException) { return null; } 
             catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
             catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
             catch (Exception ex) { throw; }
         }
 
-        //  necesita token (del conductor)
         public static async Task AceptarSolicitudAsync(int idSolicitud, string token) 
         {
             try
@@ -90,7 +88,6 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // necesita token (del conductor)
         public static async Task RechazarSolicitudAsync(int idSolicitud, string token) 
         {
             try
@@ -103,7 +100,6 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // necesita token (del pasajero)
         public static async Task CancelarSolicitudPasajeroAsync(int idSolicitud, string token) 
         {
             try

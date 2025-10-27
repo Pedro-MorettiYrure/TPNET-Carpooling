@@ -1,7 +1,7 @@
 ﻿using Application.Services;
 using DTOs;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims; // No se usa aquí pero es buena práctica tenerlo si se usa Authorize
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Domain.Model;
 using System;
@@ -72,8 +72,8 @@ namespace WebAPI
                     bool updated = localidadService.Update(dto);
                     return updated ? Results.Ok(dto) : Results.NotFound();
                 }
-                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } // 400
-                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } // 500
+                catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado: {ex.Message}"); } 
             })
             .WithName("UpdateLocalidad")
             .Produces<LocalidadDTO>(StatusCodes.Status200OK)

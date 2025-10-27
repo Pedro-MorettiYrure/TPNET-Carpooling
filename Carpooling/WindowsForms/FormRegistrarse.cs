@@ -2,7 +2,7 @@
 using System;
 using System.Windows.Forms;
 using API.Clients;
-using Domain.Model; // Para TipoUsuario
+using Domain.Model; 
 
 namespace WindowsForms
 {
@@ -38,7 +38,7 @@ namespace WindowsForms
                 labelConfirmarContra.Visible = true;
                 txtBoxContra.Visible = true;
                 txtBoxConfirmaCon.Visible = true;
-                txtEmail.Enabled = true; // Email editable en registro
+                txtEmail.Enabled = true; 
                 btnCrearUsuario.Text = "Registrarse";
             }
         }
@@ -53,7 +53,7 @@ namespace WindowsForms
                 if (string.IsNullOrWhiteSpace(txtBoxNombre.Text) || string.IsNullOrWhiteSpace(txtBoxApellido.Text))
                 {
                     MessageBox.Show("Nombre y Apellido son obligatorios.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    btnCrearUsuario.Enabled = true; // Rehabilitar botón
+                    btnCrearUsuario.Enabled = true;
                     return;
                 }
                 if (_usuarioEditar.TipoUsuario == TipoUsuario.PasajeroConductor)
@@ -97,7 +97,7 @@ namespace WindowsForms
 
                     _usuarioEditar.Nombre = txtBoxNombre.Text;
                     _usuarioEditar.Apellido = txtBoxApellido.Text;
-                    _usuarioEditar.Telefono = string.IsNullOrWhiteSpace(txtBoxTele.Text) ? null : txtBoxTele.Text; // Guardar null si está vacío
+                    _usuarioEditar.Telefono = string.IsNullOrWhiteSpace(txtBoxTele.Text) ? null : txtBoxTele.Text; 
 
                     if (_usuarioEditar.TipoUsuario == TipoUsuario.PasajeroConductor)
                     {
@@ -112,8 +112,7 @@ namespace WindowsForms
                         MessageBox.Show("Datos actualizados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         if (SessionManager.UsuarioActual?.IdUsuario == _usuarioEditar.IdUsuario)
                         {
-                            // Actualizar la sesión local
-                            SessionManager.IniciarSesion(_usuarioEditar, token); // Re-inicia sesión con los datos nuevos
+                            SessionManager.IniciarSesion(_usuarioEditar, token); 
                         }
                         this.DialogResult = DialogResult.OK;
                         this.Close();

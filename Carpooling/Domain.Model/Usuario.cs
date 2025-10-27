@@ -19,10 +19,8 @@ namespace Domain.Model
         public DateTime? fechaVencimientoLicencia { get; set; }
         public ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
 
-        // *** NUEVO: Colección de calificaciones recibidas ***
         public virtual ICollection<Calificacion> CalificacionesRecibidas { get; set; } = new List<Calificacion>();
 
-        // *** NUEVO: Colección de calificaciones dadas ***
         public virtual ICollection<Calificacion> CalificacionesDadas { get; set; } = new List<Calificacion>();
 
 
@@ -30,7 +28,6 @@ namespace Domain.Model
         private const int KeySize = 32;
         private const int Iterations = 10000;
 
-        // ... (resto de los métodos como Crear, Setters, HashPassword, VerificarContraseña, ConvertirAConductor sin cambios)...
         public static Usuario Crear(string nombre, string apellido, string email, string contraseña, string? telefono, TipoUsuario tipoUsuario = TipoUsuario.Pasajero)
         {
             var u = new Usuario();

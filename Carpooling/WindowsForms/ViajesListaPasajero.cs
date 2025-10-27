@@ -110,7 +110,6 @@ namespace WindowsForms
 
             btnVerDetalles.Enabled = haySeleccion;
             btnCancelarSolicitud.Enabled = esCancelable;
-            // btnCalificarConductor.Enabled = ... (Lógica que hicimos antes, si tienes el botón)
         }
 
         

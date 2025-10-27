@@ -208,7 +208,6 @@ namespace Application.Services
                             col.Item().Text($"Período: {reporteData.FechaInicio:dd/MM/yyyy} - {reporteData.FechaFin:dd/MM/yyyy}")
                                 .FontSize(12);
                             col.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                            // Resumen
                             col.Item().PaddingTop(5).Text(txt =>
                             {
                                 txt.Span("Resumen: ").SemiBold();

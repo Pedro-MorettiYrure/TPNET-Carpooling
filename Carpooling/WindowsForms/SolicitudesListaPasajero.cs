@@ -129,7 +129,7 @@ namespace WindowsForms
                 await SolicitudViajeApiClient.CancelarSolicitudPasajeroAsync(solicitud.IdSolicitud, token);
 
                 MessageBox.Show("Solicitud cancelada con éxito.", "Cancelación Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await CargarMisSolicitudesAsync(); // actuakizamos la lista
+                await CargarMisSolicitudesAsync(); 
                 ActualizarEstadoBotones();
             }
             catch (Exception ex)

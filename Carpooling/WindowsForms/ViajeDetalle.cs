@@ -19,10 +19,8 @@ namespace WindowsForms
             _usuarioLogueado = usuarioLogueado ?? throw new ArgumentNullException(nameof(usuarioLogueado));
             Mode = FormMode.Add;
             dtpFecha.Value = DateTime.Today;
-            // Ajustar la hora inicial a la próxima hora en punto
             dtpHora.Value = DateTime.Now.Date.AddHours(DateTime.Now.Hour + 1);
-            // Cargar combos después de inicializar
-            _ = LoadLocalidadesAsync(); // Usamos _ = para descartar la tarea si no necesitas esperar aquí
+            _ = LoadLocalidadesAsync();
             _ = LoadVehiculosAsync();
         }
 
@@ -32,10 +30,9 @@ namespace WindowsForms
             _usuarioLogueado = usuarioLogueado ?? throw new ArgumentNullException(nameof(usuarioLogueado));
             _viajeAEditar = viajeAEditar ?? throw new ArgumentNullException(nameof(viajeAEditar));
             Mode = FormMode.Update;
-            // Cargar combos primero para que SelectedValue funcione
-            _ = LoadLocalidadesAsync(); // Esperar puede ser mejor si CargarDatos depende de ellos
+            _ = LoadLocalidadesAsync(); 
             _ = LoadVehiculosAsync();
-            CargarDatosSimplesAEditar(); // Carga los datos después de inicializar combos
+            CargarDatosSimplesAEditar(); 
         }
 
         public enum FormMode
@@ -131,7 +128,7 @@ namespace WindowsForms
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar vehículos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                cbVehiculos.Enabled = false; // Deshabilitar si falla
+                cbVehiculos.Enabled = false; 
                 btnConfirmar.Enabled = false;
             }
         }
@@ -146,12 +143,10 @@ namespace WindowsForms
 
             try
             {
-                // *** Obtener token de la sesión ***
                 string? token = SessionManager.JwtToken;
                 if (string.IsNullOrEmpty(token))
                 {
                     MessageBox.Show("Error de sesión. Por favor, inicie sesión nuevamente.", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    // Considera cerrar este form o redirigir al login
                     return;
                 }
 
@@ -205,12 +200,11 @@ namespace WindowsForms
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
-            catch (UnauthorizedAccessException authEx) // Token inválido o permisos insuficientes
+            catch (UnauthorizedAccessException authEx) 
             {
                 MessageBox.Show($"Error de autorización: {authEx.Message}. Verifique su sesión.", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                // Considera cerrar sesión o redirigir al login
             }
-            catch (InvalidOperationException sessionEx) // Token no encontrado en ApiClientHelper
+            catch (InvalidOperationException sessionEx) 
             {
                 MessageBox.Show($"Error: {sessionEx.Message}. Por favor, inicie sesión.", "Error Sesión", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
@@ -233,7 +227,7 @@ namespace WindowsForms
             TimeSpan hora = dtpHora.Value.TimeOfDay;
             DateTime fechaHora = fecha.Add(hora);
 
-            if (fechaHora <= DateTime.Now) //  <= para no permitir la hora actual exacta
+            if (fechaHora <= DateTime.Now) //  para no permitir la hora actual exacta
             {
                 isValid = false;
                 errorProviderViajeDetalle.SetError(dtpFecha, "La fecha y hora deben ser futuras.");
@@ -289,12 +283,10 @@ namespace WindowsForms
             return isValid;
         }
 
-        // Evento vacío, puede quitarse si no se usa
+        // Evento vacío
         private void cbVehiculos_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Podrías usar esto para actualizar algo si cambia el vehículo,
-            // por ejemplo, re-validar la cantidad de lugares.
-            // ValidateViaje(); // Llama a validar de nuevo si cambia el vehículo
+            
         }
 
     } 

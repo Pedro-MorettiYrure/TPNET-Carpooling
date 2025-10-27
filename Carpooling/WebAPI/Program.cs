@@ -10,22 +10,19 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore;
 using WebAPI;
 using static DTOs.UsuarioDTO;
-//using Microsoft.OpenApi.Models; // Ya estaba arriba
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging; // Agregado por si lo usás
-
+using Microsoft.Extensions.Logging; 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Servicios ---
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // ... (Tu configuración de SwaggerGen con AddSecurityDefinition y AddSecurityRequirement va aquí, está OK) ...
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Carpooling WebAPI", Version = "v1" });
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -50,7 +47,7 @@ builder.Services.AddSwaggerGen(options =>
             new string[] {}
         }
     });
-}); // <-- Asegúrate que AddSwaggerGen cierre aquí
+});
 
 builder.Services.AddHttpLogging(o => { });
 
@@ -64,7 +61,7 @@ builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<VehiculoRepository>();
 builder.Services.AddScoped<ViajeRepository>();
 builder.Services.AddScoped<SolicitudViajeRepository>();
-builder.Services.AddScoped<CalificacionRepository>(); // Asegúrate que esté
+builder.Services.AddScoped<CalificacionRepository>(); 
 
 // Inyección de servicios
 builder.Services.AddScoped<LocalidadService>();
@@ -72,7 +69,7 @@ builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ViajeServices>();
 builder.Services.AddScoped<SolicitudViajeService>();
-builder.Services.AddScoped<CalificacionService>(); // Asegúrate que esté
+builder.Services.AddScoped<CalificacionService>(); 
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -117,7 +114,6 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
-    // db.Database.Migrate();
 }
 
 app.UseHttpsRedirection();

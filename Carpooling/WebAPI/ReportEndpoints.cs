@@ -1,12 +1,11 @@
-﻿// WebAPI/ReportEndpoints.cs
-using Application.Services;
+﻿using Application.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc; // Para [FromServices]
-using Microsoft.AspNetCore.Routing; // Para IEndpointRouteBuilder
-using System.Security.Claims; // Para ClaimsPrincipal
-using Microsoft.AspNetCore.Authorization; // Para [Authorize]
-using Domain.Model; // Para TipoUsuario
+using Microsoft.AspNetCore.Mvc; 
+using Microsoft.AspNetCore.Routing; 
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization; 
+using Domain.Model; 
 
 namespace WebAPI
 {
@@ -64,7 +63,7 @@ namespace WebAPI
                 })
             .WithName("GetActividadViajesReportPdf")
             .Produces<FileResult>(StatusCodes.Status200OK, "application/pdf")
-            .Produces(StatusCodes.Status400BadRequest) // Para fechas inválidas
+            .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status500InternalServerError)

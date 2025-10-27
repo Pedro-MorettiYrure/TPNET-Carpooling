@@ -15,7 +15,6 @@ namespace DTOs
         public string Color { get; set; }
         public string Marca { get; set; }
 
-        // Para saber a qué usuario pertenece
         public int IdUsuario { get; set; }
 
     }

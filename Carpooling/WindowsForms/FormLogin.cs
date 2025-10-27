@@ -44,15 +44,13 @@ namespace WindowsForms
 
                 if (!string.IsNullOrEmpty(token))
                 {
-                    // Guardar token ANTES de la siguiente llamada
-                    SessionManager.IniciarSesion(new UsuarioDTO { Email = email }, token); // DTO Temporal
+                    // Guarda token ANTES de la siguiente llamada
+                    SessionManager.IniciarSesion(new UsuarioDTO { Email = email }, token);
 
                     try
                     {
-                        // *** CORREGIDO: Pasar el token a GetByEmailAsync ***
-                        UsuarioDTO usuarioLogueado = await UsuarioApiClient.GetByEmailAsync(email, token); // <- Pasar token aquí
+                        UsuarioDTO usuarioLogueado = await UsuarioApiClient.GetByEmailAsync(email, token); 
 
-                        // Actualizar sesión con datos completos
                         SessionManager.IniciarSesion(usuarioLogueado, token);
 
                         using (FormMenu menu = new FormMenu(usuarioLogueado))

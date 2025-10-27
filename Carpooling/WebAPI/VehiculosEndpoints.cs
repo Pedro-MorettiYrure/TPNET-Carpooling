@@ -112,10 +112,10 @@ namespace WebAPI
                 {
                     var updated = vehiculoService.Update(vehiculoDto);
                     if (!updated) return Results.NotFound("Vehículo no encontrado o no pertenece al usuario.");
-                    return Results.Ok(vehiculoDto); // Devolver DTO actualizado
+                    return Results.Ok(vehiculoDto); 
                 }
-                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } // 400
-                catch (Exception ex) { return Results.Problem($"Error inesperado al actualizar vehículo: {ex.Message}"); } // 500
+                catch (ArgumentException argEx) { return Results.BadRequest(new { error = argEx.Message }); } 
+                catch (Exception ex) { return Results.Problem($"Error inesperado al actualizar vehículo: {ex.Message}"); }
             })
             .WithName("UpdateVehiculo")
             .Produces<VehiculoDTO>(StatusCodes.Status200OK)

@@ -18,21 +18,18 @@ namespace Application.Services
             _viajeRepo = viajeRepo;
             _vehiculoRepo = vehiculoRepo;
             _usuarioRepo = usuarioRepo;
-            _solicitudRepo = solicitudRepo; // Asignar
+            _solicitudRepo = solicitudRepo;
         }
 
         public ViajeDTO Add(ViajeDTO dto)
         {
-            // validacion de licencia del conductor
             var conductor = _usuarioRepo.GetById(dto.IdConductor);
 
-            // validamos que el conductor exista por seguridad 
             if (conductor == null || conductor.TipoUsuario != TipoUsuario.PasajeroConductor)
             {
                 throw new ArgumentException("El ID de usuario proporcionado no corresponde a un conductor válido.");
             }
 
-            // validamos la fecha de vencimiento de la licencia
             if (conductor.fechaVencimientoLicencia == null || conductor.fechaVencimientoLicencia.Value.Date < dto.FechaHora.Date)
             {
                 throw new ArgumentException("La licencia del conductor está vencida. No se puede publicar el viaje.");
@@ -65,7 +62,6 @@ namespace Application.Services
             );
 
 
-            //viaje.IdVehiculo = dto.IdVehiculo;
 
             _viajeRepo.Add(viaje);
 
@@ -77,8 +73,6 @@ namespace Application.Services
             var viaje = _viajeRepo.Get(idViaje);
             if (viaje != null)
             {
-                //  BAJA LÓGICA (SOFT DELETE)
-                // validar si ya está realizado
                 if (viaje.Estado == EstadoViaje.Realizado)
                 {
                     throw new InvalidOperationException("No se puede cancelar un viaje que ya fue realizado.");
@@ -190,7 +184,6 @@ namespace Application.Services
                     throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
                 }
 
-            // actualizamos campos del viaje existente con los datos del DTO
             
                 viajeExistente.SetFechaHora(dto.FechaHora);
                 viajeExistente.SetCantLugares(dto.CantLugares);
@@ -200,12 +193,10 @@ namespace Application.Services
                 viajeExistente.DestinoCodPostal = dto.DestinoCodPostal;
                 viajeExistente.IdVehiculo = dto.IdVehiculo;
 
-                // guardamos los cambios
                 return _viajeRepo.Update(viajeExistente);
             }
             catch (ArgumentException)
             {
-                // hacemos q el controlador maneje el error
                 throw;
             }
         }
@@ -214,7 +205,6 @@ namespace Application.Services
         {
             var viajes = _viajeRepo.GetViajesDisponiblesPorRuta(origenCodPostal, destinoCodPostal);
 
-            // Mapear la lista de Viaje a ViajeDTO directamente aquí
             return viajes.Select(v => new ViajeDTO
             {
                 IdViaje = v.IdViaje,
@@ -234,7 +224,7 @@ namespace Application.Services
         }
         public bool IniciarViaje(int idViaje, int idUsuarioConductor)
         {
-            var viaje = _viajeRepo.Get(idViaje); // Asume que Get carga el Conductor
+            var viaje = _viajeRepo.Get(idViaje); 
             if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
             if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor puede iniciar el viaje.");
             if (viaje.Estado != EstadoViaje.Pendiente) throw new InvalidOperationException($"El viaje no está pendiente (estado actual: {viaje.Estado}).");
@@ -244,10 +234,9 @@ namespace Application.Services
             return _viajeRepo.Update(viaje);
         }
 
-        // *** NUEVO: Finalizar Viaje ***
         public IEnumerable<UsuarioDTO> FinalizarViaje(int idViaje, int idUsuarioConductor)
         {
-            var viaje = _viajeRepo.Get(idViaje); // Asume que Get carga Conductor y Solicitudes->Pasajero
+            var viaje = _viajeRepo.Get(idViaje); 
             if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
             if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor puede finalizar el viaje.");
             if (viaje.Estado != EstadoViaje.EnCurso) throw new InvalidOperationException($"El viaje no está en curso (estado actual: {viaje.Estado}).");
@@ -259,27 +248,26 @@ namespace Application.Services
                 return _solicitudRepo.GetAllByViaje(idViaje)
                                     .Where(s => s.Estado == EstadoSolicitud.Aprobada)
                                     .Select(s => new UsuarioDTO
-                                    { // Mapear a DTO
+                                    { 
                                         IdUsuario = s.Pasajero.IdUsuario,
                                         Nombre = s.Pasajero.Nombre,
                                         Apellido = s.Pasajero.Apellido,
-                                        Email = s.Pasajero.Email // Y otros campos si los necesitas
+                                        Email = s.Pasajero.Email 
                                     })
                                     .ToList();
             }
-            return Enumerable.Empty<UsuarioDTO>(); // Devuelve lista vacía si falla el update
+            return Enumerable.Empty<UsuarioDTO>(); 
         }
 
         public IEnumerable<UsuarioDTO> GetPasajerosConfirmados(int idViaje, int idUsuarioConductor)
         {
-            // Usamos el nuevo método del repo que incluye las solicitudes y pasajeros
             var viaje = _viajeRepo.GetWithPasajerosConfirmados(idViaje);
 
             if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
             // Validar que quien pide la lista sea el conductor
             if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor del viaje puede ver los pasajeros confirmados.");
             // Permitir obtener pasajeros incluso si ya está Realizado (para calificar) o EnCurso
-            if (viaje.Estado != EstadoViaje.EnCurso && viaje.Estado != EstadoViaje.Realizado) //
+            if (viaje.Estado != EstadoViaje.EnCurso && viaje.Estado != EstadoViaje.Realizado) 
             {
                 throw new InvalidOperationException($"El viaje debe estar En Curso o Realizado para ver sus pasajeros (estado actual: {viaje.Estado}).");
             }
@@ -287,21 +275,20 @@ namespace Application.Services
 
             // Filtrar las solicitudes aprobadas y mapear los pasajeros a DTO
             return viaje.Solicitudes
-                        .Where(s => s.Estado == EstadoSolicitud.Aprobada && s.Pasajero != null) //
-                        .Select(s => new UsuarioDTO //
+                        .Where(s => s.Estado == EstadoSolicitud.Aprobada && s.Pasajero != null) 
+                        .Select(s => new UsuarioDTO 
                         {
-                            IdUsuario = s.Pasajero!.IdUsuario, //
-                            Nombre = s.Pasajero.Nombre, //
-                            Apellido = s.Pasajero.Apellido, //
-                            Email = s.Pasajero.Email //
-                                                     // Agrega otros campos si los necesitas en la página de calificación
+                            IdUsuario = s.Pasajero!.IdUsuario, 
+                            Nombre = s.Pasajero.Nombre, 
+                            Apellido = s.Pasajero.Apellido, 
+                            Email = s.Pasajero.Email 
+                                                     
                         })
                         .ToList();
             var solicitudesAprobadas = viaje.Solicitudes
                                .Where(s => s.Estado == EstadoSolicitud.Aprobada && s.Pasajero != null)
-                               .ToList(); // Materializa la lista filtrada
+                               .ToList(); 
 
-            // Agrega logs aquí (usando ILogger si lo tienes inyectado)
             Console.WriteLine($"Viaje ID {idViaje}: Total Solicitudes={viaje.Solicitudes.Count}, Aprobadas={solicitudesAprobadas.Count}");
         }
     }

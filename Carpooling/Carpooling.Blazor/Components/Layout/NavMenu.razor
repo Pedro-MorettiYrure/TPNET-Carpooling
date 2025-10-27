@@ -102,27 +102,15 @@
 </div>
 
 @code {
-    //UsuarioDTO? user;
-    //bool aut;
+    
     protected override async void OnInitialized()
     {
         SesionUsuario.OnChange += StateHasChanged;
-        // aut = await SesionUsuario.IsAuthenticatedAsync();
-        // if (aut)
-        // {
-        //     //var user = SesionUsuario.GetUsuarioAsync;
-            
-        // }
+        
         await base.OnInitializedAsync();
     }
 
-    // private void OnAuthenticationStateChanged(bool authenticated)
-    // {
-    //     InvokeAsync(async () =>
-    //     {
-    //         aut = await SesionUsuario.IsAuthenticatedAsync();
-    //     });
-    // }
+    
 
     private void CerrarSesion()
     {

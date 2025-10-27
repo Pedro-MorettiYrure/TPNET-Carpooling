@@ -81,7 +81,6 @@
 
             await UsuarioApiClient.RegistrarUsuarioAsync(usuarioDto);
 
-            // Ahora esta navegación funcionará correctamente.
             Navigation.NavigateTo("/login");
         }
         catch (Exception ex)

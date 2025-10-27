@@ -5,8 +5,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Collections.Generic; // Para Dictionary
-using static DTOs.UsuarioDTO; // Para ConductorUpgradeDTO
+using System.Collections.Generic; 
+using static DTOs.UsuarioDTO; 
 
 namespace API.Clients
 {
@@ -22,7 +22,6 @@ namespace API.Clients
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        //  devuelve token o null
         public static async Task<string?> LoginAsync(string email, string contraseña)
         {
             try
@@ -35,7 +34,6 @@ namespace API.Clients
                     var responseBody = await response.Content.ReadFromJsonAsync<LoginResponse>();
                     return responseBody?.token;
                 }
-                // No lanzamos excepción aquí, devolvemos null si el login falla 
                 return null;
             }
             catch (Exception ex)
@@ -52,7 +50,6 @@ namespace API.Clients
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("usuarios", usuario);
-                // Usamos el helper para manejar errores de forma consistente
                 await ApiClientHelper.HandleResponseErrorsAsync(response, "registrar usuario");
                 return await response.Content.ReadFromJsonAsync<UsuarioDTO>() ?? throw new Exception("Respuesta inesperada al registrar usuario.");
             }
@@ -82,7 +79,7 @@ namespace API.Clients
                 JsonContent content = JsonContent.Create(usuario);
                 HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Put, $"usuarios/{usuario.IdUsuario}", token, content);
                 await ApiClientHelper.HandleResponseErrorsAsync(response, "actualizar usuario");
-                return true; // Si no lanzó excepción, fue exitoso
+                return true; 
             }
             catch (HttpRequestException ex) { throw new Exception($"Error de conexión al actualizar usuario: {ex.Message}", ex); }
             catch (TaskCanceledException ex) { throw new Exception($"Timeout al actualizar usuario: {ex.Message}", ex); }
@@ -98,13 +95,13 @@ namespace API.Clients
 
                 await ApiClientHelper.HandleResponseErrorsAsync(response, "convertir a conductor");
 
-                var responseBody = await response.Content.ReadFromJsonAsync<LoginResponse>(); // Reusamos la clase auxiliar
-                return responseBody?.token; // Devolvemos el nuevo token
+                var responseBody = await response.Content.ReadFromJsonAsync<LoginResponse>(); 
+                return responseBody?.token; 
             }
             catch (Exception ex) 
             {
                 Console.WriteLine($"Error en ConvertirAConductorAsync: {ex.Message}");
-                return null; // Devolvemos null si hubo CUALQUIER error
+                return null; 
             }
         }
     }

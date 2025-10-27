@@ -27,7 +27,6 @@ namespace API.Clients
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // Conductor califica a Pasajero
         public static async Task<CalificacionDTO> CalificarPasajeroAsync(int idViaje, int idPasajeroCalificado, CalificacionInputDTO input, string token)
         {
             try
@@ -48,7 +47,6 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // Pasajero califica a Conductor
         public static async Task<CalificacionDTO> CalificarConductorAsync(int idViaje, CalificacionInputDTO input, string token)
         {
             try
@@ -69,7 +67,6 @@ namespace API.Clients
             catch (Exception ex) { throw; }
         }
 
-        // Obtener calificaciones recibidas por un usuario
         public static async Task<IEnumerable<CalificacionDTO>> GetCalificacionesRecibidasAsync(int idUsuario, string? rol, string token)
         {
             try
@@ -95,29 +92,24 @@ namespace API.Clients
         }
         public static async Task<IEnumerable<CalificacionDTO>> GetCalificacionesDadasAsync(int idUsuarioCalificador, string token)
         {
-            // Define la ruta del endpoint correspondiente en tu API
             string requestUri = $"usuarios/{idUsuarioCalificador}/calificaciones-dadas";
 
             try
             {
-                // Usa el helper para enviar una solicitud GET autenticada
                 HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(
                     _httpClient,
                     HttpMethod.Get,
                     requestUri,
                     token);
 
-                // Usa el helper para verificar si hubo errores en la respuesta
                 await ApiClientHelper.HandleResponseErrorsAsync(response, $"obtener calificaciones dadas por el usuario {idUsuarioCalificador}");
 
-                // Lee la respuesta como una colección de CalificacionDTO
-                // Devuelve una lista vacía si la deserialización falla o devuelve null
+                
                 return await response.Content.ReadFromJsonAsync<IEnumerable<CalificacionDTO>>() ?? Enumerable.Empty<CalificacionDTO>();
             }
-            // Captura excepciones comunes de red y lanza excepciones más descriptivas
             catch (HttpRequestException ex) { throw new Exception($"Error de red al obtener calificaciones dadas: {ex.Message}", ex); }
             catch (TaskCanceledException ex) { throw new Exception($"Timeout al obtener calificaciones dadas: {ex.Message}", ex); }
-            catch (Exception ex) { throw; } // Relanza cualquier otra excepción (incluyendo las de HandleResponseErrorsAsync)
+            catch (Exception ex) { throw; } 
         }
         public static async Task<IEnumerable<UsuarioDTO>> GetPasajerosConfirmadosAsync(int idViaje, string token)
         {

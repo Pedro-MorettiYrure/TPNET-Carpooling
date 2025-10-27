@@ -151,7 +151,7 @@ namespace WindowsForms
                 var vehiculoParaEditar = await VehiculoApiClient.GetAsync(vehiculoSeleccionado.Patente, _usuario.IdUsuario, token);
 
                 if (vehiculoParaEditar == null)
-                { // Por si acaso fue eliminado mientras tanto
+                { 
                     MessageBox.Show("El vehículo seleccionado ya no existe.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     await GetAllAndLoad(); 
                     return;
@@ -165,7 +165,7 @@ namespace WindowsForms
 
                     if (formEditar.ShowDialog() == DialogResult.OK)
                     {
-                        await GetAllAndLoad(); // Recargar si se actualizó OK
+                        await GetAllAndLoad(); 
                     }
                 }
             }

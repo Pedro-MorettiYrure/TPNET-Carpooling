@@ -9,7 +9,6 @@ namespace API.Clients
 {
     public interface IAuthService
     {
-        //event Action<bool>? AuthenticationStateChanged;
         event Action? OnChange;
 
         Task<bool> IsAuthenticatedAsync();
@@ -20,6 +19,5 @@ namespace API.Clients
         Task CheckTokenExpirationAsync();
         void NotifyStateChanged();
 
-        //Task<bool> HasPermissionAsync(string permission);
     }
 }

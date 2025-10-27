@@ -14,7 +14,7 @@ namespace DTOs
         public DateTime SolicitudFecha { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public EstadoSolicitud Estado { get; set; } // Estado de la SOLICITUD
+        public EstadoSolicitud Estado { get; set; } 
         public int IdViaje { get; set; }
         public int IdPasajero { get; set; }
 
@@ -22,14 +22,13 @@ namespace DTOs
         public string? NombrePasajero { get; set; }
         public string? ApellidoPasajero { get; set; }
 
-        // --- NUEVO: Datos del Viaje (para vista del pasajero) ---
+        // --- Datos del Viaje (para vista del pasajero) ---
         public DateTime? FechaHoraViaje { get; set; }
-        public EstadoViaje? EstadoDelViaje { get; set; } // Estado del VIAJE
+        public EstadoViaje? EstadoDelViaje { get; set; }
         public string? NombreConductor { get; set; }
         public string? ApellidoConductor { get; set; }
         public int? IdConductor { get; set; }
-        public string? OrigenViajeNombre { get; set; } // Nombre de la localidad Origen
-        public string? DestinoViajeNombre { get; set; } // Nombre de la localidad Destino
-        // --- FIN NUEVO ---
+        public string? OrigenViajeNombre { get; set; } 
+        public string? DestinoViajeNombre { get; set; } 
     }
 }
