@@ -117,10 +117,8 @@
             lnkOlvidaPass.AutoSize = true;
             lnkOlvidaPass.Location = new Point(84, 223);
             lnkOlvidaPass.Name = "lnkOlvidaPass";
-            lnkOlvidaPass.Size = new Size(119, 15);
+            lnkOlvidaPass.Size = new Size(0, 15);
             lnkOlvidaPass.TabIndex = 4;
-            lnkOlvidaPass.TabStop = true;
-            lnkOlvidaPass.Text = "Olvidé mi contraseña";
             lnkOlvidaPass.Click += lnkOlvidaPass_Click;
             // 
             // FormLogin

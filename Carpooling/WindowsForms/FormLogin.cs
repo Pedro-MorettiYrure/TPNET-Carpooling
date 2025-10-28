@@ -12,12 +12,7 @@ namespace WindowsForms
             InitializeComponent();
         }
 
-        private void lnkOlvidaPass_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Es Ud. un usuario muy descuidado, haga memoria",
-                "Olvidé mi contraseña", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        }
-
+        
         private void lnkRegistrate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             using (var formReg = new FormRegistrarse())
