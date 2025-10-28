@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
+            lblTitulo = new Label();
             labelEmail = new Label();
             labelContra = new Label();
             btnCrearUsuario = new Button();
@@ -49,16 +49,16 @@
             dateTimePickerVencimiento = new DateTimePicker();
             SuspendLayout();
             // 
-            // label1
+            // lblTitulo
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(211, 40);
-            label1.Name = "label1";
-            label1.Size = new Size(259, 30);
-            label1.TabIndex = 0;
-            label1.Text = "Registrate como pasajero\r\nAl ingresar podras solicitar para ser conductor";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            lblTitulo.AutoSize = true;
+            lblTitulo.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTitulo.Location = new Point(211, 40);
+            lblTitulo.Name = "lblTitulo";
+            lblTitulo.Size = new Size(259, 30);
+            lblTitulo.TabIndex = 0;
+            lblTitulo.Text = "Registrate como pasajero\r\nAl ingresar podras solicitar para ser conductor";
+            lblTitulo.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // labelEmail
             // 
@@ -236,7 +236,7 @@
             Controls.Add(btnCrearUsuario);
             Controls.Add(labelContra);
             Controls.Add(labelEmail);
-            Controls.Add(label1);
+            Controls.Add(lblTitulo);
             Name = "FormRegistrarse";
             Text = "FormRegistarse";
             ResumeLayout(false);
@@ -245,7 +245,7 @@
 
         #endregion
 
-        private Label label1;
+        private Label lblTitulo;
         private Label labelEmail;
         private Label labelContra;
         private Button btnCrearUsuario;
