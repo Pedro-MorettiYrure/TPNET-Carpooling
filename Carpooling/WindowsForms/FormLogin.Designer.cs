@@ -31,12 +31,12 @@
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
-            lnkOlvidaPass = new LinkLabel();
             btnIngresar = new Button();
             txtEmail = new TextBox();
             txtPass = new TextBox();
             label4 = new Label();
             lnkRegistrate = new LinkLabel();
+            lnkOlvidaPass = new LinkLabel();
             SuspendLayout();
             // 
             // label1
@@ -66,17 +66,6 @@
             label3.Size = new Size(70, 15);
             label3.TabIndex = 2;
             label3.Text = "Contraseña:";
-            // 
-            // lnkOlvidaPass
-            // 
-            lnkOlvidaPass.AutoSize = true;
-            lnkOlvidaPass.Location = new Point(84, 223);
-            lnkOlvidaPass.Name = "lnkOlvidaPass";
-            lnkOlvidaPass.Size = new Size(119, 15);
-            lnkOlvidaPass.TabIndex = 4;
-            lnkOlvidaPass.TabStop = true;
-            lnkOlvidaPass.Text = "Olvidé mi contraseña";
-            lnkOlvidaPass.Click += lnkOlvidaPass_Click;
             // 
             // btnIngresar
             // 
@@ -123,6 +112,17 @@
             lnkRegistrate.Text = "Registrate";
             lnkRegistrate.LinkClicked += lnkRegistrate_LinkClicked;
             // 
+            // lnkOlvidaPass
+            // 
+            lnkOlvidaPass.AutoSize = true;
+            lnkOlvidaPass.Location = new Point(84, 223);
+            lnkOlvidaPass.Name = "lnkOlvidaPass";
+            lnkOlvidaPass.Size = new Size(119, 15);
+            lnkOlvidaPass.TabIndex = 4;
+            lnkOlvidaPass.TabStop = true;
+            lnkOlvidaPass.Text = "Olvidé mi contraseña";
+            lnkOlvidaPass.Click += lnkOlvidaPass_Click;
+            // 
             // FormLogin
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -148,11 +148,11 @@
         private Label label1;
         private Label label2;
         private Label label3;
-        private LinkLabel lnkOlvidaPass;
         private Button btnIngresar;
         private TextBox txtEmail;
         private TextBox txtPass;
         private Label label4;
         private LinkLabel lnkRegistrate;
+        private LinkLabel lnkOlvidaPass;
     }
 }

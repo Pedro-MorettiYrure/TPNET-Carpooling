@@ -20,12 +20,13 @@ namespace WindowsForms
             _pasajeroLogueado = pasajeroLogueado;
             _misViajesConfirmados = new List<SolicitudViajeDTO>();
             ViajesListaPasajero_Load(this, EventArgs.Empty); 
+            this.Load+= dgvMisViajes_SelectionChanged;
         }
 
         private async void ViajesListaPasajero_Load(object sender, EventArgs e)
         {
             await CargarMisViajesAsync();
-            ActualizarEstadoBotones();
+            //ActualizarEstadoBotones();
         }
 
         private async Task CargarMisViajesAsync()
@@ -88,7 +89,7 @@ namespace WindowsForms
        
         private void dgvMisViajes_SelectionChanged(object sender, EventArgs e)
         {
-            ActualizarEstadoBotones();
+            //ActualizarEstadoBotones();
         }
 
         private void ActualizarEstadoBotones()

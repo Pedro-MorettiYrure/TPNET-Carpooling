@@ -19,7 +19,8 @@ namespace WindowsForms
             InitializeComponent();
             _idViaje = idViaje;
             _conductorLogueado = conductorLogueado ?? throw new ArgumentNullException(nameof(conductorLogueado));
-            FormGestionarSolicitudes_Load(this, EventArgs.Empty); 
+            FormGestionarSolicitudes_Load(this, EventArgs.Empty);
+            this.Load += dgvSolicitudes_SelectionChanged;
         }
 
 
@@ -30,7 +31,7 @@ namespace WindowsForms
             dgvSolicitudes.ReadOnly = true;
             dgvSolicitudes.AllowUserToAddRows = false;
             dgvSolicitudes.AllowUserToDeleteRows = false;
-            dgvSolicitudes.RowHeadersVisible = false; 
+            dgvSolicitudes.RowHeadersVisible = true; 
 
             await CargarSolicitudesAsync();
             ActualizarEstadoBotones(); 
@@ -143,6 +144,7 @@ namespace WindowsForms
 
             btnAceptarSolicitud.Enabled = haySeleccion && esPendiente;
             btnRechazarSolicitud.Enabled = haySeleccion && esPendiente;
+            
         }
 
 

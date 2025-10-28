@@ -55,6 +55,7 @@
             dgvSolicitudes.Location = new Point(14, 27);
             dgvSolicitudes.Name = "dgvSolicitudes";
             dgvSolicitudes.ReadOnly = true;
+            dgvSolicitudes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvSolicitudes.Size = new Size(658, 375);
             dgvSolicitudes.TabIndex = 1;
             dgvSolicitudes.SelectionChanged += dgvSolicitudes_SelectionChanged;
