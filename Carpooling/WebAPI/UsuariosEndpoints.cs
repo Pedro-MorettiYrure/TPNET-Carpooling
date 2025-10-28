@@ -24,7 +24,11 @@ namespace WebAPI
             {
                 try
                 {
-                    UsuarioDTO usuarioDTO = usuarioService.Registrar(dto, dto.Contraseña ?? string.Empty);
+                    UsuarioDTO? usuarioDTO = usuarioService.Registrar(dto, dto.Contraseña ?? string.Empty);
+                    if (usuarioDTO == null)
+                    {
+                        return Results.BadRequest("Ya existe un usuario con ese mail");
+                    }
                     var usuarioCreadoDto = new UsuarioDTO
                     {
                         IdUsuario = usuarioDTO.IdUsuario,

@@ -16,19 +16,29 @@ namespace Application.Services
 
         public UsuarioDTO Registrar(UsuarioDTO dto, string contraseña)
         {
-            var usuario = Usuario.Crear(dto.Nombre, dto.Apellido, dto.Email, contraseña, dto.Telefono);
-            _repo.Add(usuario);
+            var existe = _repo.GetByEmail(dto.Email);
 
-            return new UsuarioDTO
+            if (existe == null)
             {
-                IdUsuario = usuario.IdUsuario,
-                Nombre = usuario.Nombre,
-                Apellido = usuario.Apellido,
-                Email = usuario.Email,
-                Telefono= usuario.Telefono,
-                Contraseña = usuario.ContraseñaHash,
-                TipoUsuario = usuario.TipoUsuario
-            };
+
+                var usuario = Usuario.Crear(dto.Nombre, dto.Apellido, dto.Email, contraseña, dto.Telefono);
+                _repo.Add(usuario);
+
+                return new UsuarioDTO
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    Nombre = usuario.Nombre,
+                    Apellido = usuario.Apellido,
+                    Email = usuario.Email,
+                    Telefono = usuario.Telefono,
+                    Contraseña = usuario.ContraseñaHash,
+                    TipoUsuario = usuario.TipoUsuario
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public bool Login(string email, string contraseña)

@@ -2,16 +2,16 @@
 using System;
 using System.Windows.Forms;
 using API.Clients;
-using Domain.Model; 
+using Domain.Model;
 
 namespace WindowsForms
 {
     public partial class FormRegistrarse : Form
     {
         private readonly bool _esEdicion;
-        private readonly UsuarioDTO? _usuarioEditar; 
+        private readonly UsuarioDTO? _usuarioEditar;
 
-        public FormRegistrarse() : this(null, false) 
+        public FormRegistrarse() : this(null, false)
         {
         }
 
@@ -19,15 +19,20 @@ namespace WindowsForms
         {
             InitializeComponent();
             _esEdicion = esEdicion;
-            _usuarioEditar = usuarioAEditar; 
+            _usuarioEditar = usuarioAEditar;
 
             if (_esEdicion && _usuarioEditar != null)
             {
-                PrepararModoEdicion(); 
+                PrepararModoEdicion();
             }
-            else 
+            else
             {
+                // --- MODO REGISTRO ---
                 this.Text = "Registrar Nuevo Usuario";
+
+                
+               lblTitulo.Text = "Complete sus datos para registrarse";
+
                 textBoxLicencia.Visible = false;
                 dateTimePickerVencimiento.Visible = false;
                 labelLicencia.Visible = false;
@@ -38,7 +43,7 @@ namespace WindowsForms
                 labelConfirmarContra.Visible = true;
                 txtBoxContra.Visible = true;
                 txtBoxConfirmaCon.Visible = true;
-                txtEmail.Enabled = true; 
+                txtEmail.Enabled = true; // Email editable en registro
                 btnCrearUsuario.Text = "Registrarse";
             }
         }
@@ -50,6 +55,7 @@ namespace WindowsForms
 
             if (_esEdicion && _usuarioEditar != null)
             {
+                // --- LÓGICA DE EDICIÓN (Sin cambios) ---
                 if (string.IsNullOrWhiteSpace(txtBoxNombre.Text) || string.IsNullOrWhiteSpace(txtBoxApellido.Text))
                 {
                     MessageBox.Show("Nombre y Apellido son obligatorios.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -86,7 +92,7 @@ namespace WindowsForms
                 if (!huboCambios)
                 {
                     MessageBox.Show("No se detectaron cambios en los datos.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    btnCrearUsuario.Enabled = true; 
+                    btnCrearUsuario.Enabled = true;
                     return;
                 }
 
@@ -97,7 +103,7 @@ namespace WindowsForms
 
                     _usuarioEditar.Nombre = txtBoxNombre.Text;
                     _usuarioEditar.Apellido = txtBoxApellido.Text;
-                    _usuarioEditar.Telefono = string.IsNullOrWhiteSpace(txtBoxTele.Text) ? null : txtBoxTele.Text; 
+                    _usuarioEditar.Telefono = string.IsNullOrWhiteSpace(txtBoxTele.Text) ? null : txtBoxTele.Text;
 
                     if (_usuarioEditar.TipoUsuario == TipoUsuario.PasajeroConductor)
                     {
@@ -112,7 +118,7 @@ namespace WindowsForms
                         MessageBox.Show("Datos actualizados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         if (SessionManager.UsuarioActual?.IdUsuario == _usuarioEditar.IdUsuario)
                         {
-                            SessionManager.IniciarSesion(_usuarioEditar, token); 
+                            SessionManager.IniciarSesion(_usuarioEditar, token);
                         }
                         this.DialogResult = DialogResult.OK;
                         this.Close();
@@ -128,25 +134,25 @@ namespace WindowsForms
                 {
                     MessageBox.Show($"Error al actualizar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                finally { if (!this.IsDisposed) btnCrearUsuario.Enabled = true; } 
+                finally { if (!this.IsDisposed) btnCrearUsuario.Enabled = true; }
             }
             else
             {
-                
+                // --- LÓGICA DE REGISTRO (Sin cambios) ---
                 if (string.IsNullOrWhiteSpace(txtBoxNombre.Text) ||
                     string.IsNullOrWhiteSpace(txtBoxApellido.Text) ||
                     string.IsNullOrWhiteSpace(txtEmail.Text) ||
                     string.IsNullOrWhiteSpace(txtBoxContra.Text) ||
-                    string.IsNullOrWhiteSpace(txtBoxConfirmaCon.Text)) 
+                    string.IsNullOrWhiteSpace(txtBoxConfirmaCon.Text))
                 {
                     MessageBox.Show("Debe completar Nombre, Apellido, Email y Contraseña.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    btnCrearUsuario.Enabled = true; 
+                    btnCrearUsuario.Enabled = true;
                     return;
                 }
                 if (txtBoxContra.Text != txtBoxConfirmaCon.Text)
                 {
                     MessageBox.Show("Las contraseñas no coinciden.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    btnCrearUsuario.Enabled = true; 
+                    btnCrearUsuario.Enabled = true;
                     return;
                 }
 
@@ -157,8 +163,8 @@ namespace WindowsForms
                         Nombre = txtBoxNombre.Text,
                         Apellido = txtBoxApellido.Text,
                         Email = txtEmail.Text,
-                        Contraseña = txtBoxContra.Text, 
-                        Telefono = string.IsNullOrWhiteSpace(txtBoxTele.Text) ? null : txtBoxTele.Text 
+                        Contraseña = txtBoxContra.Text,
+                        Telefono = string.IsNullOrWhiteSpace(txtBoxTele.Text) ? null : txtBoxTele.Text
                     };
 
                     var usuarioGuardado = await UsuarioApiClient.RegistrarUsuarioAsync(usuarioDto);
@@ -172,12 +178,13 @@ namespace WindowsForms
                 {
                     MessageBox.Show($"Error al registrar usuario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                finally { if (!this.IsDisposed) btnCrearUsuario.Enabled = true; } 
+                finally { if (!this.IsDisposed) btnCrearUsuario.Enabled = true; }
             }
         }
 
         private void CargarDatosUsuario()
         {
+            // --- (Método sin cambios) ---
             if (_usuarioEditar == null) return;
 
             txtBoxNombre.Text = _usuarioEditar.Nombre;
@@ -207,8 +214,13 @@ namespace WindowsForms
 
         private void PrepararModoEdicion()
         {
+            // --- MODO EDICIÓN ---
             this.Text = "Editar Mis Datos";
             btnCrearUsuario.Text = "Guardar Cambios";
+
+            // *** CAMBIO AQUÍ: Texto del título para EDICIÓN ***
+            // (Asumiendo que 'label1' es tu 'labelTitulo')
+            lblTitulo.Text = "Modifique sus datos personales";
 
             labelContra.Visible = false;
             labelConfirmarContra.Visible = false;
@@ -223,5 +235,5 @@ namespace WindowsForms
 
         private void label4_Click(object sender, EventArgs e) { }
 
-    } 
+    }
 }
