@@ -119,7 +119,6 @@
             lnkOlvidaPass.Name = "lnkOlvidaPass";
             lnkOlvidaPass.Size = new Size(0, 15);
             lnkOlvidaPass.TabIndex = 4;
-            lnkOlvidaPass.Click += lnkOlvidaPass_Click;
             // 
             // FormLogin
             // 
