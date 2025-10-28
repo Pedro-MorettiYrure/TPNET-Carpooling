@@ -48,7 +48,7 @@ namespace WindowsForms
 
             // Conectar eventos
             dgvBuscarViaje.SelectionChanged += dgvResultadosBusqueda_SelectionChanged;
-            btnSolicitarViaje.Click += btnSolicitarViaje_Click;
+            //btnSolicitarViaje.Click += btnSolicitarViaje_Click;
             btnCancelar.Click += btnCancelar_Click;
             btnBuscar.Click += btnBuscar_Click;
         }

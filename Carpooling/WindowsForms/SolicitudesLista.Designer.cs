@@ -57,6 +57,7 @@
             dgvSolicitudes.ReadOnly = true;
             dgvSolicitudes.Size = new Size(658, 375);
             dgvSolicitudes.TabIndex = 1;
+            dgvSolicitudes.SelectionChanged += dgvSolicitudes_SelectionChanged;
             // 
             // btnRechazarSolicitud
             // 
