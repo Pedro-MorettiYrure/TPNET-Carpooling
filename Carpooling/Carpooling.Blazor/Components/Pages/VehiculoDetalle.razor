@@ -10,48 +10,58 @@
 
 @if (puedeAcceder)
 {
-    <h3>@Titulo</h3>
+    @if (Vehiculo == null)
+    {
+        <em>Cargando...</em>
+    }
+    else
+    {
 
-    <EditForm Model="@Vehiculo" OnValidSubmit="Guardar" FormName="VehiculoForm">
-        <DataAnnotationsValidator />
 
-        <div class="mb-3">
-            <label for="patente" class="form-label">Patente</label>
-            <InputText id="patente" class="form-control" @bind-Value="Vehiculo.Patente" disabled="@modoEdicion" />
-            <ValidationMessage For="@(() => Vehiculo.Patente)" />
-        </div>
+        <h3>@Titulo</h3>
 
-        <div class="mb-3">
-            <label for="marca" class="form-label">Marca</label>
-            <InputText id="marca" class="form-control" @bind-Value="Vehiculo.Marca" />
-            <ValidationMessage For="@(() => Vehiculo.Marca)" />
-        </div>
+        <EditForm Model="@Vehiculo" OnValidSubmit="Guardar" FormName="VehiculoForm">
+            <DataAnnotationsValidator />
 
-        <div class="mb-3">
-            <label for="modelo" class="form-label">Modelo</label>
-            <InputText id="modelo" class="form-control" @bind-Value="Vehiculo.Modelo" />
-            <ValidationMessage For="@(() => Vehiculo.Modelo)" />
-        </div>
+            <div class="mb-3">
+                <label for="patente" class="form-label">Patente</label>
+                <InputText id="patente" class="form-control" @bind-Value="Vehiculo.Patente" disabled="@modoEdicion" />
+                <ValidationMessage For="@(() => Vehiculo.Patente)" />
+            </div>
 
-        <div class="mb-3">
-            <label for="color" class="form-label">Color</label>
-            <InputText id="color" class="form-control" @bind-Value="Vehiculo.Color" />
-            <ValidationMessage For="@(() => Vehiculo.Color)" />
-        </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <InputText id="marca" class="form-control" @bind-Value="Vehiculo.Marca" />
+                <ValidationMessage For="@(() => Vehiculo.Marca)" />
+            </div>
 
-        <div class="mb-3">
-            <label for="cantLugares" class="form-label">Cantidad de Lugares</label>
-            <InputNumber id="cantLugares" class="form-control" @bind-Value="Vehiculo.CantLugares" />
-            <ValidationMessage For="@(() => Vehiculo.CantLugares)" />
-        </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <InputText id="modelo" class="form-control" @bind-Value="Vehiculo.Modelo" />
+                <ValidationMessage For="@(() => Vehiculo.Modelo)" />
+            </div>
 
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-    </EditForm>
+            <div class="mb-3">
+                <label for="color" class="form-label">Color</label>
+                <InputText id="color" class="form-control" @bind-Value="Vehiculo.Color" />
+                <ValidationMessage For="@(() => Vehiculo.Color)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="cantLugares" class="form-label">Cantidad de Lugares</label>
+                <InputNumber id="cantLugares" class="form-control" @bind-Value="Vehiculo.CantLugares" />
+                <ValidationMessage For="@(() => Vehiculo.CantLugares)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+        </EditForm>
+    }
+
 }
 else
 {
-    <p>Cargando o no tienes permiso para estar aquí...</p>
+    <p>No tienes permiso para estar aquí...</p>
 }
 
 

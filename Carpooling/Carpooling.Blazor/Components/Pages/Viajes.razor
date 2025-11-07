@@ -19,81 +19,83 @@
         @errorMensaje
     </div>
 }
-
-@if (puedeAcceder) 
+else
 {
-    <div class="mb-3">
-        <button class="btn btn-success" @onclick="AgregarViaje">
-            <span class="bi bi-plus-circle-fill" aria-hidden="true"></span> Publicar Nuevo Viaje
-        </button>
-    </div>
+    @if (puedeAcceder) 
+    {
+        <div class="mb-3">
+            <button class="btn btn-success" @onclick="AgregarViaje">
+                <span class="bi bi-plus-circle-fill" aria-hidden="true"></span> Publicar Nuevo Viaje
+            </button>
+        </div>
 
-    @if (viajes == null) 
-    {
-        <p><em>Cargando viajes...</em></p>
-    }
-    else if (viajes.Count == 0) 
-    {
-        <p>Aún no has publicado ningún viaje.</p>
-        //
+        @if (viajes == null) 
+        {
+            <p><em>Cargando viajes...</em></p>
+        }
+        else if (viajes.Count == 0) 
+        {
+            <p>Aún no has publicado ningún viaje.</p>
+            //
+        }
+        else 
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Lugares Disp.</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var viaje in viajes) 
+                    {
+                        <tr>
+                            <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@viaje.NombreOrigen</td>
+                            <td>@viaje.NombreDestino</td> 
+                            <td>@viaje.CantLugares</td>
+                            <td>@viaje.Precio.ToString("C")</td> 
+                            <td>@viaje.Estado</td>
+                            <td>
+                                @switch (viaje.Estado)
+                                {
+                                    case EstadoViaje.Pendiente: // Si el viaje está pendiente
+                                        <button class="btn btn-success btn-sm m-1" @onclick="() => IniciarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Iniciar</button>
+                                        <button class="btn btn-secondary btn-sm m-1" @onclick="() => EditarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Editar</button>
+                                        <button class="btn btn-secondary btn-sm m-1" @onclick="() => VerSolicitudes(viaje.IdViaje)" disabled="@procesandoAccion">Ver Solicitudes</button>
+                                        <button class="btn btn-danger btn-sm m-1" @onclick="() => CancelarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Cancelar</button>
+                                        break;
+                                    case EstadoViaje.EnCurso: // Si el viaje está en curso
+                                        <button class="btn btn-warning btn-sm" @onclick="() => FinalizarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Finalizar</button>
+                                        break;
+                                    case EstadoViaje.Realizado: // Si el viaje ya se realizó
+                                        <button class="btn btn-info btn-sm" @onclick="() => IrACalificarPasajeros(viaje.IdViaje)">Calificar Pasajeros</button>
+                                        break;
+                                    case EstadoViaje.Cancelado: // Si el viaje fue cancelado
+                                        <span class="text-muted">Cancelado</span>
+                                        break;
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     }
     else 
     {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Fecha y Hora</th>
-                    <th>Origen</th>
-                    <th>Destino</th>
-                    <th>Lugares Disp.</th>
-                    <th>Precio</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var viaje in viajes) 
-                {
-                    <tr>
-                        <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@viaje.NombreOrigen</td>
-                        <td>@viaje.NombreDestino</td> 
-                        <td>@viaje.CantLugares</td>
-                        <td>@viaje.Precio.ToString("C")</td> 
-                        <td>@viaje.Estado</td>
-                        <td>
-                            @switch (viaje.Estado)
-                            {
-                                case EstadoViaje.Pendiente: // Si el viaje está pendiente
-                                    <button class="btn btn-success btn-sm m-1" @onclick="() => IniciarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Iniciar</button>
-                                    <button class="btn btn-secondary btn-sm m-1" @onclick="() => EditarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Editar</button>
-                                    <button class="btn btn-secondary btn-sm m-1" @onclick="() => VerSolicitudes(viaje.IdViaje)" disabled="@procesandoAccion">Ver Solicitudes</button>
-                                    <button class="btn btn-danger btn-sm m-1" @onclick="() => CancelarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Cancelar</button>
-                                    break;
-                                case EstadoViaje.EnCurso: // Si el viaje está en curso
-                                    <button class="btn btn-warning btn-sm" @onclick="() => FinalizarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Finalizar</button>
-                                    break;
-                                case EstadoViaje.Realizado: // Si el viaje ya se realizó
-                                    <button class="btn btn-info btn-sm" @onclick="() => IrACalificarPasajeros(viaje.IdViaje)">Calificar Pasajeros</button>
-                                    break;
-                                case EstadoViaje.Cancelado: // Si el viaje fue cancelado
-                                    <span class="text-muted">Cancelado</span>
-                                    break;
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-}
-else 
-{
-    <p><em>Verificando permisos...</em></p>
-    @if (!puedeAcceder && SesionUsuario.EstaLogueado) 
-    {
-        <div class="alert alert-warning mt-3">No tienes permiso para acceder a esta sección. Debes ser conductor.</div>
-        //
+        <p><em>Verificando permisos...</em></p>
+        @if (!puedeAcceder && SesionUsuario.EstaLogueado) 
+        {
+            <div class="alert alert-warning mt-3">No tienes permiso para acceder a esta sección. Debes ser conductor.</div>
+            //
+        }
     }
 }
 

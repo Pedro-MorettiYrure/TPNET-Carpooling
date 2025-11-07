@@ -22,17 +22,19 @@
         <div class="card-header">Reporte: Conductores Mejor Calificados</div>
         <div class="card-body">
             <p>Genera un PDF con los conductores ordenados por su calificación promedio (recibida como conductor).</p>
-            <button class="btn btn-primary" @onclick="GenerarReporteTopConductores" disabled="@generandoReporte1">
-                @if (generandoReporte1)
+            <div class="card-body d-flex justify-content-end">
+                <button class="btn btn-primary" @onclick="GenerarReporteTopConductores" disabled="@generandoReporte1">
+                    @if (generandoReporte1)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    }
+                    Generar Reporte Top Conductores
+                </button>
+                @if (!string.IsNullOrEmpty(errorReporte1))
                 {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <div class="text-danger mt-2">@errorReporte1</div>
                 }
-                Generar Reporte Top Conductores
-            </button>
-            @if (!string.IsNullOrEmpty(errorReporte1))
-            {
-                <div class="text-danger mt-2">@errorReporte1</div>
-            }
+            </div>
         </div>
     </div>
 

@@ -107,7 +107,8 @@ namespace Application.Services
                 IdConductor = l.IdConductor,
                 NombreConductor = l.Conductor.Nombre,
                 ApellidoConductor = l.Conductor.Apellido,
-                EmailConductor = l.Conductor.Email
+                EmailConductor = l.Conductor.Email,
+                Patente = l.Vehiculo.Patente
             };
         }
 
@@ -125,7 +126,8 @@ namespace Application.Services
                 DestinoCodPostal = l.DestinoCodPostal,
                 NombreOrigen = l.Origen.nombreLoc,
                 NombreDestino = l.Destino.nombreLoc,
-                IdConductor = l.IdConductor
+                IdConductor = l.IdConductor,
+                Patente = l.Vehiculo.Patente
             }).ToList();
         }
 
@@ -144,7 +146,8 @@ namespace Application.Services
                 NombreOrigen = l.Origen.nombreLoc,
                 NombreDestino = l.Destino.nombreLoc,
                 IdConductor = l.IdConductor,
-                IdVehiculo = l.IdVehiculo
+                IdVehiculo = l.IdVehiculo,
+                Patente = l.Vehiculo.Patente
             }).ToList();
         }
 

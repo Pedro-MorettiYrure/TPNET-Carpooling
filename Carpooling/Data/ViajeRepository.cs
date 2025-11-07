@@ -51,6 +51,7 @@ namespace Data
             return _context.Viajes
                 .Include(v => v.Origen)
                 .Include(v => v.Destino)
+                .Include(v => v.Vehiculo)
                 .Where(v => v.IdConductor == idUsuario)
                 .OrderByDescending(v => v.FechaHora)
                 .ToList();
@@ -61,6 +62,7 @@ namespace Data
             return _context.Viajes
                 .Include(v => v.Origen)
                 .Include(v => v.Destino)
+                .Include(v => v.Vehiculo)
                 .OrderBy(p => p.IdViaje)
                 .ToList();
         }
