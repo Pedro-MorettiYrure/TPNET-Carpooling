@@ -187,13 +187,20 @@ namespace Application.Services
                     throw new ArgumentException("La cantidad de lugares del viaje no puede superar los lugares disponibles del vehículo.");
                 }
 
-            
+                var solicitudesAprobadas = _solicitudRepo.GetAllByViaje(dto.IdViaje)
+                                    .Count(s => s.Estado == EstadoSolicitud.Aprobada); 
+                if (dto.CantLugares < solicitudesAprobadas)
+                {
+                    throw new InvalidOperationException($"No puede reducir el número de lugares a {dto.CantLugares}, porque ya tiene {solicitudesAprobadas} pasajeros confirmados.");
+                }
+
+
                 viajeExistente.SetFechaHora(dto.FechaHora);
                 viajeExistente.SetCantLugares(dto.CantLugares);
                 viajeExistente.SetPrecio(dto.Precio);
                 viajeExistente.SetComentario(dto.Comentario);
                 viajeExistente.OrigenCodPostal = dto.OrigenCodPostal;
-                viajeExistente.DestinoCodPostal = dto.DestinoCodPostal;
+                viajeExistente.SetDestinoCodPostal(dto.DestinoCodPostal);
                 viajeExistente.IdVehiculo = dto.IdVehiculo;
 
                 return _viajeRepo.Update(viajeExistente);
@@ -247,7 +254,6 @@ namespace Application.Services
             viaje.Estado = EstadoViaje.Realizado;
             if (_viajeRepo.Update(viaje))
             {
-                // Devolver la lista de pasajeros APROBADOS para calificar
                 return _solicitudRepo.GetAllByViaje(idViaje)
                                     .Where(s => s.Estado == EstadoSolicitud.Aprobada)
                                     .Select(s => new UsuarioDTO
@@ -267,16 +273,15 @@ namespace Application.Services
             var viaje = _viajeRepo.GetWithPasajerosConfirmados(idViaje);
 
             if (viaje == null) throw new KeyNotFoundException("Viaje no encontrado.");
-            // Validar que quien pide la lista sea el conductor
+            // validamos que quien pide la lista sea el conductor
             if (viaje.IdConductor != idUsuarioConductor) throw new UnauthorizedAccessException("Solo el conductor del viaje puede ver los pasajeros confirmados.");
-            // Permitir obtener pasajeros incluso si ya está Realizado (para calificar) o EnCurso
+            // permitimps obtener pasajeros incluso si ya está Realizado (para calificar) o EnCurso
             if (viaje.Estado != EstadoViaje.EnCurso && viaje.Estado != EstadoViaje.Realizado) 
             {
                 throw new InvalidOperationException($"El viaje debe estar En Curso o Realizado para ver sus pasajeros (estado actual: {viaje.Estado}).");
             }
 
 
-            // Filtrar las solicitudes aprobadas y mapear los pasajeros a DTO
             return viaje.Solicitudes
                         .Where(s => s.Estado == EstadoSolicitud.Aprobada && s.Pasajero != null) 
                         .Select(s => new UsuarioDTO 

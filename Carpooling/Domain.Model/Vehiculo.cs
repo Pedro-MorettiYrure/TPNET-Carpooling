@@ -8,12 +8,12 @@ namespace Domain.Model
 {
     public class Vehiculo
     {
-        public int IdVehiculo { get; set; }   // PK
-        public string Patente { get; set; }
-        public string Modelo { get; set; }
-        public int CantLugares { get; set; }
-        public string Color { get; set; }
-        public string Marca { get; set; }
+        public int IdVehiculo { get; set; }   
+        public string Patente { get; private set; }
+        public string Modelo { get; private set; }
+        public int CantLugares { get; private set; }
+        public string Color { get; private set; }
+        public string Marca { get; private set; }
 
         // Relación con Usuario
         public int IdUsuario { get; set; }

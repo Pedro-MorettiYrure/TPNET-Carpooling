@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq; 
 using System.Windows.Forms;
 using API.Clients; 
-using DTOs;      
+using DTOs;
+using Domain.Model;
 
 namespace WindowsForms
 {
@@ -152,7 +153,7 @@ namespace WindowsForms
 
                 DateTime fecha = dtpFecha.Value.Date;
                 TimeSpan hora = dtpHora.Value.TimeOfDay;
-                DateTime fechaHora = fecha.Add(hora); // Combinar fecha y hora
+                DateTime fechaHora = fecha.Add(hora); 
 
                 if (cbOrigen.SelectedValue == null || cbDestino.SelectedValue == null || cbVehiculos.SelectedValue == null)
                 {
@@ -172,6 +173,28 @@ namespace WindowsForms
 
                 string comentario = tbComentario.Text;
 
+                if (Mode == FormMode.Update && _viajeAEditar != null)
+                {
+                    try
+                    {
+                        var solicitudes = await SolicitudViajeApiClient.GetSolicitudesPorViajeAsync(_viajeAEditar.IdViaje, token);
+                        var solicitudesAprobadas = solicitudes.Count(s => s.Estado == EstadoSolicitud.Aprobada); 
+
+                        if (cantLugares < solicitudesAprobadas)
+                        {
+                            MessageBox.Show($"No puede reducir el número de lugares a {cantLugares}, porque ya tiene {solicitudesAprobadas} pasajeros confirmados. Contacte a los pasajeros.", "Error de Validación de Lugares",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                            errorProviderViajeDetalle.SetError(tbCantLugares, $"No puede reducir a {cantLugares} lugares, ya tiene {solicitudesAprobadas} pasajeros confirmados. Contacte a los pasajeros.");
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al validar lugares disponibles: {ex.Message}", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return; 
+                    }
+                }
                 var dto = new ViajeDTO
                 {
                     FechaHora = fechaHora,
@@ -182,7 +205,6 @@ namespace WindowsForms
                     Comentario = comentario,
                     IdConductor = _usuarioLogueado.IdUsuario, 
                     IdVehiculo = idVehiculo,
-                    // El estado se asigna en el backend al crear
                 };
 
                 if (Mode == FormMode.Update && _viajeAEditar != null)
@@ -283,11 +305,6 @@ namespace WindowsForms
             return isValid;
         }
 
-        // Evento vacío
-        private void cbVehiculos_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            
-        }
 
     } 
 }

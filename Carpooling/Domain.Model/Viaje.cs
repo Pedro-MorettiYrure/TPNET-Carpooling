@@ -10,15 +10,15 @@ namespace Domain.Model
     {
         public int IdViaje {  get; set; }
 
-        public DateTime FechaHora { get; set; }
+        public DateTime FechaHora { get; private set; }
 
-        public int CantLugares { get; set; }
+        public int CantLugares { get; private set; }
 
         public EstadoViaje Estado { get; set; }
 
-        public string? Comentario { get; set; }
+        public string? Comentario { get; private set; }
 
-        public decimal Precio { get; set; }
+        public decimal Precio { get; private set; }
 
         public Localidad Origen { get; set; }
 
@@ -26,7 +26,7 @@ namespace Domain.Model
 
         public Localidad Destino { get; set; }
 
-        public string DestinoCodPostal { get; set; }
+        public string DestinoCodPostal { get; private set; }
 
         public Usuario Conductor { get; set; }
 
@@ -53,7 +53,7 @@ namespace Domain.Model
             v.SetComentario(comentario);
 
             v.OrigenCodPostal = origenCodPostal;
-            v.DestinoCodPostal = destinoCodPostal;
+            v.SetDestinoCodPostal(destinoCodPostal);
             v.IdConductor = idConductor;
             v.IdVehiculo = idVehiculo;
             v.Estado = EstadoViaje.Pendiente;
@@ -90,20 +90,13 @@ namespace Domain.Model
             Precio = precio;
         }
 
-        public void SetOrigen(Localidad origen)
+        public void SetDestinoCodPostal(string destino)
         {
-            if (origen == null)
-                throw new ArgumentNullException(nameof(origen));
-            Origen = origen;
-        }
-
-        public void SetDestino(Localidad destino)
-        {
-            if (destino == null)
-                throw new ArgumentNullException(nameof(destino));
-            if (Origen != null && destino.codPostal == Origen.codPostal)
+            if (string.IsNullOrWhiteSpace(destino))
+                throw new ArgumentException("El código postal de destino no puede ser nulo o vacío.");
+            if (Origen != null && destino == this.OrigenCodPostal)
                 throw new ArgumentException("El destino no puede ser la misma localidad que el origen.", nameof(destino));
-            Destino = destino;
+            DestinoCodPostal = destino;
         }
     }
 

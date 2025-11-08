@@ -37,7 +37,7 @@ namespace Application.Services
             }
             else
             {
-                return null;
+                throw new ArgumentException("Este mail ya está registrado. Por favor, intente con otro."); ;
             }
         }
 

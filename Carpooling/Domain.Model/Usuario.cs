@@ -9,12 +9,12 @@ namespace Domain.Model
     public class Usuario
     {
         public int IdUsuario { get; set; }
-        public string Nombre { get; set; } = null!;
-        public string Apellido { get; set; } = null!;
-        public string Email { get; set; } = null!;
+        public string Nombre { get; private set; } = null!;
+        public string Apellido { get; private set; } = null!;
+        public string Email { get; private set; } = null!;
         public TipoUsuario TipoUsuario { get; set; }
         public string ContraseñaHash { get; private set; } = null!;
-        public string? Telefono { get; set; }
+        public string? Telefono { get; private set; }
         public string? nroLicenciaConductor { get; set; }
         public DateTime? fechaVencimientoLicencia { get; set; }
         public ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();

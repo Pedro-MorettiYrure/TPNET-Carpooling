@@ -4,8 +4,8 @@ namespace Domain.Model
 {
     public class Localidad
     {
-        public string codPostal { get; set; }
-        public string nombreLoc { get; set; }
+        public string codPostal { get; private set; }
+        public string nombreLoc { get; private set; }
 
         public Localidad() { }
 

@@ -196,17 +196,12 @@ namespace WindowsForms
                     {
                         case EstadoViaje.Pendiente:
                             btnEditar.Enabled = true;
-                            btnEliminar.Enabled = true; 
-
-                            // Habilitar Iniciar SOLO si la fecha del viaje es HOY
-                            if (viajeSeleccionado.FechaHora.Date == DateTime.Today.Date)
-                            {
-                                btnIniciarViaje.Enabled = true;
-                            }
+                            btnEliminar.Enabled = true;
+                            btnIniciarViaje.Enabled = true;
                             break;
 
                         case EstadoViaje.EnCurso:
-                            // Habilitar Finalizar si está En Curso
+                            // habilitar Finalizar si está En Curso
                             btnFinalizarViaje.Enabled = true;
                             break;
 
@@ -228,7 +223,7 @@ namespace WindowsForms
 
             if (viajeSeleccionado.Estado != EstadoViaje.Pendiente || viajeSeleccionado.FechaHora.Date != DateTime.Today.Date)
             {
-                MessageBox.Show("Este viaje no se puede iniciar ahora (no está pendiente o no es hoy).", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Este viaje no se puede iniciar ahora porque no está pendiente o no es hoy).", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -241,7 +236,7 @@ namespace WindowsForms
 
                 await ViajeApiClient.IniciarViajeAsync(viajeSeleccionado.IdViaje, token); 
                 MessageBox.Show("Viaje iniciado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await GetAllAndLoad(); // Recargar la grilla para ver el estado actualizado
+                await GetAllAndLoad(); 
             }
             catch (Exception ex)
             {
@@ -256,7 +251,7 @@ namespace WindowsForms
 
             if (viajeSeleccionado.Estado != EstadoViaje.EnCurso)
             {
-                MessageBox.Show("Este viaje no se puede finalizar (no está en curso).", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Este viaje no se puede finalizar porque aún no ha comenzado.", "Acción no válida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -288,9 +283,6 @@ namespace WindowsForms
 
         private async void btnCalificarPasajeros_Click(object sender, EventArgs e)
         {
-            await GetAllAndLoad();
-            await Task.Delay(200); 
-
             if (dgvViajesLista.SelectedRows.Count == 0 || !(dgvViajesLista.SelectedRows[0].DataBoundItem is ViajeDTO viajeSeleccionado))
             {
                 MessageBox.Show("Seleccione un viaje realizado para calificar.", "Selección Requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -303,51 +295,52 @@ namespace WindowsForms
                 return;
             }
 
-            SetBotonesAccionEnabled(false);
+            SetBotonesAccionEnabled(false); 
 
             try
             {
                 string? token = SessionManager.JwtToken;
                 if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("Sesión inválida.");
 
-                // Obtener la lista de pasajeros confirmados
-                var pasajerosConfirmados = (await ViajeApiClient.GetPasajerosConfirmadosAsync(viajeSeleccionado.IdViaje, token)).ToList();
+                var todasLasSolicitudes = await SolicitudViajeApiClient.GetSolicitudesPorViajeAsync(viajeSeleccionado.IdViaje, token);
 
-                if (!pasajerosConfirmados.Any())
+                var solicitudesAprobadas = todasLasSolicitudes
+                    .Where(s => s.Estado == EstadoSolicitud.Aprobada) 
+                    .ToList();
+
+                if (!solicitudesAprobadas.Any()) 
                 {
-                    MessageBox.Show("No hay pasajeros confirmados (o pendientes de calificar) en este viaje.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("No hay pasajeros aprobados (o pendientes de calificar) en este viaje.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
-                    btnCalificarPasajeros.Enabled = false;
                     return;
                 }
 
                 bool algunaCalificacionEnviada = false;
                 var calificacionesYaHechas = (await CalificacionApiClient.GetCalificacionesDadasAsync(_usuario.IdUsuario, token)).ToList();
 
-                foreach (var pasajero in pasajerosConfirmados)
+                foreach (var solicitud in solicitudesAprobadas)
                 {
-                    // Verificar si ya se calificó a ESTE pasajero en ESTE viaje
                     bool yaCalificado = calificacionesYaHechas.Any(c =>
                         c.IdViaje == viajeSeleccionado.IdViaje &&
-                        c.IdCalificado == pasajero.IdUsuario &&
-                        c.RolCalificado == RolCalificado.Pasajero.ToString() 
+                        c.IdCalificado == solicitud.IdPasajero && 
+                        c.RolCalificado == RolCalificado.Pasajero.ToString()
                     );
 
                     if (yaCalificado)
                     {
-                        Console.WriteLine($"Pasajero {pasajero.Nombre} ya calificado para viaje {viajeSeleccionado.IdViaje}, omitiendo.");
-                        continue; 
+                        Console.WriteLine($"Pasajero {solicitud.NombrePasajero} ya calificado, omitiendo.");
+                        continue;
                     }
 
-                    DialogResult preguntarCalificar = MessageBox.Show($"¿Desea calificar al pasajero {pasajero.Nombre} {pasajero.Apellido}?",
-                                                                  "Calificar Pasajero", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                    DialogResult preguntarCalificar = MessageBox.Show($"¿Desea calificar al pasajero {solicitud.NombrePasajero} {solicitud.ApellidoPasajero}?", 
+                                                                "Calificar Pasajero", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
                     if (preguntarCalificar == DialogResult.Cancel) break;
                     if (preguntarCalificar == DialogResult.No) continue;
 
                     using (FormCalificar formCalificar = new FormCalificar(
                         _usuario.IdUsuario,
-                        pasajero.IdUsuario,
+                        solicitud.IdPasajero,
                         viajeSeleccionado.IdViaje,
                         RolCalificado.Pasajero
                     ))
@@ -357,40 +350,45 @@ namespace WindowsForms
                             try
                             {
                                 CalificacionInputDTO calificacionInput = formCalificar.CalificacionIngresada;
-                                await CalificacionApiClient.CalificarPasajeroAsync(viajeSeleccionado.IdViaje, pasajero.IdUsuario, calificacionInput, token);
+
+                                await CalificacionApiClient.CalificarPasajeroAsync(viajeSeleccionado.IdViaje, solicitud.IdPasajero, calificacionInput, token);
+
                                 algunaCalificacionEnviada = true;
-                                calificacionesYaHechas.Add(new CalificacionDTO { IdViaje = viajeSeleccionado.IdViaje, IdCalificado = pasajero.IdUsuario, RolCalificado = RolCalificado.Pasajero.ToString() });
-                                MessageBox.Show($"Calificación para {pasajero.Nombre} enviada.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                calificacionesYaHechas.Add(new CalificacionDTO { IdViaje = viajeSeleccionado.IdViaje, IdCalificado = solicitud.IdPasajero, RolCalificado = RolCalificado.Pasajero.ToString() });
+                                MessageBox.Show($"Calificación para {solicitud.NombrePasajero} enviada.", "Éxito");
                             }
                             catch (InvalidOperationException opEx) when (opEx.Message.Contains("Ya has calificado"))
                             {
-                                MessageBox.Show($"Ya habías calificado a {pasajero.Nombre} para este viaje (detectado por API).", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                if (!calificacionesYaHechas.Any(c => c.IdViaje == viajeSeleccionado.IdViaje && c.IdCalificado == pasajero.IdUsuario))
+                                MessageBox.Show($"Ya habías calificado a {solicitud.NombrePasajero} (detectado por API).", "Información");
+                                if (!calificacionesYaHechas.Any(c => c.IdViaje == viajeSeleccionado.IdViaje && c.IdCalificado == solicitud.IdPasajero))
                                 {
-                                    calificacionesYaHechas.Add(new CalificacionDTO { IdViaje = viajeSeleccionado.IdViaje, IdCalificado = pasajero.IdUsuario, RolCalificado = RolCalificado.Pasajero.ToString() });
+                                    calificacionesYaHechas.Add(new CalificacionDTO { IdViaje = viajeSeleccionado.IdViaje, IdCalificado = solicitud.IdPasajero, RolCalificado = RolCalificado.Pasajero.ToString() });
                                 }
                             }
                             catch (Exception exCalif)
                             {
-                                MessageBox.Show($"Error al calificar a {pasajero.Nombre}: {exCalif.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                MessageBox.Show($"Error al calificar a {solicitud.NombrePasajero}: {exCalif.Message}", "Error");
                             }
                         }
                         else
                         {
                             DialogResult seguir = MessageBox.Show("No se envió calificación. ¿Continuar calificando a otros pasajeros?",
-                                                               "Continuar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                                                                "Continuar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                             if (seguir == DialogResult.No) break;
                         }
-                    } 
-                } 
-                  
+                    }
+                }
 
+                //verificar si quedan pendientes
                 bool quedanPendientes = false;
-                var pasajerosActualizados = (await ViajeApiClient.GetPasajerosConfirmadosAsync(viajeSeleccionado.IdViaje, token)).ToList(); // Volver a pedir por si acaso
-                var calificacionesActualizadas = (await CalificacionApiClient.GetCalificacionesDadasAsync(_usuario.IdUsuario, token)).ToList(); // Volver a pedir
-                foreach (var p in pasajerosActualizados)
+                var solicitudesAprobadasActualizadas = (await SolicitudViajeApiClient.GetSolicitudesPorViajeAsync(viajeSeleccionado.IdViaje, token))
+                                                        .Where(s => s.Estado == EstadoSolicitud.Aprobada)
+                                                        .ToList();
+                var calificacionesActualizadas = (await CalificacionApiClient.GetCalificacionesDadasAsync(_usuario.IdUsuario, token)).ToList();
+
+                foreach (var s in solicitudesAprobadasActualizadas)
                 {
-                    if (!calificacionesActualizadas.Any(c => c.IdViaje == viajeSeleccionado.IdViaje && c.IdCalificado == p.IdUsuario && c.RolCalificado == RolCalificado.Pasajero.ToString()))
+                    if (!calificacionesActualizadas.Any(c => c.IdViaje == viajeSeleccionado.IdViaje && c.IdCalificado == s.IdPasajero && c.RolCalificado == RolCalificado.Pasajero.ToString()))
                     {
                         quedanPendientes = true;
                         break;
@@ -399,34 +397,34 @@ namespace WindowsForms
 
                 if (!quedanPendientes)
                 {
-                    MessageBox.Show("Todos los pasajeros de este viaje han sido calificados.", "Completado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    
-                    btnCalificarPasajeros.Enabled = false;
+                    MessageBox.Show("Todos los pasajeros de este viaje han sido calificados.", "Completado");
                 }
                 else if (algunaCalificacionEnviada)
                 {
-                    MessageBox.Show("Proceso de calificación finalizado por ahora.", "Calificación Parcial", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Proceso de calificación finalizado por ahora.", "Calificación Parcial");
                 }
                 else
                 {
-                    MessageBox.Show("No se enviaron nuevas calificaciones.", "Calificación", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("No se enviaron nuevas calificaciones.", "Calificación");
                 }
-
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error en el proceso de calificación: {ex.Message}", "Error General", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error en el proceso de calificación: {ex.Message}", "Error General");
             }
             finally
             {
+                SetBotonesAccionEnabled(true);
+
                 if (!this.IsDisposed && dgvViajesLista.SelectedRows.Count > 0)
                 {
                     dgvViajesLista_SelectionChanged(dgvViajesLista, EventArgs.Empty);
                 }
-                else if (!this.IsDisposed) // Si no hay nada seleccionado, deshabilitamos todo
+                else if (!this.IsDisposed)
                 {
                     SetBotonesAccionEnabled(false);
-                    btnVerSolicitudes.Enabled = false; 
+                    btnVerSolicitudes.Enabled = false;
+                    btnCalificarPasajeros.Enabled = false; 
                 }
             }
         }
