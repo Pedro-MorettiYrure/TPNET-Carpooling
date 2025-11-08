@@ -53,32 +53,46 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var viaje in viajes) 
+                    @foreach (var viaje in viajes)
                     {
                         <tr>
                             <td>@viaje.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>@viaje.NombreOrigen</td>
-                            <td>@viaje.NombreDestino</td> 
+                            <td>@viaje.NombreDestino</td>
                             <td>@viaje.CantLugares</td>
-                            <td>@viaje.Precio.ToString("C")</td> 
+                            <td>@viaje.Precio.ToString("C")</td>
                             <td>@viaje.Estado</td>
                             <td>
                                 @switch (viaje.Estado)
                                 {
                                     case EstadoViaje.Pendiente: // Si el viaje está pendiente
-                                        <button class="btn btn-success btn-sm m-1" @onclick="() => IniciarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Iniciar</button>
+
+                                        @if (viaje.FechaHora.Date == DateTime.Today)
+                                        {
+                                            <button class="btn btn-success btn-sm m-1" @onclick="() => IniciarViaje(viaje)" disabled="@procesandoAccion">Iniciar</button>
+                                        }
+                                        else
+                                        {
+                                            <span class="d-inline-block" tabindex="0" title="Solo se pueden iniciar viajes en su fecha de inicio.">
+                                                <button class="btn btn-success btn-sm m-1" disabled style="pointer-events: none;">
+                                                    Iniciar
+                                                </button>
+                                            </span>
+                                        }
+
                                         <button class="btn btn-secondary btn-sm m-1" @onclick="() => EditarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Editar</button>
                                         <button class="btn btn-secondary btn-sm m-1" @onclick="() => VerSolicitudes(viaje.IdViaje)" disabled="@procesandoAccion">Ver Solicitudes</button>
                                         <button class="btn btn-danger btn-sm m-1" @onclick="() => CancelarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Cancelar</button>
                                         break;
+
                                     case EstadoViaje.EnCurso: // Si el viaje está en curso
-                                        <button class="btn btn-warning btn-sm" @onclick="() => FinalizarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Finalizar</button>
+                                                              <button class="btn btn-warning btn-sm" @onclick="() => FinalizarViaje(viaje.IdViaje)" disabled="@procesandoAccion">Finalizar</button>
                                         break;
                                     case EstadoViaje.Realizado: // Si el viaje ya se realizó
-                                        <button class="btn btn-info btn-sm" @onclick="() => IrACalificarPasajeros(viaje.IdViaje)">Calificar Pasajeros</button>
+                                                                <button class="btn btn-info btn-sm" @onclick="() => IrACalificarPasajeros(viaje.IdViaje)">Calificar Pasajeros</button>
                                         break;
                                     case EstadoViaje.Cancelado: // Si el viaje fue cancelado
-                                        <span class="text-muted">Cancelado</span>
+                                                                <span class="text-muted">Cancelado</span>
                                         break;
                                 }
                             </td>
@@ -201,33 +215,41 @@ else
     }
 
     // Método asíncrono para iniciar un viaje
-    private async Task IniciarViaje(int idViaje)
+    private async Task IniciarViaje(ViajeDTO viaje)
+{
+    if (viaje.FechaHora.Date != DateTime.Today.Date)
     {
-        if (procesandoAccion) return;
-        procesandoAccion = true;
-        errorMensaje = null;
-        await Task.Delay(1);
-
-        try
-        {
-            await SesionUsuario.CheckTokenExpirationAsync(); //
-            token = await SesionUsuario.GetTokenAsync(); //
-            if (token == null) throw new InvalidOperationException("Sesión expirada.");
-
-            await ViajeApiClient.IniciarViajeAsync(idViaje, token); //
-            await CargarViajes();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al iniciar el viaje {idViaje}: {ex.Message}");
-            errorMensaje = $"Error al iniciar viaje: {ex.Message}";
-        }
-        finally
-        {
-            procesandoAccion = false;
-            StateHasChanged();
-        }
+        errorMensaje = "Este viaje no se puede iniciar ahora porque no es hoy.";
+        StateHasChanged();
+        return;
     }
+
+    if (procesandoAccion) return;
+    procesandoAccion = true;
+    errorMensaje = null;
+    await Task.Delay(1);
+
+    try
+    {
+        await SesionUsuario.CheckTokenExpirationAsync();
+        
+        token = await SesionUsuario.GetTokenAsync();
+       
+        if (token == null) throw new InvalidOperationException("Sesión expirada.");
+        await ViajeApiClient.IniciarViajeAsync(viaje.IdViaje, token); 
+        await CargarViajes();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al iniciar el viaje {viaje.IdViaje}: {ex.Message}");
+        errorMensaje = $"Error al iniciar viaje: {ex.Message}";
+    }
+    finally
+    {
+        procesandoAccion = false;
+        StateHasChanged();
+    }
+}
 
     // Método asíncrono para finalizar un viaje
     private async Task FinalizarViaje(int idViaje)
