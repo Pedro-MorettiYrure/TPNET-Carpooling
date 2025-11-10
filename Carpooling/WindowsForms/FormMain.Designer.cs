@@ -91,9 +91,10 @@
             // btnIniciarSesion
             // 
             btnIniciarSesion.Dock = DockStyle.Top;
+            btnIniciarSesion.Font = new Font("Segoe UI", 14F);
             btnIniciarSesion.Location = new Point(150, 227);
             btnIniciarSesion.Name = "btnIniciarSesion";
-            btnIniciarSesion.Size = new Size(500, 53);
+            btnIniciarSesion.Size = new Size(500, 60);
             btnIniciarSesion.TabIndex = 4;
             btnIniciarSesion.Text = "Iniciar Sesion";
             btnIniciarSesion.UseVisualStyleBackColor = true;
@@ -102,9 +103,10 @@
             // btnRegistrar
             // 
             btnRegistrar.Dock = DockStyle.Top;
+            btnRegistrar.Font = new Font("Segoe UI", 14F);
             btnRegistrar.Location = new Point(150, 339);
             btnRegistrar.Name = "btnRegistrar";
-            btnRegistrar.Size = new Size(500, 47);
+            btnRegistrar.Size = new Size(500, 60);
             btnRegistrar.TabIndex = 5;
             btnRegistrar.Text = "Registrar usuario";
             btnRegistrar.UseVisualStyleBackColor = true;

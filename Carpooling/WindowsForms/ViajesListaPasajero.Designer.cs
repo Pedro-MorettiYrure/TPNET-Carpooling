@@ -95,7 +95,7 @@
             Controls.Add(btnVerDetalles);
             Controls.Add(dgvMisViajes);
             Name = "ViajesListaPasajero";
-            Text = "Form1";
+            Text = "ViajesListaPasajero";
             ((System.ComponentModel.ISupportInitialize)dgvMisViajes).EndInit();
             ResumeLayout(false);
         }

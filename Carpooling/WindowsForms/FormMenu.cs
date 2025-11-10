@@ -27,7 +27,9 @@ namespace WindowsForms
             btnLocalidadLista.Visible = false;
             btnBuscarViaje.Visible = false;
             btnMisSolicitudes.Visible = false;
-            btnReportes.Visible = false; 
+            btnReportes.Visible = false;
+            btnViajesConductor.Visible = false;
+
             switch (_usuarioLogueado.TipoUsuario)
             {
                 case TipoUsuario.Administrador:
@@ -41,6 +43,7 @@ namespace WindowsForms
                     btnViajeLista.Visible = true;
                     btnBuscarViaje.Visible = true;
                     btnMisSolicitudes.Visible = true;
+
                     break;
 
                 case TipoUsuario.PasajeroConductor:
@@ -48,6 +51,8 @@ namespace WindowsForms
                     btnViajeLista.Visible = true;
                     btnBuscarViaje.Visible = true;
                     btnMisSolicitudes.Visible = true;
+                    btnViajesConductor.Visible = true;
+                    btnViajeLista.Text = "Mis Viajes como Pasajero";
                     break;
             }
         }
@@ -78,14 +83,14 @@ namespace WindowsForms
             MostrarBtnsTipoUsuario();
         }
 
-        private void btnViajeLista_Click(object sender, EventArgs e) 
+        private void btnViajeLista_Click(object sender, EventArgs e)
         {
-            if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor) 
+            if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor)
             {
                 DialogResult eleccion = MessageBox.Show(
                     "¿Desea ver sus viajes como conductor o como pasajero? (Si: Conductor, No: Pasajero",
                     "Seleccionar Vista de Mis Viajes",
-                    MessageBoxButtons.YesNo, 
+                    MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
                 if (eleccion == DialogResult.Yes) // como conductor
@@ -99,8 +104,8 @@ namespace WindowsForms
                     formViajesPasajero.ShowDialog();
                 }
             }
-            
-            else if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero) 
+
+            else if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero)
             {
                 ViajesListaPasajero formViajesPasajero = new ViajesListaPasajero(_usuarioLogueado);
                 formViajesPasajero.ShowDialog();
@@ -130,7 +135,7 @@ namespace WindowsForms
 
         private void btnCerrarSesion_Click(object sender, EventArgs e)
         {
-            if (SessionManager.EstaLogueado) 
+            if (SessionManager.EstaLogueado)
             {
                 SessionManager.CerrarSesion();
                 MessageBox.Show("Sesión cerrada.", "Cerrar Sesión", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -138,9 +143,14 @@ namespace WindowsForms
 
             this.Close();
 
-            Application.OpenForms["FormLogin"]?.Show(); 
+            Application.OpenForms["FormLogin"]?.Show();
         }
 
+        private void btnViajesConductor_Click(object sender, EventArgs e)
+        {
+            ViajesLista formViajesConductor = new ViajesLista(_usuarioLogueado);
+            formViajesConductor.ShowDialog();
+        }
     }
 }
 

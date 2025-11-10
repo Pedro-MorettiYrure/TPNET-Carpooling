@@ -195,7 +195,7 @@
             ClientSize = new Size(800, 450);
             Controls.Add(tsViajesLista);
             Name = "ViajesLista";
-            Text = "Form1";
+            Text = "ViajesListaConductor";
             Load += ViajesLista_Load;
             tsViajesLista.ContentPanel.ResumeLayout(false);
             tsViajesLista.ResumeLayout(false);
