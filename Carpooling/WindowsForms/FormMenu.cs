@@ -85,31 +85,10 @@ namespace WindowsForms
 
         private void btnViajeLista_Click(object sender, EventArgs e)
         {
-            if (_usuarioLogueado.TipoUsuario == TipoUsuario.PasajeroConductor)
-            {
-                DialogResult eleccion = MessageBox.Show(
-                    "¿Desea ver sus viajes como conductor o como pasajero? (Si: Conductor, No: Pasajero",
-                    "Seleccionar Vista de Mis Viajes",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (eleccion == DialogResult.Yes) // como conductor
-                {
-                    ViajesLista formViajesConductor = new ViajesLista(_usuarioLogueado);
-                    formViajesConductor.ShowDialog();
-                }
-                else if (eleccion == DialogResult.No) // como pasajero
-                {
-                    ViajesListaPasajero formViajesPasajero = new ViajesListaPasajero(_usuarioLogueado);
-                    formViajesPasajero.ShowDialog();
-                }
-            }
-
-            else if (_usuarioLogueado.TipoUsuario == TipoUsuario.Pasajero)
-            {
+            
                 ViajesListaPasajero formViajesPasajero = new ViajesListaPasajero(_usuarioLogueado);
                 formViajesPasajero.ShowDialog();
-            }
+            
         }
 
         private void btnEditarUsuario_Click(object sender, EventArgs e)
