@@ -41,7 +41,6 @@ namespace WebAPI
             [FromQuery] DateTime fechaFin,
             [FromServices] ReportService reportService) =>
                 {
-                    // Validación básica de fechas
                     if (fechaInicio > fechaFin)
                     {
                         return Results.BadRequest(new { error = "La fecha de inicio no puede ser posterior a la fecha de fin." });
@@ -69,7 +68,24 @@ namespace WebAPI
             .ProducesProblem(StatusCodes.Status500InternalServerError)
             .RequireAuthorization("EsAdmin")
             .WithOpenApi();
-            }
+
+            app.MapGet("/api/reports/top-conductores-ado", [Authorize(Policy = "EsAdmin")] async ([FromServices] ReportService reportService) =>
+            {
+                try
+                {
+                    byte[] pdfBytes = await reportService.GetTopConductoresAdoPdfAsync();
+
+                    return Results.File(pdfBytes, "application/pdf", "top_conductores_ado.pdf");
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem($"Error al generar reporte ADO: {ex.Message}", statusCode: StatusCodes.Status500InternalServerError);
+                }
+            })
+            .WithName("GetTopConductoresAdoReportPdf")
+            .Produces<FileResult>(StatusCodes.Status200OK, "application/pdf")
+            .RequireAuthorization("EsAdmin");
+        }
 
 
     }

@@ -61,7 +61,8 @@ builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<VehiculoRepository>();
 builder.Services.AddScoped<ViajeRepository>();
 builder.Services.AddScoped<SolicitudViajeRepository>();
-builder.Services.AddScoped<CalificacionRepository>(); 
+builder.Services.AddScoped<CalificacionRepository>();
+builder.Services.AddScoped<ReporteAdoRepository>();
 
 // Inyección de servicios
 builder.Services.AddScoped<LocalidadService>();
@@ -115,7 +116,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
 
-    //Never in Production
+    
     //db.Database.EnsureDeleted();
     //db.Database.EnsureCreated();
 

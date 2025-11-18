@@ -28,7 +28,14 @@
                     {
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     }
-                    Generar Reporte Top Conductores
+                    Generar Reporte Top Conductores (EF)
+                </button>
+                <button class="btn btn-secondary" @onclick="GenerarReporteAdo" disabled="@generandoReporteAdo">
+                    @if (generandoReporteAdo)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    }
+                    Generar Reporte Top Conductores (ADO.NET)
                 </button>
                 @if (!string.IsNullOrEmpty(errorReporte1))
                 {
@@ -91,6 +98,7 @@ else
     private bool generandoReporte2 = false;
     private string? errorReporte1;
     private string? errorReporte2; 
+    private bool generandoReporteAdo = false;
 
     private ActividadFechasModel actividadModel = new();
 
@@ -153,6 +161,39 @@ else
         {
             generandoReporte1 = false; 
             StateHasChanged(); 
+        }
+    }
+
+    private async Task GenerarReporteAdo()
+    {
+        generandoReporteAdo = true;
+        errorReporte1 = null; // Reusamos la variable de error de la card
+        await Task.Delay(50);
+
+        try
+        {
+            await SesionUsuario.CheckTokenExpirationAsync();
+            string? token = await SesionUsuario.GetTokenAsync();
+            if (token == null)
+            {
+                errorReporte1 = "Error de sesión.";
+                return;
+            }
+
+            // Llamamos al nuevo método del ApiClient
+            byte[] pdfData = await ReportApiClient.GetTopConductoresAdoPdfAsync(token);
+
+            // Descargamos con un nombre distinto para diferenciar
+            await DownloadFileFromBytes("top_conductores_ado.pdf", pdfData);
+        }
+        catch (Exception ex)
+        {
+            errorReporte1 = $"Error al generar reporte ADO: {ex.Message}";
+        }
+        finally
+        {
+            generandoReporteAdo = false;
+            StateHasChanged();
         }
     }
 

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using DTOs; 
+using System;
+using System.Collections.Generic; 
 using System.Net.Http;
 using System.Net.Http.Headers; 
+using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Collections.Generic; 
-using DTOs; 
 
 namespace API.Clients
 {
@@ -65,6 +66,26 @@ namespace API.Clients
             }
             catch (HttpRequestException ex) { throw new Exception($"Error de red: {ex.Message}", ex); }
             catch (TaskCanceledException ex) { throw new Exception($"Timeout: {ex.Message}", ex); }
+            catch (Exception ex) { throw; }
+        }
+
+        public static async Task<byte[]> GetTopConductoresAdoPdfAsync(string token)
+        {
+            string requestUri = "api/reports/top-conductores-ado";
+            try
+            {
+                HttpResponseMessage response = await ApiClientHelper.SendAuthenticatedRequestAsync(_httpClient, HttpMethod.Get, requestUri, token);
+
+                if (response.IsSuccessStatusCode && response.Content.Headers.ContentType?.MediaType == "application/pdf")
+                {
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+                else
+                {
+                    await ApiClientHelper.HandleResponseErrorsAsync(response, "obtener reporte ADO");
+                    throw new HttpRequestException($"Error status: {response.StatusCode}");
+                }
+            }
             catch (Exception ex) { throw; }
         }
     }

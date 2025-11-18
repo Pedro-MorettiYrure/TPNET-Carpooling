@@ -21,17 +21,20 @@ namespace Application.Services
         private readonly CalificacionRepository _califRepo;
         private readonly ViajeRepository _viajeRepo; 
         private readonly SolicitudViajeRepository _solicitudRepo;
+        private readonly ReporteAdoRepository _adoRepo;
 
         public ReportService(
             UsuarioRepository usuarioRepo,
             CalificacionRepository califRepo,
             ViajeRepository viajeRepo,
-            SolicitudViajeRepository solicitudRepo) 
+            SolicitudViajeRepository solicitudRepo,
+            ReporteAdoRepository adoRepo ) 
         {
             _usuarioRepo = usuarioRepo;
             _califRepo = califRepo;
             _viajeRepo = viajeRepo; 
-            _solicitudRepo = solicitudRepo; 
+            _solicitudRepo = solicitudRepo;
+            _adoRepo = adoRepo;
         }
 
         public IEnumerable<TopConductorDTO> GetTopConductores(int count = 50)
@@ -45,13 +48,12 @@ namespace Application.Services
 
             foreach (var conductor in conductores)
             {
-                // Obtener calificaciones recibidas COMO CONDUCTOR
+                // Obtenemos calificaciones recibidas COMO CONDUCTOR
                 var calificaciones = _califRepo.GetCalificacionesRecibidas(conductor.IdUsuario, RolCalificado.Conductor).ToList(); //
 
                 double promedio = 0;
                 if (calificaciones.Any()) 
                 {
-                    // Calcular promedio calificaciones
                     promedio = calificaciones.Average(c => c.Puntaje); 
                 }
 
@@ -66,7 +68,6 @@ namespace Application.Services
                 });
             }
 
-            // Ordenar
             return conductoresConCalificaciones
                    .OrderByDescending(c => c.PromedioCalificacion) 
                    .ThenByDescending(c => c.CantidadCalificaciones) 
@@ -136,15 +137,21 @@ namespace Application.Services
                 });
             });
 
-            // Generar el PDF en memoria
+            // Generamos el PDF en memoria
             using var stream = new MemoryStream();
             await Task.Run(() => document.GeneratePdf(stream)); 
             return stream.ToArray();
         }
+        public async Task<byte[]> GetTopConductoresAdoPdfAsync()
+        {
+            var datosAdo = _adoRepo.ObtenerMejoresConductoresADO();
+
+            return await GenerateTopConductoresPdfAsync(datosAdo);
+        }
 
         public ReporteActividadViajesDTO GetActividadViajes(DateTime fechaInicio, DateTime fechaFin)
         {
-            // Asegura que fechaFin incluya todo el día
+            // Aseguramos que fechaFin incluya todo el día
             var fechaFinInclusive = fechaFin.Date.AddDays(1).AddTicks(-1);
 
             var viajesEnRango = _viajeRepo.GetViajesByDateRange(fechaInicio.Date, fechaFinInclusive);
@@ -158,7 +165,7 @@ namespace Application.Services
 
             foreach (var viaje in viajesEnRango)
             {
-                // Contar pasajeros confirmados (solicitudes aprobadas)
+                // Contamos pasajeros confirmados (solicitudes aprobadas)
                 int pasajerosConfirmados = _solicitudRepo.GetAllByViaje(viaje.IdViaje) 
                                                    .Count(s => s.Estado == EstadoSolicitud.Aprobada); 
 
@@ -194,7 +201,7 @@ namespace Application.Services
         {
             QuestPDF.Settings.License = LicenseType.Community;
 
-            // Generar la imagen antes de crear el Document
+            // Generamos la imagen antes de crear el Document
             var chartBytes = GenerateActividadChartPng_ScottPlot4(reporteData);
 
             var document = Document.Create(container =>
@@ -226,12 +233,12 @@ namespace Application.Services
                             col.Item().PaddingTop(5).LineHorizontal(1).LineColor(QuestPDF.Helpers.Colors.Grey.Lighten2);
                         });
 
-                    // Único page.Content que contiene la imagen y la tabla
+                    
                     page.Content()
                         .PaddingTop(0.5f, Unit.Centimetre)
                         .Column(col =>
                         {
-                            // Imagen del gráfico (usar byte[] directamente)
+                            
                             col.Item().Element(c =>
                             {
                                 c.Height(120).Image(chartBytes);
@@ -239,7 +246,7 @@ namespace Application.Services
 
                             col.Item().PaddingTop(6);
 
-                            // Tabla con los datos
+                            
                             col.Item().Table(table =>
                             {
                                 table.ColumnsDefinition(columns =>
@@ -295,9 +302,9 @@ namespace Application.Services
                 });
             });
 
-            // Generar el PDF en memoria (síncrono)
+            
             using var stream = new MemoryStream();
-            // QuestPDF's GeneratePdf is synchronous; no need de Task.Run salvo que quieras evitar bloqueo
+            
             document.GeneratePdf(stream);
             return stream.ToArray();
         }
@@ -305,7 +312,6 @@ namespace Application.Services
 
         private byte[] GenerateActividadChartPng_ScottPlot4(ReporteActividadViajesDTO reporte)
         {
-            // Fallback: imagen 1x1 si no hay datos
             if (reporte?.ViajesDetalle == null || !reporte.ViajesDetalle.Any())
             {
                 using var msEmpty = new MemoryStream();
@@ -314,7 +320,6 @@ namespace Application.Services
                 return msEmpty.ToArray();
             }
 
-            // Preparar etiquetas y valores
             var labels = reporte.ViajesDetalle
                                .Select(v => v.FechaHora.ToString("dd/MM"))
                                .ToArray();
@@ -323,25 +328,23 @@ namespace Application.Services
                                .Select(v => (double)v.PasajerosConfirmados)
                                .ToArray();
 
-            // Crear plot con tamaño (ScottPlot 4.x admite constructor con ancho/alto)
+            
             var plt = new ScottPlot.Plot(900, 300);
 
-            // Añadir barras usando la API 4.x (AddBar o AddBar(values))
+            
             plt.AddBar(values);
 
-            // Configurar ticks X: XTicks acepta un array de etiquetas
-            // por defecto las posiciones serán 0..N-1; XTicks(labels) funciona en 4.x
+            
             plt.XTicks(labels);
 
-            // Títulos y etiquetas de eje
+            
             plt.Title("Pasajeros confirmados por viaje");
             plt.YLabel("Pasajeros");
 
-            // Opciones visuales: colores y padding (en 4.x algunos métodos son SetAxisLimitsY, etc.)
+           
             try
             {
-                // Color de barras: sobrecarga AddBar(values, tickPositions, color) también existe
-                // pero si ya llamamos AddBar(values) podemos cambiar el style mediante plottable
+                
                 var bars = plt.GetPlottables().OfType<ScottPlot.Plottable.BarPlot>().FirstOrDefault();
                 if (bars != null)
                 {
@@ -352,15 +355,15 @@ namespace Application.Services
             }
             catch
             {
-                // Si alguna propiedad no existe en una subversión 4.x, ignorar sin romper
+                //  ignorar sin romper
             }
 
             try { plt.SetAxisLimits(yMin: 0); } catch { }
             try { plt.XLabel("Viajes"); } catch { }
             try { plt.Style(figureBackground: System.Drawing.Color.White); } catch { }
 
-            // Obtener un Bitmap desde el Plot y guardarlo en MemoryStream (compatible 4.x)
-            using var bitmap = plt.GetBitmap(); // GetBitmap() disponible en ScottPlot 4.x
+            
+            using var bitmap = plt.GetBitmap();
             using var ms = new MemoryStream();
             bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
             return ms.ToArray();

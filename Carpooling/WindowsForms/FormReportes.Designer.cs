@@ -37,6 +37,7 @@
             dtpFechaFin = new DateTimePicker();
             btnGenerarActividad = new Button();
             statusLabel = new StatusStrip();
+            btnReporteAdo = new Button();
             SuspendLayout();
             // 
             // lblTopConductores
@@ -119,11 +120,22 @@
             statusLabel.TabIndex = 8;
             statusLabel.Text = "statusStrip1";
             // 
+            // btnReporteAdo
+            // 
+            btnReporteAdo.Location = new Point(255, 71);
+            btnReporteAdo.Name = "btnReporteAdo";
+            btnReporteAdo.Size = new Size(126, 38);
+            btnReporteAdo.TabIndex = 9;
+            btnReporteAdo.Text = "Generar (ADO.NET)";
+            btnReporteAdo.UseVisualStyleBackColor = true;
+            btnReporteAdo.Click += btnReporteAdo_Click;
+            // 
             // FormReportes
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnReporteAdo);
             Controls.Add(statusLabel);
             Controls.Add(btnGenerarActividad);
             Controls.Add(dtpFechaFin);
@@ -150,5 +162,6 @@
         private DateTimePicker dtpFechaFin;
         private Button btnGenerarActividad;
         private StatusStrip statusLabel;
+        private Button btnReporteAdo;
     }
 }

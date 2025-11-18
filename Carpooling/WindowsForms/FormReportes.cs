@@ -111,5 +111,15 @@ namespace WindowsForms
             }
         }
 
+        private async void btnReporteAdo_Click(object sender, EventArgs e)
+        {
+            await GenerarYGuardarReporte(async (token) =>
+            {
+                byte[] pdfBytes = await ReportApiClient.GetTopConductoresAdoPdfAsync(token);
+
+                return ("reporte_conductores_ado.pdf", pdfBytes);
+            }, btnReporteAdo);
+        }
+
     }
 }
