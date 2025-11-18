@@ -61,6 +61,8 @@ namespace Data
                         }
                     }
                 }
+
+                connection.Close();
             }
 
             return lista;

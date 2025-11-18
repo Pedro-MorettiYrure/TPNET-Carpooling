@@ -23,14 +23,14 @@
         <div class="card-body">
             <p>Genera un PDF con los conductores ordenados por su calificación promedio (recibida como conductor).</p>
             <div class="card-body d-flex justify-content-end">
-                <button class="btn btn-primary" @onclick="GenerarReporteTopConductores" disabled="@generandoReporte1">
+                <button class="btn btn-primary m-1" @onclick="GenerarReporteTopConductores" disabled="@generandoReporte1">
                     @if (generandoReporte1)
                     {
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     }
                     Generar Reporte Top Conductores (EF)
                 </button>
-                <button class="btn btn-secondary" @onclick="GenerarReporteAdo" disabled="@generandoReporteAdo">
+                <button class="btn btn-secondary m-1" @onclick="GenerarReporteAdo" disabled="@generandoReporteAdo">
                     @if (generandoReporteAdo)
                     {
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -39,6 +39,7 @@
                 </button>
                 @if (!string.IsNullOrEmpty(errorReporte1))
                 {
+                    <br />
                     <div class="text-danger mt-2">@errorReporte1</div>
                 }
             </div>

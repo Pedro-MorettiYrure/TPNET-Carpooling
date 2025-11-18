@@ -69,6 +69,7 @@ namespace Application.Services
             }
 
             return conductoresConCalificaciones
+                   .Where(c=> c.CantidadCalificaciones > 0)
                    .OrderByDescending(c => c.PromedioCalificacion) 
                    .ThenByDescending(c => c.CantidadCalificaciones) 
                    .Take(count)
